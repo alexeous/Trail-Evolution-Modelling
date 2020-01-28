@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WorkingArea : MonoBehaviour
+public class WorkingBounds : MonoBehaviour
 {
     private SpriteRenderer spriteRenderer => GetComponent<SpriteRenderer>();
 
-    public Bounds bounds => spriteRenderer.bounds;
+    public Bounds Bounds => spriteRenderer.bounds;
 }

@@ -5,14 +5,14 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class GraphBuilder : MonoBehaviour
 {
-    [SerializeField] WorkingArea workingArea = null;
+    [SerializeField] WorkingBounds workingBounds = null;
     [SerializeField] GraphHolder target = null;
     [SerializeField] bool buildOnUpdate = false;
 
     [ContextMenu("Build")]
     private void Build()
     {
-        if (workingArea == null || target == null)
+        if (workingBounds == null || target == null)
             return;
 
         var graph = new Graph();
@@ -23,7 +23,7 @@ public class GraphBuilder : MonoBehaviour
         graph.AddEdge(node1, node3, 7);
         graph.AddEdge(node2, node3, 2);
 
-        target.graph = graph;
+        target.Graph = graph;
     }
 
     private void Update()
