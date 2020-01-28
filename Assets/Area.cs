@@ -4,15 +4,11 @@ using UnityEngine;
 
 public class Area : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] bool isWalkable = true;
+    [SerializeField] float weight = 1;
+    [SerializeField] bool isTramplable = false;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public bool IsWalkable => isWalkable;
+    public float Weight => weight;
+    public bool IsTramplable => isTramplable;
 }
