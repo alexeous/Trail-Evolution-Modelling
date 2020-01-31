@@ -8,12 +8,12 @@ using UnityEngine;
 public class Node
 {
     public Vector2 Position { get; set; }
-    public List<Edge> IncidentEdges { get; }
+    public HashSet<Edge> IncidentEdges { get; }
 
     public Node(Vector2 position)
     {
         Position = position;
-        IncidentEdges = new List<Edge>();
+        IncidentEdges = new HashSet<Edge>();
     }
 
     public void AddIncidentEdge(Edge edge) => IncidentEdges.Add(edge);
@@ -27,13 +27,15 @@ public class Edge : IEquatable<Edge>
     public Node Node2 { get; set; }
     public float Weight { get; set; }
     public float Trampledness { get; set; }
+    public bool IsTramplable { get; set; }
 
-    public Edge(Node node1, Node node2, float weight)
+    public Edge(Node node1, Node node2, float weight, bool isTramplable)
     {
         Node1 = node1;
         Node2 = node2;
         Weight = weight;
         Trampledness = 0;
+        IsTramplable = isTramplable;
     }
 
     public Node OtherNode(Node node)
@@ -48,20 +50,19 @@ public class Edge : IEquatable<Edge>
 
     public bool Equals(Edge other)
     {
-        return this.Weight == other.Weight &&
-            (this.Node1 == other.Node1 && this.Node2 == other.Node2 ||
-            this.Node2 == other.Node1 && this.Node1 == other.Node2);
+        return (this.Node1 == other.Node1 && this.Node2 == other.Node2 ||
+                this.Node2 == other.Node1 && this.Node1 == other.Node2);
     }
 
     public override bool Equals(object obj) => obj is Edge other && this.Equals(other);
 
-    public override int GetHashCode() => (Node1, Node2, Weight).GetHashCode();
+    public override int GetHashCode() => Node1.GetHashCode() + Node2.GetHashCode();
 }
 
 public class Graph
 {
-    public List<Node> Nodes { get; } = new List<Node>();
-    public List<Edge> Edges { get; } = new List<Edge>();
+    public HashSet<Node> Nodes { get; } = new HashSet<Node>();
+    public HashSet<Edge> Edges { get; } = new HashSet<Edge>();
 
     public Node AddNode(Vector2 position)
     {
@@ -73,12 +74,12 @@ public class Graph
     public void RemoveNode(Node node)
     {
         Nodes.Remove(node);
-        Edges.RemoveAll(edge => node.IncidentEdges.Contains(edge));
+        Edges.RemoveWhere(edge => node.IncidentEdges.Contains(edge));
     }
 
-    public Edge AddEdge(Node node1, Node node2, float weight)
+    public Edge AddEdge(Node node1, Node node2, float weight, bool isTramplable)
     {
-        var edge = new Edge(node1, node2, weight);
+        var edge = new Edge(node1, node2, weight, isTramplable);
         node1.AddIncidentEdge(edge);
         node2.AddIncidentEdge(edge);
         

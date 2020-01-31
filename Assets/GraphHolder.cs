@@ -22,8 +22,8 @@ public class GraphHolder : MonoBehaviour, IGraphHolder
         {
             Handles.color = GetEdgeColor(edge, maxWeight);
             
-            Handles.DrawSolidDisc(edge.Node1.Position, Vector3.forward, 0.1f);
-            Handles.DrawSolidDisc(edge.Node2.Position, Vector3.forward, 0.1f);
+            //Handles.DrawSolidDisc(edge.Node1.Position, Vector3.forward, 0.1f);
+            //Handles.DrawSolidDisc(edge.Node2.Position, Vector3.forward, 0.1f);
             Handles.DrawLine(edge.Node1.Position, edge.Node2.Position);
         }
     }
