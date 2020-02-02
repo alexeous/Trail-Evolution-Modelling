@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-public class GraphHolder : MonoBehaviour, IGraphHolder
+public class GraphHolder : MonoBehaviour
 {
     [SerializeField] Color minWeightColor = Color.blue;
     [SerializeField] Color maxWeightColor = Color.red;
