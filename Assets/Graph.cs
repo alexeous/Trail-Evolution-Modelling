@@ -44,7 +44,7 @@ public class Edge : IEquatable<Edge>
         IsTramplable = isTramplable;
     }
 
-    public Node OtherNode(Node node)
+    public Node GetOppositeNode(Node node)
     {
         if (node == Node1)
             return Node2;
