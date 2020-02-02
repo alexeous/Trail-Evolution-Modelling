@@ -8,17 +8,23 @@ using UnityEngine;
 public class Node
 {
     public Vector2 Position { get; set; }
-    public HashSet<Edge> IncidentEdges { get; }
+    public List<Edge> IncidentEdges { get; }
 
     public Node(Vector2 position)
     {
         Position = position;
-        IncidentEdges = new HashSet<Edge>();
+        IncidentEdges = new List<Edge>();
     }
 
-    public void AddIncidentEdge(Edge edge) => IncidentEdges.Add(edge);
+    public void AddIncidentEdge(Edge edge)
+    {
+        if (!IncidentEdges.Contains(edge))
+        {
+            IncidentEdges.Add(edge);
+        }
+    }
 
-    public void RemoveIncidentEdge(Edge edge) => IncidentEdges.Remove(edge);
+    public bool RemoveIncidentEdge(Edge edge) => IncidentEdges.Remove(edge);
 }
 
 public class Edge : IEquatable<Edge>
