@@ -67,37 +67,47 @@ public class Edge : IEquatable<Edge>
 
 public class Graph
 {
-    public HashSet<Node> Nodes { get; } = new HashSet<Node>();
+    public event Action Changed;
+    public List<Node> Nodes { get; } = new List<Node>();
     public HashSet<Edge> Edges { get; } = new HashSet<Edge>();
 
     public Node AddNode(Vector2 position)
     {
         var node = new Node(position);
         Nodes.Add(node);
+        Changed?.Invoke();
         return node;
     }
 
     public void RemoveNode(Node node)
     {
-        Nodes.Remove(node);
-        Edges.RemoveWhere(edge => node.IncidentEdges.Contains(edge));
+        bool removed = Nodes.Remove(node);
+        removed |= Edges.RemoveWhere(edge => node.IncidentEdges.Contains(edge)) > 0;
+
+        if (removed)
+            Changed?.Invoke();
     }
 
     public Edge AddEdge(Node node1, Node node2, float weight, bool isTramplable)
     {
-        var edge = new Edge(node1, node2, weight, isTramplable);
-        node1.AddIncidentEdge(edge);
-        node2.AddIncidentEdge(edge);
-        
-        Edges.Add(edge);
-        return edge;
+        var edge = new Edge(node1, node2, weight, isTramplable);        
+        if (Edges.Add(edge))
+        {
+            node1.AddIncidentEdge(edge);
+            node2.AddIncidentEdge(edge);
+            Changed?.Invoke();
+            return edge;
+        }
+        return null;
     }
 
     public void RemoveEdge(Edge edge)
     {
-        edge.Node1.RemoveIncidentEdge(edge);
-        edge.Node2.RemoveIncidentEdge(edge);
-
-        Edges.Remove(edge);
+        bool removed = Edges.Remove(edge);
+        removed |= edge.Node1.RemoveIncidentEdge(edge);
+        removed |= edge.Node2.RemoveIncidentEdge(edge);
+        
+        if (removed)
+            Changed?.Invoke();
     }
 }
