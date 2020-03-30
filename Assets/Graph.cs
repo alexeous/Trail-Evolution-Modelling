@@ -67,7 +67,6 @@ public class Edge : IEquatable<Edge>
 
 public class Graph
 {
-    public event Action Changed;
     public List<Node> Nodes { get; } = new List<Node>();
     public HashSet<Edge> Edges { get; } = new HashSet<Edge>();
 
@@ -75,17 +74,13 @@ public class Graph
     {
         var node = new Node(position);
         Nodes.Add(node);
-        Changed?.Invoke();
         return node;
     }
 
     public void RemoveNode(Node node)
     {
-        bool removed = Nodes.Remove(node);
-        removed |= Edges.RemoveWhere(edge => node.IncidentEdges.Contains(edge)) > 0;
-
-        if (removed)
-            Changed?.Invoke();
+        Nodes.Remove(node);
+        Edges.RemoveWhere(edge => node.IncidentEdges.Contains(edge));
     }
 
     public Edge AddEdge(Node node1, Node node2, float weight, bool isTramplable)
@@ -95,7 +90,6 @@ public class Graph
         {
             node1.AddIncidentEdge(edge);
             node2.AddIncidentEdge(edge);
-            Changed?.Invoke();
             return edge;
         }
         return null;
@@ -103,11 +97,8 @@ public class Graph
 
     public void RemoveEdge(Edge edge)
     {
-        bool removed = Edges.Remove(edge);
-        removed |= edge.Node1.RemoveIncidentEdge(edge);
-        removed |= edge.Node2.RemoveIncidentEdge(edge);
-        
-        if (removed)
-            Changed?.Invoke();
+        Edges.Remove(edge);
+        edge.Node1.RemoveIncidentEdge(edge);
+        edge.Node2.RemoveIncidentEdge(edge);
     }
 }

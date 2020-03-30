@@ -17,13 +17,8 @@ public class GraphHolder : MonoBehaviour
         get => graph;
         set
         {
-            if (graph != null) 
-                graph.Changed -= GraphChanged;
-            
             graph = value;
-            
-            if (graph != null) 
-                graph.Changed += GraphChanged;
+            GraphChanged?.Invoke();
         }
     }
 
