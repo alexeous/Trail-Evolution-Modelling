@@ -11,6 +11,7 @@ public class GraphDrawer : MonoBehaviour
 {
     [SerializeField] GraphHolder graphHolder = null;
     [SerializeField] float minWeight = 1;
+    [SerializeField] float maxWeight = 2.7f;
     [SerializeField] Color minWeightColor = Color.blue;
     [SerializeField] Color maxWeightColor = Color.red;
 
@@ -47,8 +48,6 @@ public class GraphDrawer : MonoBehaviour
     private void Redraw()
     {
         Graph graph = graphHolder.Graph;
-        
-        float maxWeight = graph.Edges.Max(edge => edge.Weight);
 
         var vertices = new List<Vector3>();
         var colors = new List<Color>();
@@ -56,7 +55,7 @@ public class GraphDrawer : MonoBehaviour
         {
             Vector3 vertex1 = edge.Node1.Position;
             Vector3 vertex2 = edge.Node2.Position;
-            Color color = GetEdgeColor(edge, maxWeight);
+            Color color = GetEdgeColor(edge);
             
             vertices.Add(vertex1);
             colors.Add(color);
@@ -74,7 +73,7 @@ public class GraphDrawer : MonoBehaviour
         GetComponent<MeshFilter>().sharedMesh = mesh;
     }
 
-    private Color GetEdgeColor(Edge edge, float maxWeight)
+    private Color GetEdgeColor(Edge edge)
     {
         float t = (edge.Weight - minWeight) / (maxWeight - minWeight);
         return Color.Lerp(minWeightColor, maxWeightColor, t);
