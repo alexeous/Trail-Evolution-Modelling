@@ -38,7 +38,7 @@ public class GraphBuilder : MonoBehaviour
     }
 
     [ContextMenu("Build")]
-    private void Build()
+    public void Build()
     {
         if (bounds == null || target == null)
             return;
