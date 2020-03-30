@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -9,7 +10,24 @@ public class GraphHolder : MonoBehaviour
     [SerializeField] Color minWeightColor = Color.blue;
     [SerializeField] Color maxWeightColor = Color.red;
 
-    public Graph Graph { get; set; }
+    private Graph graph;
+
+    public Graph Graph
+    {
+        get => graph;
+        set
+        {
+            if (graph != null) 
+                graph.Changed -= GraphChanged;
+            
+            graph = value;
+            
+            if (graph != null) 
+                graph.Changed += GraphChanged;
+        }
+    }
+
+    public event Action GraphChanged;
 
     private void OnDrawGizmos()
     {
