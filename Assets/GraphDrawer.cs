@@ -10,15 +10,24 @@ using UnityEngine;
 public class GraphDrawer : MonoBehaviour
 {
     [SerializeField] GraphHolder graphHolder = null;
+    [SerializeField] float minWeight = 1;
     [SerializeField] Color minWeightColor = Color.blue;
     [SerializeField] Color maxWeightColor = Color.red;
 
+    private Color oldMinColor;
+    private Color oldMaxColor;
     private GraphHolder oldGraphHolder;
 
     private void Update()
     {
-        if (graphHolder != oldGraphHolder)
+        if (graphHolder != oldGraphHolder ||
+            minWeightColor != oldMinColor ||
+            maxWeightColor != oldMaxColor)
         {
+            oldGraphHolder = graphHolder;
+            oldMinColor = minWeightColor;
+            oldMaxColor = maxWeightColor;
+
             Redraw();
         }
 
@@ -27,13 +36,16 @@ public class GraphDrawer : MonoBehaviour
             graphHolder.GraphChanged -= Redraw;
             graphHolder.GraphChanged += Redraw;
         }
+
+        if (graphHolder?.Graph == null)
+        {
+            if (GetComponent<MeshFilter>().sharedMesh != null)
+                GetComponent<MeshFilter>().sharedMesh.Clear();
+        }
     }
 
     private void Redraw()
     {
-        if (graphHolder?.Graph == null)
-            return;
-
         Graph graph = graphHolder.Graph;
         
         float maxWeight = graph.Edges.Max(edge => edge.Weight);
@@ -59,11 +71,12 @@ public class GraphDrawer : MonoBehaviour
         mesh.SetColors(colors);
         mesh.SetIndices(indices, MeshTopology.Lines, 0);
 
-        GetComponent<MeshFilter>().mesh = mesh;
+        GetComponent<MeshFilter>().sharedMesh = mesh;
     }
 
     private Color GetEdgeColor(Edge edge, float maxWeight)
     {
-        return Color.Lerp(minWeightColor, maxWeightColor, edge.Weight / maxWeight);
+        float t = (edge.Weight - minWeight) / (maxWeight - minWeight);
+        return Color.Lerp(minWeightColor, maxWeightColor, t);
     }
 }
