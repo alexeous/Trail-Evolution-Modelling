@@ -105,8 +105,8 @@ public class GraphBuilder : MonoBehaviour
         float cos30 = Mathf.Cos(Mathf.PI / 6);
 
         Vector2 min = bounds.Min + new Vector2(0, 0.5f);
-        int w = (int)(bounds.Size.x / step * cos30);
-        int h = (int)(bounds.Size.y / step) + 1;
+        int w = Mathf.CeilToInt(bounds.Size.x / (step * cos30));
+        int h = Mathf.CeilToInt(bounds.Size.y / step);
 
         var nodes = new Node[w, h];
 
