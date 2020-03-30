@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+[ExecuteInEditMode]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
 public class GraphDrawer : MonoBehaviour
@@ -14,24 +15,17 @@ public class GraphDrawer : MonoBehaviour
 
     private GraphHolder oldGraphHolder;
 
-    private void Start()
-    {
-        OnValidate();
-    }
-
-    private void OnValidate()
+    private void Update()
     {
         if (graphHolder != oldGraphHolder)
         {
-            if (oldGraphHolder != null) 
-                oldGraphHolder.GraphChanged -= Redraw;
-
-            oldGraphHolder = graphHolder;
-
-            if (graphHolder != null)
-                graphHolder.GraphChanged += Redraw;
-
             Redraw();
+        }
+
+        if (graphHolder != null)
+        {
+            graphHolder.GraphChanged -= Redraw;
+            graphHolder.GraphChanged += Redraw;
         }
     }
 
