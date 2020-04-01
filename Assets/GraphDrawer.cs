@@ -49,6 +49,12 @@ public class GraphDrawer : MonoBehaviour
     {
         Graph graph = graphHolder.Graph;
 
+        if (graphHolder?.Graph == null)
+        {
+            if (GetComponent<MeshFilter>().sharedMesh != null)
+                GetComponent<MeshFilter>().sharedMesh.Clear();
+        }
+
         var vertices = new List<Vector3>();
         var colors = new List<Color>();
         foreach (var edge in graph.Edges)
