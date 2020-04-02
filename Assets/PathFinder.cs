@@ -21,7 +21,7 @@ public class PathFinder
             if (current == goal)
             {
                 Node[] path = ReconstructPath(current);
-                Cleanup(open);
+                Cleanup(open, graph);
                 return path;
             }
 
@@ -41,8 +41,7 @@ public class PathFinder
             }
         }
 
-        Cleanup(open);
-        Debug.Log("No path found");
+        Cleanup(open, graph);
         return null;
 
 
@@ -67,16 +66,15 @@ public class PathFinder
         //}
     }
 
-    private static void Cleanup(FastPriorityQueue<Node> open)
+    private static void Cleanup(FastPriorityQueue<Node> open, Graph graph)
     {
-        foreach (var node in open)
+        open.Clear();
+        foreach (var node in graph.Nodes)
         {
             node.IsClosed = false;
             node.G = float.PositiveInfinity;
             node.F = float.PositiveInfinity;
             node.CameFrom = null;
-
-            open.ResetNode(node);
         }
     }
 

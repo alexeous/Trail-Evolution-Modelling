@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -26,9 +27,29 @@ public class QuickAccessTools : EditorWindow
         Handles.BeginGUI();
 
         GUI.color = new Color(1, 1, 1, 0.4f);
+
         if (GUI.Button(new Rect(2, 2, 40, 15), "Build"))
-            FindObjectOfType<GraphBuilder>().Build();
+            BuildGraphs();
+
+        if (GUI.Button(new Rect(2, 19, 40, 15), "Find"))
+            FindPaths();
 
         Handles.EndGUI();
+    }
+
+    private static void BuildGraphs()
+    {
+        foreach (var builder in FindObjectsOfType<GraphBuilder>())
+        {
+            builder.Build();
+        }
+    }
+
+    private static void FindPaths()
+    {
+        foreach (var invoker in FindObjectsOfType<PathFinderInvoker>())
+        {
+            invoker.FindPath();
+        }
     }
 }
