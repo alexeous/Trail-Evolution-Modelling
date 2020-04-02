@@ -52,11 +52,12 @@ public class GraphHolder : LinesProvider, ILinesChangedNotifier
 
     private void Update()
     {
-        if(minWeightColor != oldMinColor ||
+        if (minWeightColor != oldMinColor ||
             maxWeightColor != oldMaxColor)
         {
             oldMinColor = minWeightColor;
             oldMaxColor = maxWeightColor;
+
             LinesChanged?.Invoke(this);
         }   
     }
