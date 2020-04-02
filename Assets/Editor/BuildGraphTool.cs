@@ -3,8 +3,14 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class BuildGraphTool : Editor
+public class BuildGraphTool : EditorWindow
 {
+    [MenuItem("Window/BuildGraphTool")]
+    static void Init()
+    {
+        GetWindow<BuildGraphTool>().Show();
+    }
+
     private void OnEnable()
     {
         SceneView.duringSceneGui += OnScene;
