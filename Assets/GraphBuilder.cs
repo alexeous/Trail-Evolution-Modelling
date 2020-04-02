@@ -40,11 +40,15 @@ public class GraphBuilder : MonoBehaviour
     [ContextMenu("Build")]
     public void Build()
     {
+
+    }
+
+    public void Build(bool moore = false)
+    {
         if (bounds == null || target == null)
             return;
 
-        //target.Graph = BuildRectangularMoore();
-        target.Graph = BuildHexagonal();
+        target.Graph = moore ? BuildRectangularMoore() : BuildHexagonal();
     }
 
     private Graph BuildRectangularMoore()
@@ -95,7 +99,7 @@ public class GraphBuilder : MonoBehaviour
         {
             for (int j = 0; j < h; j++)
             {
-                BuildEdgesAround(graph, nodes, i, j, MooreIndexShifts);
+                BuildEdgesAround(graph, nodes, i, j, MooreIndexShifts, true);
             }
         }
     }
@@ -139,12 +143,12 @@ public class GraphBuilder : MonoBehaviour
                                                 ? HexagonalIndexShiftsEven
                                                 : HexagonalIndexShiftsOdd;
 
-                BuildEdgesAround(graph, nodes, i, j, shifts);
+                BuildEdgesAround(graph, nodes, i, j, shifts, false);
             }
         }
     }
 
-    private static void BuildEdgesAround(Graph graph, Node[,] nodes, int i, int j, (int di, int dj)[] shifts)
+    private void BuildEdgesAround(Graph graph, Node[,] nodes, int i, int j, (int di, int dj)[] shifts, bool mulByDistance)
     {
         Node node = nodes[i, j];
         if (node == null)
@@ -160,7 +164,10 @@ public class GraphBuilder : MonoBehaviour
             if (!areaAttributes.IsWalkable)
                 continue;
 
-            graph.AddEdge(node, otherNode, areaAttributes.Weight, areaAttributes.IsTramplable);
+            float weight = areaAttributes.Weight;
+            if (mulByDistance)
+                weight *= Vector2.Distance(node.Position, otherNode.Position) / step;
+            graph.AddEdge(node, otherNode, weight, areaAttributes.IsTramplable);
         }
     }
 

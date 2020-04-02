@@ -1,23 +1,31 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Priority_Queue;
 using UnityEngine;
 
-public class Node : FastPriorityQueueNode
+public sealed class Node : FastPriorityQueueNode
 {
     public Vector2 Position { get; set; }
     public List<Edge> IncidentEdges { get; }
 
-    public bool IsClosed = false;
-    public float G = float.PositiveInfinity;
-    public float F = float.PositiveInfinity;
-    public Node CameFrom = null;
+    public bool IsClosed;
+    public float G1;
+    public float F1;
+    public float G2;
+    public float F2;
+    public int H1;
+    public int H2;
+    public Node CameFrom1;
+    public Node CameFrom2;
 
     public Node(Vector2 position)
     {
         Position = position;
         IncidentEdges = new List<Edge>();
+
+        CleanupAfterPathSearch();
     }
 
     public void AddIncidentEdge(Edge edge)
@@ -36,9 +44,36 @@ public class Node : FastPriorityQueueNode
         }
         return false;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref float G(bool forward) => ref (forward ? ref G1 : ref G2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref float F(bool forward) => ref (forward ? ref F1 : ref F2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref int H(bool forward) => ref (forward ? ref H1 : ref H2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref Node CameFrom(bool forward) => ref (forward ? ref CameFrom1 : ref CameFrom2);
+
+
+
+    public void CleanupAfterPathSearch()
+    {
+        IsClosed = false;
+        G1 = float.PositiveInfinity;
+        G2 = float.PositiveInfinity;
+        F1 = float.PositiveInfinity;
+        F2 = float.PositiveInfinity;
+        H1 = -1;
+        H2 = -1;
+        CameFrom1 = null;
+        CameFrom2 = null;
+    }
 }
 
-public class Edge : IEquatable<Edge>
+public sealed class Edge : IEquatable<Edge>
 {
     public Node Node1 { get; set; }
     public Node Node2 { get; set; }
@@ -76,7 +111,7 @@ public class Edge : IEquatable<Edge>
     public override int GetHashCode() => Node1.GetHashCode() + Node2.GetHashCode();
 }
 
-public class Graph
+public sealed class Graph
 {
     public List<Node> Nodes { get; } = new List<Node>();
     public HashSet<Edge> Edges { get; } = new HashSet<Edge>();

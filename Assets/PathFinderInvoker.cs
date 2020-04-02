@@ -20,6 +20,11 @@ public class PathFinderInvoker : LinesProvider, ILinesChangedNotifier
     [ContextMenu("Find Path")]
     public void FindPath()
     {
+        FindPath(false);
+    }
+
+    public void FindPath(bool aStar)
+    {
         if (graphHolder == null || start == null || end == null)
         {
             return;
@@ -34,7 +39,7 @@ public class PathFinderInvoker : LinesProvider, ILinesChangedNotifier
         Node startNode = FindClosestNode(graph, start.position);
         Node endNode = FindClosestNode(graph, end.position);
 
-        this.path = PathFinder.FindPath(graph, startNode, endNode);
+        this.path = PathFinder.FindPath(graph, startNode, endNode, aStar);
         if (this.path == null)
         {
             Debug.LogWarning("Path not found");

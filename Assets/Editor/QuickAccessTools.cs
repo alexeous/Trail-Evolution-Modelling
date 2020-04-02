@@ -28,28 +28,36 @@ public class QuickAccessTools : EditorWindow
 
         GUI.color = new Color(1, 1, 1, 0.4f);
 
-        if (GUI.Button(new Rect(2, 2, 40, 15), "Build"))
-            BuildGraphs();
+        int y = 2;
 
-        if (GUI.Button(new Rect(2, 19, 40, 15), "Find"))
-            FindPaths();
+        if (GUI.Button(new Rect(2, y, 60, 15), "Build 8"))
+            BuildGraphs(true);
+
+        if (GUI.Button(new Rect(2, y += 17, 60, 15), "Build 6"))
+            BuildGraphs(false);
+
+        if (GUI.Button(new Rect(2, y += 20, 40, 15), "A*"))
+            FindPaths(true);
+
+        if (GUI.Button(new Rect(2, y += 17, 40, 15), "NBA"))
+            FindPaths(false);
 
         Handles.EndGUI();
     }
 
-    private static void BuildGraphs()
+    private static void BuildGraphs(bool moore)
     {
         foreach (var builder in FindObjectsOfType<GraphBuilder>())
         {
-            builder.Build();
+            builder.Build(moore);
         }
     }
 
-    private static void FindPaths()
+    private static void FindPaths(bool aStar)
     {
         foreach (var invoker in FindObjectsOfType<PathFinderInvoker>())
         {
-            invoker.FindPath();
+            invoker.FindPath(aStar);
         }
     }
 }
