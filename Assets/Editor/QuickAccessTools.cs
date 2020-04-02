@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class BuildGraphTool : EditorWindow
+public class QuickAccessTools : EditorWindow
 {
-    [MenuItem("Window/BuildGraphTool")]
+    [MenuItem("Window/QuickAccessTools")]
     static void Init()
     {
-        GetWindow<BuildGraphTool>().Show();
+        GetWindow<QuickAccessTools>().Show();
     }
 
     private void OnEnable()
