@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Priority_Queue;
 using UnityEngine;
 
-
-
-public class Node
+public class Node : FastPriorityQueueNode
 {
     public Vector2 Position { get; set; }
     public List<Edge> IncidentEdges { get; }
+
+    public bool IsClosed = false;
+    public float G = float.PositiveInfinity;
+    public float F = float.PositiveInfinity;
+    public Node CameFrom = null;
 
     public Node(Vector2 position)
     {
@@ -24,7 +28,14 @@ public class Node
         }
     }
 
-    public bool RemoveIncidentEdge(Edge edge) => IncidentEdges.Remove(edge);
+    public bool RemoveIncidentEdge(Edge edge)
+    {
+        if (IncidentEdges.Remove(edge))
+        {
+            return true;
+        }
+        return false;
+    }
 }
 
 public class Edge : IEquatable<Edge>

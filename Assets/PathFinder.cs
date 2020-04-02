@@ -2,83 +2,142 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Priority_Queue;
+using System.Runtime.CompilerServices;
 
 public class PathFinder
 {
-    private static readonly float Sqrt2 = Mathf.Sqrt(2);
-    
-    private const float Found = 0;
-
-    public static Node[] FindPath(Node start, Node goal)
+    public static Node[] FindPath(Graph graph, Node start, Node goal)
     {
-        //return null;
-        //var open = new SortedDictionary<float, Node>();
-        //open.Add()
+        var open = new FastPriorityQueue<Node>(graph.Nodes.Count);
 
-        float bound = HeuristicCost(start.Position, goal.Position);
-        var path = new Stack<Node>();
-        path.Push(start);
+        start.G = 0;
+        start.F = HeuristicCost(start, goal);
+        open.Enqueue(start, start.F);
 
-        while (true)
+        while (open.Count != 0)
         {
-            float t = Search(path, goal, 0, bound);
+            Node current = open.Dequeue();
+            if (current == goal)
+            {
+                Node[] path = ReconstructPath(current);
+                Cleanup(open);
+                return path;
+            }
 
-            if (t == Found)
+            current.IsClosed = true;
+            foreach (var edge in current.IncidentEdges)
             {
-                return path.ToArray();
+                Node successor = edge.GetOppositeNode(current);
+                float tentativeSuccessorG = current.G + edge.Weight;
+                if (tentativeSuccessorG < successor.G)
+                {
+                    successor.CameFrom = current;
+                    successor.G = tentativeSuccessorG;
+                    successor.F = tentativeSuccessorG + HeuristicCost(successor, goal);
+                    if (!successor.IsClosed)
+                        open.Enqueue(successor, successor.F);
+                }
             }
-            if (t == float.PositiveInfinity)
-            {
-                return null;
-            }
-            
-            bound = t;
+        }
+
+        Cleanup(open);
+        Debug.Log("No path found");
+        return null;
+
+
+        //float bound = HeuristicCost(start.Position, goal.Position);
+        //var path = new Stack<Node>();
+        //path.Push(start);
+
+        //while (true)
+        //{
+        //    float t = Search(path, goal, 0, bound);
+
+        //    if (t == Found)
+        //    {
+        //        return path.ToArray();
+        //    }
+        //    if (t == float.PositiveInfinity)
+        //    {
+        //        return null;
+        //    }
+
+        //    bound = t;
+        //}
+    }
+
+    private static void Cleanup(FastPriorityQueue<Node> open)
+    {
+        foreach (var node in open)
+        {
+            node.IsClosed = false;
+            node.G = float.PositiveInfinity;
+            node.F = float.PositiveInfinity;
+            node.CameFrom = null;
+
+            open.ResetNode(node);
         }
     }
 
-    private static float HeuristicCost(in Vector2 nodePos, in Vector2 goalPos)
+    private static Node[] ReconstructPath(Node current)
     {
-        return Vector2.Distance(nodePos, goalPos);
+        var pathReversed = new List<Node>();
+        while (current != null)
+        {
+            pathReversed.Add(current);
+            current = current.CameFrom;
+        }
+        pathReversed.Reverse();
+        return pathReversed.ToArray();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static float HeuristicCost(Node node, Node goal)
+    {
+        return Vector2.Distance(node.Position, goal.Position);
 
         //float dx = Mathf.Abs(nodePos.x - goalPos.x);
         //float dy = Mathf.Abs(nodePos.y - goalPos.y);
         //return dx + dy + (Sqrt2 - 2) * Mathf.Min(dx, dy);
     }
-    
-    private static float Search(Stack<Node> path, Node goal, float currentCost, float bound)
-    {
-        Node node = path.Peek();
-        float f = currentCost + HeuristicCost(node.Position, goal.Position);
-        
-        if (f > bound)
-        {
-            return f;
-        }
-        if (node == goal)
-        {
-            return Found;
-        }
 
-        float min = float.PositiveInfinity;
-        List<Edge> incidentEdges = node.IncidentEdges;
-        for (int i = 0; i < incidentEdges.Count; i++)
-        {
-            Edge edge = incidentEdges[i];
-            Node successor = edge.GetOppositeNode(node);
-            
-            if (path.Contains(successor)) continue;
 
-            path.Push(successor);
-            
-            float t = Search(path, goal, currentCost + edge.Weight, bound);
-            if (t == Found)
-            {
-                return Found;
-            }
-            min = Mathf.Min(min, t);
 
-            path.Pop();
-        }
-        return min;
-    }
+    //private static float Search(Stack<Node> path, Node goal, float currentCost, float bound)
+    //{
+    //    Node node = path.Peek();
+    //    float f = currentCost + HeuristicCost(node.Position, goal.Position);
+
+    //    if (f > bound)
+    //    {
+    //        return f;
+    //    }
+    //    if (node == goal)
+    //    {
+    //        return Found;
+    //    }
+
+    //    float min = float.PositiveInfinity;
+    //    List<Edge> incidentEdges = node.IncidentEdges;
+    //    for (int i = 0; i < incidentEdges.Count; i++)
+    //    {
+    //        Edge edge = incidentEdges[i];
+    //        Node successor = edge.GetOppositeNode(node);
+
+    //        if (path.Contains(successor)) continue;
+
+    //        path.Push(successor);
+
+    //        float t = Search(path, goal, currentCost + edge.Weight, bound);
+    //        if (t == Found)
+    //        {
+    //            return Found;
+    //        }
+    //        min = Mathf.Min(min, t);
+
+    //        path.Pop();
+    //    }
+    //    return min;
+    //}
 }

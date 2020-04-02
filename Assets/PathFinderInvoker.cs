@@ -34,7 +34,7 @@ public class PathFinderInvoker : LinesProvider, ILinesChangedNotifier
         Node startNode = FindClosestNode(graph, start.position);
         Node endNode = FindClosestNode(graph, end.position);
 
-        this.path = PathFinder.FindPath(startNode, endNode);
+        this.path = PathFinder.FindPath(graph, startNode, endNode);
         if (this.path == null)
         {
             Debug.LogWarning("Path not found");
