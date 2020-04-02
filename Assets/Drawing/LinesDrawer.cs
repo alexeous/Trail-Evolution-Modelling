@@ -11,18 +11,24 @@ public class LinesDrawer : MonoBehaviour
 {
     [SerializeField] LinesProvider linesProvider = null;
 
-    private LinesProvider oldLinesPrivder;
+    private LinesProvider oldLinesProvider;
+    private object firstUpdateDetector = null;
+
+    private void Awake()
+    {
+        GetComponent<MeshRenderer>().material = new Material(Shader.Find("Sprites/Default"));
+    }
 
     private void Update()
     {
-        if (linesProvider != oldLinesPrivder)
+        if (linesProvider != oldLinesProvider)
         {
-            if (oldLinesPrivder is ILinesChangedNotifier oldNotifier)
+            if (oldLinesProvider is ILinesChangedNotifier oldNotifier)
             {
                 oldNotifier.LinesChanged -= OnLinesChanged;
             }
 
-            oldLinesPrivder = linesProvider;
+            oldLinesProvider = linesProvider;
 
             Redraw();
         }
@@ -31,6 +37,12 @@ public class LinesDrawer : MonoBehaviour
         {
             notifier.LinesChanged -= OnLinesChanged;
             notifier.LinesChanged += OnLinesChanged;
+        }
+
+        if (firstUpdateDetector == null)
+        {
+            firstUpdateDetector = new object();
+            Redraw();
         }
     }
 
@@ -41,6 +53,8 @@ public class LinesDrawer : MonoBehaviour
 
     private void Redraw()
     {
+        transform.position = new Vector3(0, 0, transform.position.z);
+
         ClearMesh();
 
         if (linesProvider == null)
@@ -59,6 +73,7 @@ public class LinesDrawer : MonoBehaviour
         int[] indices = Enumerable.Range(0, vertices.Count).ToArray();
 
         var mesh = new Mesh();
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.SetVertices(vertices);
         mesh.SetColors(colors);
         mesh.SetIndices(indices, MeshTopology.Lines, 0);
