@@ -3,180 +3,183 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteInEditMode]
-public class GraphBuilder : MonoBehaviour
+namespace TrailEvolutionModelling
 {
-    [SerializeField] WorkingBounds bounds = null;
-    [SerializeField] GraphHolder target = null;
-    [SerializeField] float step = 0.5f;
-
-    private static (int di, int dj)[] MooreIndexShifts =
+    [ExecuteInEditMode]
+    public class GraphBuilder : MonoBehaviour
     {
+        [SerializeField] WorkingBounds bounds = null;
+        [SerializeField] GraphHolder target = null;
+        [SerializeField] float step = 0.5f;
+
+        private static (int di, int dj)[] MooreIndexShifts =
+        {
         (-1, -1), (-1, 0), (-1, 1),
         (0, -1), (0, 1),
         (1, -1), (1, 0), (1, 1)
     };
 
-    private static (int di, int dj)[] HexagonalIndexShiftsEven =
-    {
+        private static (int di, int dj)[] HexagonalIndexShiftsEven =
+        {
         (-1, 1), (0, 1), (1, 1),
         (-1, 0), (0, -1), (1, 0)
     };
 
-    private static (int di, int dj)[] HexagonalIndexShiftsOdd =
-    {
+        private static (int di, int dj)[] HexagonalIndexShiftsOdd =
+        {
         (-1, 0), (0, 1), (1, 0),
         (-1, -1), (0, -1), (1, -1)
     };
 
-    private void OnValidate()
-    {
-        if (step < 0.25f)
+        private void OnValidate()
         {
-            step = 0.25f;
-        }
-    }
-
-    [ContextMenu("Build")]
-    public void Build()
-    {
-
-    }
-
-    public void Build(bool moore = false)
-    {
-        if (bounds == null || target == null)
-            return;
-
-        target.Graph = moore ? BuildRectangularMoore() : BuildHexagonal();
-    }
-
-    private Graph BuildRectangularMoore()
-    {
-        var graph = new Graph();
-        Node[,] nodes = BuildRectangularMooreNodes(graph);
-        BuildRectangularMooreEdges(nodes, graph);
-        return graph;
-    }
-
-    private Graph BuildHexagonal()
-    {
-        var graph = new Graph();
-        Node[,] nodes = BuildHexagonalNodes(graph);
-        BuildHexagonalEdges(nodes, graph);
-        return graph;
-    }
-
-    private Node[,] BuildRectangularMooreNodes(Graph graph)
-    {
-        Vector2 min = bounds.Min;
-        int w = (int)(bounds.Size.x / step);
-        int h = (int)(bounds.Size.y / step);
-
-        var nodes = new Node[w, h];
-        
-        for (int i = 0; i < w; i++)
-        {
-            for (int j = 0; j < h; j++)
+            if (step < 0.25f)
             {
-                var position = min + new Vector2(i, j) * step;
-                if (MapObject.IsPointWalkable(position))
+                step = 0.25f;
+            }
+        }
+
+        [ContextMenu("Build")]
+        public void Build()
+        {
+
+        }
+
+        public void Build(bool moore = false)
+        {
+            if (bounds == null || target == null)
+                return;
+
+            target.Graph = moore ? BuildRectangularMoore() : BuildHexagonal();
+        }
+
+        private Graph BuildRectangularMoore()
+        {
+            var graph = new Graph();
+            Node[,] nodes = BuildRectangularMooreNodes(graph);
+            BuildRectangularMooreEdges(nodes, graph);
+            return graph;
+        }
+
+        private Graph BuildHexagonal()
+        {
+            var graph = new Graph();
+            Node[,] nodes = BuildHexagonalNodes(graph);
+            BuildHexagonalEdges(nodes, graph);
+            return graph;
+        }
+
+        private Node[,] BuildRectangularMooreNodes(Graph graph)
+        {
+            Vector2 min = bounds.Min;
+            int w = (int)(bounds.Size.x / step);
+            int h = (int)(bounds.Size.y / step);
+
+            var nodes = new Node[w, h];
+
+            for (int i = 0; i < w; i++)
+            {
+                for (int j = 0; j < h; j++)
                 {
-                    nodes[i, j] = graph.AddNode(position);
+                    var position = min + new Vector2(i, j) * step;
+                    if (MapObject.IsPointWalkable(position))
+                    {
+                        nodes[i, j] = graph.AddNode(position);
+                    }
+                }
+            }
+
+            return nodes;
+        }
+
+        private void BuildRectangularMooreEdges(Node[,] nodes, Graph graph)
+        {
+            int w = nodes.GetLength(0);
+            int h = nodes.GetLength(1);
+
+            for (int i = 0; i < w; i++)
+            {
+                for (int j = 0; j < h; j++)
+                {
+                    BuildEdgesAround(graph, nodes, i, j, MooreIndexShifts, true);
                 }
             }
         }
 
-        return nodes;
-    }
-
-    private void BuildRectangularMooreEdges(Node[,] nodes, Graph graph)
-    {
-        int w = nodes.GetLength(0);
-        int h = nodes.GetLength(1);
-
-        for (int i = 0; i < w; i++)
+        private Node[,] BuildHexagonalNodes(Graph graph)
         {
-            for (int j = 0; j < h; j++)
+            float cos30 = Mathf.Cos(Mathf.PI / 6);
+
+            Vector2 min = bounds.Min + new Vector2(0, 0.5f);
+            int w = Mathf.CeilToInt(bounds.Size.x / (step * cos30));
+            int h = Mathf.CeilToInt(bounds.Size.y / step);
+
+            var nodes = new Node[w, h];
+
+            for (int i = 0; i < w; i++)
             {
-                BuildEdgesAround(graph, nodes, i, j, MooreIndexShifts, true);
-            }
-        }
-    }
-
-    private Node[,] BuildHexagonalNodes(Graph graph)
-    {
-        float cos30 = Mathf.Cos(Mathf.PI / 6);
-
-        Vector2 min = bounds.Min + new Vector2(0, 0.5f);
-        int w = Mathf.CeilToInt(bounds.Size.x / (step * cos30));
-        int h = Mathf.CeilToInt(bounds.Size.y / step);
-
-        var nodes = new Node[w, h];
-
-        for (int i = 0; i < w; i++)
-        {
-            for (int j = 0; j < h; j++)
-            {
-                float evenOddShift = i % 2 == 0 ? 0 : -0.5f;
-                var position = min + new Vector2(i * cos30, j + evenOddShift) * step;
-                if (MapObject.IsPointWalkable(position))
+                for (int j = 0; j < h; j++)
                 {
-                    nodes[i, j] = graph.AddNode(position);
+                    float evenOddShift = i % 2 == 0 ? 0 : -0.5f;
+                    var position = min + new Vector2(i * cos30, j + evenOddShift) * step;
+                    if (MapObject.IsPointWalkable(position))
+                    {
+                        nodes[i, j] = graph.AddNode(position);
+                    }
+                }
+            }
+
+            return nodes;
+        }
+
+        private void BuildHexagonalEdges(Node[,] nodes, Graph graph)
+        {
+            int w = nodes.GetLength(0);
+            int h = nodes.GetLength(1);
+
+            for (int i = 0; i < w; i++)
+            {
+                for (int j = 0; j < h; j++)
+                {
+                    (int di, int dj)[] shifts = i % 2 == 0
+                                                    ? HexagonalIndexShiftsEven
+                                                    : HexagonalIndexShiftsOdd;
+
+                    BuildEdgesAround(graph, nodes, i, j, shifts, false);
                 }
             }
         }
 
-        return nodes;
-    }
-
-    private void BuildHexagonalEdges(Node[,] nodes, Graph graph)
-    {
-        int w = nodes.GetLength(0);
-        int h = nodes.GetLength(1);
-
-        for (int i = 0; i < w; i++)
+        private void BuildEdgesAround(Graph graph, Node[,] nodes, int i, int j, (int di, int dj)[] shifts, bool mulByDistance)
         {
-            for (int j = 0; j < h; j++)
-            {
-                (int di, int dj)[] shifts = i % 2 == 0
-                                                ? HexagonalIndexShiftsEven
-                                                : HexagonalIndexShiftsOdd;
+            Node node = nodes[i, j];
+            if (node == null)
+                return;
 
-                BuildEdgesAround(graph, nodes, i, j, shifts, false);
+            foreach (var shift in shifts)
+            {
+                Node otherNode = GetNodeAtOrNull(nodes, i + shift.di, j + shift.dj);
+                if (otherNode == null)
+                    continue;
+
+                AreaAttributes areaAttributes = MapObject.GetAreaAttributes(node.Position, otherNode.Position);
+                if (!areaAttributes.IsWalkable)
+                    continue;
+
+                float weight = areaAttributes.Weight;
+                if (mulByDistance)
+                    weight *= Vector2.Distance(node.Position, otherNode.Position) / step;
+                graph.AddEdge(node, otherNode, weight, areaAttributes.IsTramplable);
             }
         }
-    }
 
-    private void BuildEdgesAround(Graph graph, Node[,] nodes, int i, int j, (int di, int dj)[] shifts, bool mulByDistance)
-    {
-        Node node = nodes[i, j];
-        if (node == null)
-            return;
-
-        foreach (var shift in shifts)
+        private static Node GetNodeAtOrNull(Node[,] nodes, int i, int j)
         {
-            Node otherNode = GetNodeAtOrNull(nodes, i + shift.di, j + shift.dj);
-            if (otherNode == null)
-                continue;
-
-            AreaAttributes areaAttributes = MapObject.GetAreaAttributes(node.Position, otherNode.Position);
-            if (!areaAttributes.IsWalkable)
-                continue;
-
-            float weight = areaAttributes.Weight;
-            if (mulByDistance)
-                weight *= Vector2.Distance(node.Position, otherNode.Position) / step;
-            graph.AddEdge(node, otherNode, weight, areaAttributes.IsTramplable);
+            int w = nodes.GetLength(0);
+            int h = nodes.GetLength(1);
+            if (i < 0 || j < 0 || i >= w || j >= h)
+                return null;
+            return nodes[i, j];
         }
-    }
-
-    private static Node GetNodeAtOrNull(Node[,] nodes, int i, int j)
-    {
-        int w = nodes.GetLength(0);
-        int h = nodes.GetLength(1);
-        if (i < 0 || j < 0 || i >= w || j >= h)
-            return null;
-        return nodes[i, j];
     }
 }

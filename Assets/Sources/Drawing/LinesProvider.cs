@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class LinesProvider : MonoBehaviour
+namespace TrailEvolutionModelling.Drawing
 {
-    public abstract IEnumerable<ColoredLine> GetLines();
+    public abstract class LinesProvider : MonoBehaviour
+    {
+        public abstract IEnumerable<ColoredLine> GetLines();
+    }
 }

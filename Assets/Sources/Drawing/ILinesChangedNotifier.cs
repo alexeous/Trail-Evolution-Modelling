@@ -3,7 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ILinesChangedNotifier
+namespace TrailEvolutionModelling.Drawing
 {
-    event Action<ILinesChangedNotifier> LinesChanged;
+    public interface ILinesChangedNotifier
+    {
+        event Action<ILinesChangedNotifier> LinesChanged;
+    }
 }

@@ -4,87 +4,90 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[ExecuteInEditMode]
-[RequireComponent(typeof(MeshRenderer))]
-[RequireComponent(typeof(MeshFilter))]
-public class LinesDrawer : MonoBehaviour
+namespace TrailEvolutionModelling.Drawing
 {
-    [SerializeField] LinesProvider linesProvider = null;
-
-    private LinesProvider oldLinesProvider;
-    private object firstUpdateDetector = null;
-
-    private void Awake()
+    [ExecuteInEditMode]
+    [RequireComponent(typeof(MeshRenderer))]
+    [RequireComponent(typeof(MeshFilter))]
+    public class LinesDrawer : MonoBehaviour
     {
-        GetComponent<MeshRenderer>().material = new Material(Shader.Find("Sprites/Default"));
-    }
+        [SerializeField] LinesProvider linesProvider = null;
 
-    private void Update()
-    {
-        if (linesProvider != oldLinesProvider)
+        private LinesProvider oldLinesProvider;
+        private object firstUpdateDetector = null;
+
+        private void Awake()
         {
-            if (oldLinesProvider is ILinesChangedNotifier oldNotifier)
+            GetComponent<MeshRenderer>().material = new Material(Shader.Find("Sprites/Default"));
+        }
+
+        private void Update()
+        {
+            if (linesProvider != oldLinesProvider)
             {
-                oldNotifier.LinesChanged -= OnLinesChanged;
+                if (oldLinesProvider is ILinesChangedNotifier oldNotifier)
+                {
+                    oldNotifier.LinesChanged -= OnLinesChanged;
+                }
+
+                oldLinesProvider = linesProvider;
+
+                Redraw();
             }
 
-            oldLinesProvider = linesProvider;
+            if (linesProvider is ILinesChangedNotifier notifier)
+            {
+                notifier.LinesChanged -= OnLinesChanged;
+                notifier.LinesChanged += OnLinesChanged;
+            }
 
+            if (firstUpdateDetector == null)
+            {
+                firstUpdateDetector = new object();
+                Redraw();
+            }
+        }
+
+        private void OnLinesChanged(ILinesChangedNotifier notifier)
+        {
             Redraw();
         }
 
-        if (linesProvider is ILinesChangedNotifier notifier)
+        private void Redraw()
         {
-            notifier.LinesChanged -= OnLinesChanged;
-            notifier.LinesChanged += OnLinesChanged;
+            transform.position = new Vector3(0, 0, transform.position.z);
+
+            ClearMesh();
+
+            if (linesProvider == null)
+                return;
+
+            var vertices = new List<Vector3>();
+            var colors = new List<Color>();
+            foreach (var line in linesProvider.GetLines())
+            {
+                vertices.Add(line.start);
+                colors.Add(line.color);
+                vertices.Add(line.end);
+                colors.Add(line.color);
+            }
+
+            int[] indices = Enumerable.Range(0, vertices.Count).ToArray();
+
+            var mesh = new Mesh();
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            mesh.SetVertices(vertices);
+            mesh.SetColors(colors);
+            mesh.SetIndices(indices, MeshTopology.Lines, 0);
+
+            GetComponent<MeshFilter>().sharedMesh = mesh;
         }
 
-        if (firstUpdateDetector == null)
+        private void ClearMesh()
         {
-            firstUpdateDetector = new object();
-            Redraw();
+            Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
+            if (mesh != null)
+                mesh.Clear();
         }
-    }
-
-    private void OnLinesChanged(ILinesChangedNotifier notifier)
-    {
-        Redraw();
-    }
-
-    private void Redraw()
-    {
-        transform.position = new Vector3(0, 0, transform.position.z);
-
-        ClearMesh();
-
-        if (linesProvider == null)
-            return;
-
-        var vertices = new List<Vector3>();
-        var colors = new List<Color>();
-        foreach (var line in linesProvider.GetLines())
-        {   
-            vertices.Add(line.start);
-            colors.Add(line.color);
-            vertices.Add(line.end);
-            colors.Add(line.color);
-        }
-
-        int[] indices = Enumerable.Range(0, vertices.Count).ToArray();
-
-        var mesh = new Mesh();
-        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        mesh.SetVertices(vertices);
-        mesh.SetColors(colors);
-        mesh.SetIndices(indices, MeshTopology.Lines, 0);
-
-        GetComponent<MeshFilter>().sharedMesh = mesh;
-    }
-
-    private void ClearMesh()
-    {
-        Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
-        if (mesh != null)
-            mesh.Clear();
     }
 }
