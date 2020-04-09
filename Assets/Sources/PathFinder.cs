@@ -4,16 +4,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using Priority_Queue;
 using System.Runtime.CompilerServices;
-using System.Linq.Expressions;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Threading;
 
 namespace TrailEvolutionModelling
 {
+    public enum PathFindingAlgorithm { AStar, NBA, Wavefront }
+
     public class PathFinder
     {
-        public static Node[] FindPath(Graph graph, Node start, Node goal, bool aStar = false)
+        public static Node[] FindPath(Graph graph, Node start, Node goal, PathFindingAlgorithm algorithm)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            var result = aStar ? AStar(graph, start, goal) : NBA(graph, start, goal);
+
+            Node[] result = null;
+            switch (algorithm) {
+                case PathFindingAlgorithm.AStar:
+                    result = AStar(graph, start, goal);
+                    break;
+                case PathFindingAlgorithm.NBA:
+                    result = NBA(graph, start, goal);
+                    break;
+                case PathFindingAlgorithm.Wavefront:
+                    result = Wavefront(graph, start, goal);
+                    break;
+            };
             stopwatch.Stop();
 
             Debug.Log($"Path finding took {stopwatch.ElapsedMilliseconds} ms");
@@ -208,6 +224,148 @@ namespace TrailEvolutionModelling
 
                 return result;
             }
+        }
+
+        private static Node[] Wavefront(Graph graph, Node start, Node goal)
+        {
+            foreach (var node in graph.Nodes)
+            {
+                node.G1 = -1;
+                node.G2 = -1;
+                node.CameFrom1 = null;
+            }
+            goal.G1 = 0;
+            goal.G2 = 0;
+
+            bool exitFlag = false;
+            while (!exitFlag)
+            {
+                exitFlag = true;
+                Parallel.ForEach(graph.Nodes, PlannerKernel);
+                if (start.G1 == -1)
+                    exitFlag = false;
+                Parallel.ForEach(graph.Nodes, node => node.G1 = node.G2);
+            }
+            Node[] path = ReconstructPath(start);
+            RedrawHeatmap(graph);
+
+            CleanupGraph(graph);
+            return path;
+
+            void PlannerKernel(Node node)
+            {
+                if (node == goal) return;
+                node.G2 = node.G1;
+                foreach (var edge in node.IncidentEdges)
+                {
+                    Node other = edge.GetOppositeNode(node);
+                    var newG = other.G1 + edge.Weight;
+                    if (other.G1 != -1 && (node.G2 == -1 || newG < node.G2))
+                    {
+                        node.CameFrom1 = other;
+                        node.G2 = newG;
+                        if (node.G2 < /*precalculated max of*/ start.G1)
+                            exitFlag = false;
+                    }
+                }
+            }
+
+            Node[] ReconstructPath(Node current)
+            {
+                var pathNodes = new List<Node>();
+                //while (current != null)
+                //{
+                //    pathNodes.Add(current);
+                //    if (pathNodes.Count > 100000)
+                //    {
+                //        CleanupGraph(graph);
+                //        throw new Exception("Something went wrong");
+                //    }
+                //    current = current.CameFrom1;
+                //}
+                while (true)
+                {
+                    pathNodes.Add(current);
+                    if (pathNodes.Count > 100000)
+                    {
+                        CleanupGraph(graph);
+                        throw new Exception("Something went wrong");
+                    }
+                    if (current == goal)
+                        break;
+
+                    float min = float.PositiveInfinity;
+                    Node next = null;
+                    foreach (var edge in current.IncidentEdges)
+                    {
+                        Node other = edge.GetOppositeNode(current);
+                        if (other.G1 != -1 && other.G1 < min)
+                        {
+                            next = other;
+                            min = other.G1;
+                        }
+                    }
+                    current = next;
+                }
+                return pathNodes.ToArray();
+            }
+        }
+
+        static void RedrawHeatmap(Graph graph)
+        {
+            float minG = graph.Nodes.Min(n => n.G1);
+            float maxG = graph.Nodes.Max(n => n.G1);
+            Color minColor = Color.green;
+            Color maxColor = Color.red;
+            Vector2 deltaPos = graph.Nodes[0].Position - graph.Nodes[1].Position;
+            float step = Mathf.Max(Mathf.Abs(deltaPos.x), Mathf.Abs(deltaPos.y));
+            float halfStep = step / 2;
+
+            var mesh = new Mesh();
+            var vertices = new List<Vector3>();
+            var colors = new List<Color>();
+            foreach (var node in graph.Nodes)
+            {
+                float t = (node.G1 - minG) / (maxG - minG);
+                var color = node.G1 == -1 ? Color.blue : Color.Lerp(minColor, maxColor, t);
+                vertices.Add(node.Position + new Vector2(-halfStep, -halfStep));
+                vertices.Add(node.Position + new Vector2(+halfStep, -halfStep));
+                vertices.Add(node.Position + new Vector2(+halfStep, +halfStep));
+                vertices.Add(node.Position + new Vector2(-halfStep, +halfStep));
+
+                colors.Add(color);
+                colors.Add(color);
+                colors.Add(color);
+                colors.Add(color);
+            }
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            mesh.SetVertices(vertices);
+            mesh.SetColors(colors);
+            var indices = Enumerable.Range(0, vertices.Count).ToArray();
+            mesh.SetIndices(indices, MeshTopology.Quads, 0);
+
+            var old = GameObject.Find("HEATMAP");
+            if (old != null)
+            {
+                GameObject.DestroyImmediate(old);
+            }
+            var go = new GameObject("HEATMAP");
+            go.transform.position = new Vector3(0, 0, -0.95f);
+            var meshFilter = go.AddComponent<MeshFilter>();
+            meshFilter.sharedMesh = mesh;
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.material = new Material(Shader.Find("Sprites/Default"));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void AtomicMin(ref float ptr, float value)
+        {
+            float oldVal, newVal;
+            do
+            {
+                oldVal = ptr;
+                newVal = Mathf.Min(oldVal, value);
+            } while (Interlocked.CompareExchange(ref ptr, oldVal, newVal) != oldVal);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

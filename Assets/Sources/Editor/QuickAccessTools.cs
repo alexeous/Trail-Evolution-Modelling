@@ -39,10 +39,13 @@ namespace TrailEvolutionModelling.Editor
                 BuildGraphs(false);
 
             if (GUI.Button(new Rect(2, y += 20, 40, 15), "A*"))
-                FindPaths(true);
+                FindPaths(PathFindingAlgorithm.AStar);
 
             if (GUI.Button(new Rect(2, y += 17, 40, 15), "NBA"))
-                FindPaths(false);
+                FindPaths(PathFindingAlgorithm.NBA);
+
+            if (GUI.Button(new Rect(2, y += 17, 40, 15), "Wave"))
+                FindPaths(PathFindingAlgorithm.Wavefront);
 
             Handles.EndGUI();
         }
@@ -55,11 +58,11 @@ namespace TrailEvolutionModelling.Editor
             }
         }
 
-        private static void FindPaths(bool aStar)
+        private static void FindPaths(PathFindingAlgorithm algorithm)
         {
             foreach (var invoker in FindObjectsOfType<PathFinderInvoker>())
             {
-                invoker.FindPath(aStar);
+                invoker.FindPath(algorithm);
             }
         }
     }

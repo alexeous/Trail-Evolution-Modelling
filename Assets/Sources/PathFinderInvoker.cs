@@ -20,13 +20,13 @@ namespace TrailEvolutionModelling
 
         public event Action<ILinesChangedNotifier> LinesChanged;
 
-        [ContextMenu("Find Path")]
-        public void FindPath()
+        [ContextMenu("Invoke A*")]
+        public void InvokeAStar()
         {
-            FindPath(false);
+            FindPath(PathFindingAlgorithm.AStar);
         }
 
-        public void FindPath(bool aStar)
+        public void FindPath(PathFindingAlgorithm algorithm)
         {
             if (graphHolder == null || start == null || end == null)
             {
@@ -42,7 +42,7 @@ namespace TrailEvolutionModelling
             Node startNode = FindClosestNode(graph, start.position);
             Node endNode = FindClosestNode(graph, end.position);
 
-            this.path = PathFinder.FindPath(graph, startNode, endNode, aStar);
+            this.path = PathFinder.FindPath(graph, startNode, endNode, algorithm);
             if (this.path == null)
             {
                 Debug.LogWarning("Path not found");
