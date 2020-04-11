@@ -240,7 +240,7 @@ namespace TrailEvolutionModelling
                 return result;
             }
         }
-
+        public static List<List<Vector2>> gg;
         private static Node[] Wavefront(Graph graph, Node start, Node goal)
         {
             foreach (var node in graph.Nodes)
@@ -253,6 +253,7 @@ namespace TrailEvolutionModelling
             start.G2 = 0;
 
             bool exitFlag = false;
+            int iters = 0;
             while (!exitFlag)
             {
                 exitFlag = true;
@@ -267,6 +268,8 @@ namespace TrailEvolutionModelling
             }
             Node[] path = ReconstructPath(start);
             RedrawHeatmap(graph);
+
+            Debug.Log("Iterations: " + iters);
 
             CleanupGraph(graph);
             var visitedEdges = new HashSet<Edge>();
@@ -295,6 +298,7 @@ namespace TrailEvolutionModelling
 
             void PlannerKernel(Node node)
             {
+                Interlocked.Increment(ref iters);
                 node.F1 = node.G1;
                 if (node != goal)
                     foreach (var edge in node.IncidentEdges)
@@ -333,6 +337,8 @@ namespace TrailEvolutionModelling
                     return new Node[] { current };
                 }
 
+                gg = new List<List<Vector2>>();
+
                 var pathNodes = new List<Node> { current };
                 Node prevGuide = current;
                 Node guide = current.CameFrom1;
@@ -351,9 +357,9 @@ namespace TrailEvolutionModelling
                     float minG2 = prevGuide.G2;
                     float maxG2 = nextGuide.G2;
 
-                    var visited = new HashSet<Node>();
+                    var visited = new HashSet<Node> { guide };
                     var similarCostNodes = new List<Node> { guide };
-                    Vector2 averagePos = Vector2.zero;
+                    Vector2 averagePos = guide.Position;
 
                     Rec(guide);
                     void Rec(Node center)
@@ -375,6 +381,8 @@ namespace TrailEvolutionModelling
                             }
                         }
                     }
+
+                    gg.Add(similarCostNodes.Select(n => n.Position).ToList());
 
                     averagePos /= similarCostNodes.Count;
                     Node next = null;

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TrailEvolutionModelling.Drawing;
+using UnityEditor;
 using UnityEngine;
 
 namespace TrailEvolutionModelling
@@ -14,6 +15,7 @@ namespace TrailEvolutionModelling
         [SerializeField] Transform start = null;
         [SerializeField] Transform end = null;
         [SerializeField] Color pathColor = Color.red;
+        [SerializeField] int ind = 0;
 
         private Color oldPathColor;
         private Node[] path;
@@ -24,6 +26,22 @@ namespace TrailEvolutionModelling
         public void InvokeAStar()
         {
             FindPath(PathFindingAlgorithm.AStar);
+        }
+
+        public int count;
+
+        void OnDrawGizmos()
+        {
+            try
+            {
+                Handles.color = Color.white;
+                foreach (var p in PathFinder.gg[ind])
+                {
+                    Handles.DrawSolidDisc(p, Vector3.forward, 0.2f);
+                }
+                count = PathFinder.gg[ind].Count;
+            }
+            catch { }
         }
 
         public void FindPath(PathFindingAlgorithm algorithm)
