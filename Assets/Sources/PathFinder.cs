@@ -250,16 +250,20 @@ namespace TrailEvolutionModelling
                 node.CameFrom1 = null;
             }
             goal.G1 = 0;
-            goal.G2 = 0;
+            start.G2 = 0;
 
             bool exitFlag = false;
             while (!exitFlag)
             {
                 exitFlag = true;
                 Parallel.ForEach(graph.Nodes, PlannerKernel);
-                if (start.G1 == -1)
+                if (start.G1 == -1 || goal.G2 == -1)
                     exitFlag = false;
-                Parallel.ForEach(graph.Nodes, node => node.G1 = node.G2);
+                Parallel.ForEach(graph.Nodes, node =>
+                {
+                    node.G1 = node.F1;
+                    node.G2 = node.F2;
+                });
             }
             Node[] path = ReconstructPath(start);
             RedrawHeatmap(graph);
@@ -291,35 +295,117 @@ namespace TrailEvolutionModelling
 
             void PlannerKernel(Node node)
             {
-                if (node == goal) return;
-                node.G2 = node.G1;
-                foreach (var edge in node.IncidentEdges)
-                {
-                    Node other = edge.GetOppositeNode(node);
-                    var newG = other.G1 + edge.Weight;
-                    if (other.G1 != -1 && (node.G2 == -1 || newG < node.G2))
+                node.F1 = node.G1;
+                if (node != goal)
+                    foreach (var edge in node.IncidentEdges)
                     {
-                        node.CameFrom1 = other;
-                        node.G2 = newG;
-                        if (node.G2 < /*precalculated max of*/ start.G1)
-                            exitFlag = false;
+                        Node other = edge.GetOppositeNode(node);
+                        var newG = other.G1 + edge.Weight;
+                        if (other.G1 != -1 && (node.F1 == -1 || newG < node.F1))
+                        {
+                            node.CameFrom1 = other;
+                            node.F1 = newG;
+                            if (node.F1 < /*precalculated max of*/ start.G1)
+                                exitFlag = false;
+                        }
                     }
-                }
+
+                node.F2 = node.G2;
+                if (node != start)
+                    foreach (var edge in node.IncidentEdges)
+                    {
+                        Node other = edge.GetOppositeNode(node);
+                        var newG = other.G2 + edge.Weight;
+                        if (other.G2 != -1 && (node.F2 == -1 || newG < node.F2))
+                        {
+                            node.CameFrom2 = other;
+                            node.F2 = newG;
+                            if (node.F2 < /*precalculated max of*/ start.G2)
+                                exitFlag = false;
+                        }
+                    }
             }
 
             Node[] ReconstructPath(Node current)
             {
-                var pathNodes = new List<Node>();
-                while (current != null)
+                if (current == goal)
                 {
-                    pathNodes.Add(current);
+                    return new Node[] { current };
+                }
+
+                var pathNodes = new List<Node> { current };
+                Node prevGuide = current;
+                Node guide = current.CameFrom1;
+                while (guide != goal)
+                {
                     if (pathNodes.Count > 100000)
                     {
                         CleanupGraph(graph);
                         throw new Exception("Something went wrong");
                     }
-                    current = current.CameFrom1;
+
+                    Node nextGuide = guide.CameFrom1;
+
+                    float minG1 = nextGuide.G1;
+                    float maxG1 = prevGuide.G1;
+                    float minG2 = prevGuide.G2;
+                    float maxG2 = nextGuide.G2;
+
+                    var visited = new HashSet<Node>();
+                    var similarCostNodes = new List<Node> { guide };
+                    Vector2 averagePos = Vector2.zero;
+
+                    Rec(guide);
+                    void Rec(Node center)
+                    {
+                        foreach (var edge in center.IncidentEdges)
+                        {
+                            Node other = edge.GetOppositeNode(center);
+                            if (visited.Contains(other))
+                                continue;
+
+                            visited.Add(other);
+
+                            if (other.G1 >= minG1 && other.G1 <= maxG1 &&
+                                other.G2 >= minG2 && other.G2 <= maxG2)
+                            {
+                                similarCostNodes.Add(other);
+                                averagePos += other.Position;
+                                Rec(other);
+                            }
+                        }
+                    }
+
+                    averagePos /= similarCostNodes.Count;
+                    Node next = null;
+                    float minSqrDist = float.PositiveInfinity;
+                    foreach (var node in similarCostNodes)
+                    {
+                        float sqrDist = (averagePos - node.Position).sqrMagnitude;
+                        if (sqrDist < minSqrDist)
+                        {
+                            minSqrDist = sqrDist;
+                            next = node;
+                        }
+                    }
+                    pathNodes.Add(next);
+
+                    prevGuide = guide;
+                    guide = guide.CameFrom1;
                 }
+                pathNodes.Add(goal);
+
+                //var pathNodes = new List<Node>();
+                //while (current != null)
+                //{
+                //    pathNodes.Add(current);
+                //    if (pathNodes.Count > 100000)
+                //    {
+                //        CleanupGraph(graph);
+                //        throw new Exception("Something went wrong");
+                //    }
+                //    current = current.CameFrom1;
+                //}
 
                 //Vector2 deltaPos = graph.Nodes[0].Position - graph.Nodes[1].Position;
                 //float cellStep = Mathf.Max(Mathf.Abs(deltaPos.x), Mathf.Abs(deltaPos.y));
