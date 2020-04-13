@@ -76,7 +76,6 @@ namespace TrailEvolutionModelling
             int h = (int)(bounds.Size.y / step);
 
             var nodes = new Node[w][];
-
             for (int i = 0; i < w; i++)
             {
                 nodes[i] = new Node[h];
@@ -90,6 +89,7 @@ namespace TrailEvolutionModelling
                 }
             }
             graph.Nodes = nodes;
+            graph.ComputeNodes = new ComputeNode[w * h];
         }
 
         private void BuildRectangularMooreEdges(Graph graph)
@@ -98,11 +98,23 @@ namespace TrailEvolutionModelling
             int w = nodes.Length;
             int h = nodes[0].Length;
 
+            graph.ComputeEdgesHoriz = new float[(w + 1) * h];
+            graph.ComputeEdgesVert = new float[w * (h + 1)];
+            graph.ComputeEdgesLeftDiag = new float[(w + 1) * (h + 1)];
+            graph.ComputeEdgesRightDiag = new float[(w + 1) * (h + 1)];
+
+            graph.ComputeEdgesLeftDiag[0] = float.PositiveInfinity;
+            graph.ComputeEdgesLeftDiag[graph.ComputeEdgesLeftDiag.Length - 1] = float.PositiveInfinity;
+
+            graph.ComputeEdgesRightDiag[0] = float.PositiveInfinity;
+            graph.ComputeEdgesRightDiag[graph.ComputeEdgesRightDiag.Length - 1] = float.PositiveInfinity;
+
             for (int i = 0; i < w; i++)
             {
                 for (int j = 0; j < h; j++)
                 {
                     BuildEdgesAround(graph, nodes, i, j, MooreIndexShifts, true);
+
                 }
             }
         }
@@ -155,25 +167,67 @@ namespace TrailEvolutionModelling
 
         private void BuildEdgesAround(Graph graph, Node[][] nodes, int i, int j, (int di, int dj)[] shifts, bool mulByDistance)
         {
+            int w = nodes.Length;
+            int h = nodes[0].Length;
+
             Node node = nodes[i][j];
             if (node == null)
+            { 
+                foreach (var shift in shifts)
+                {
+                    GetComputeEdge(shift) = float.PositiveInfinity;
+                }
                 return;
+            }
+
 
             foreach (var shift in shifts)
             {
+                ref float computeEdge = ref GetComputeEdge(shift);
+
                 Node otherNode = GetNodeAtOrNull(nodes, i + shift.di, j + shift.dj);
                 if (otherNode == null)
+                {
+                    computeEdge = float.PositiveInfinity;
                     continue;
+                }
 
                 AreaAttributes areaAttributes = MapObject.GetAreaAttributes(node.Position, otherNode.Position);
                 if (!areaAttributes.IsWalkable)
+                {
+                    computeEdge = float.PositiveInfinity;
                     continue;
+                }
 
                 float weight = areaAttributes.Weight;
                 if (mulByDistance)
                     weight *= Vector2.Distance(node.Position, otherNode.Position) / step;
                 graph.AddEdge(node, otherNode, weight, areaAttributes.IsTramplable);
+
+                computeEdge = weight;
             }
+            
+            ref float GetComputeEdge((int di, int dj) shift)
+            {
+                //int newI = i + shift.di;
+                //int newJ = j + shift.dj;
+                int di = shift.di;
+                int dj = shift.dj;
+                
+                if (di == -1 && dj == -1) return ref graph.ComputeEdgesLeftDiag[i + j * (w + 1)];
+                if (di == 0 && dj == -1) return ref graph.ComputeEdgesVert[i + j * w];
+                if (di == 1 && dj == -1) return ref graph.ComputeEdgesRightDiag[i + 1 + j * (w + 1)];
+
+                if (di == -1 && dj == 0) return ref graph.ComputeEdgesHoriz[i + j * (w + 1)];
+                if (di == 1 && dj == 0) return ref graph.ComputeEdgesHoriz[i + 1 + j * (w + 1)];
+
+                if (di == -1 && dj == 1) return ref graph.ComputeEdgesRightDiag[i + (j + 1) * (w + 1)];
+                if (di == 0 && dj == 1) return ref graph.ComputeEdgesVert[i + (j + 1) * w];
+                if (di == 1 && dj == 1) return ref graph.ComputeEdgesLeftDiag[i + 1 + (j + 1) * (w + 1)];
+
+                throw new Exception("Invalid rectangular moore shift");
+            }
+
         }
 
         private static Node GetNodeAtOrNull(Node[][] nodes, int i, int j)

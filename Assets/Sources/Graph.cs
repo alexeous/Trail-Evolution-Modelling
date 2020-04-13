@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Priority_Queue;
 using UnityEngine;
 
@@ -113,10 +114,23 @@ namespace TrailEvolutionModelling
         public override int GetHashCode() => Node1.GetHashCode() + Node2.GetHashCode();
     }
 
+    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct ComputeNode
+    {
+        public float G;
+        public int DirectionNext;
+    }
+
     public sealed class Graph
     {
-        public Node[][] Nodes { get; set; } = new Node[0][];
+        public Node[][] Nodes { get; set; }
         public HashSet<Edge> Edges { get; } = new HashSet<Edge>();
+        
+        public ComputeNode[] ComputeNodes { get; set; }
+        public float[] ComputeEdgesVert { get; set; }
+        public float[] ComputeEdgesHoriz { get; set; }
+        public float[] ComputeEdgesLeftDiag { get; set; }
+        public float[] ComputeEdgesRightDiag { get; set; }
 
         //public Node AddNode(Vector2 position)
         //{

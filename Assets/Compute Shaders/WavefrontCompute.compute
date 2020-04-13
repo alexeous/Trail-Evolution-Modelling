@@ -1,0 +1,40 @@
+﻿#pragma kernel WavefrontPlannerKernel
+
+#include "HLSLSupport.cginc"
+
+#define GROUP_SIZE_X 16
+#define GROUP_SIZE_Y 16
+
+struct Node 
+{
+    float g;
+    int dirNext; // clockwise
+};
+
+RWStructuredBuffer<Node> nodesRead;
+RWStructuredBuffer<Node> nodesWrite;
+
+StructuredBuffer<float> edgesVert;      //  | edges
+StructuredBuffer<float> edgesHoriz;     //  — edges
+StructuredBuffer<float> edgesLeftDiag;  //  \ edges
+StructuredBuffer<float> edgesRightDiag; //  / edges
+
+RWStructuredBuffer<bool> exitFlag;
+
+CBUFFER_START(Params)
+uint readNodesIndex;
+uint nodesWidth;
+uint nodesHeight;
+uint startIndex;
+uint goalIndex;
+CBUFFER_END
+
+[numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
+void WavefrontPlannerKernel (uint3 id : SV_DispatchThreadID)
+{
+    uint index = id.x + nodesWidth * id.y;
+    if(id.x >= nodesWidth || id.y >= nodesHeight || index == goalIndex)
+        return;
+
+
+}

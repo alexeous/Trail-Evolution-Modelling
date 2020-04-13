@@ -133,7 +133,7 @@ namespace TrailEvolutionModelling
             }
 
             Node[] path = ReconstructPath(minNode);
-
+            
             CleanupGraph(nodesFlattened);
 
             return path;
@@ -262,34 +262,34 @@ namespace TrailEvolutionModelling
             Node[] path = ReconstructPath(start);
             stopwatch.Stop();
             Debug.Log("Path reconstruction took: " + stopwatch.ElapsedMilliseconds + " ms");
-
+            
             RedrawHeatmap(nodesFlattened);
 
             Debug.Log("Iterations: " + iters);
             
             CleanupGraph(nodesFlattened);
-            var visitedEdges = new HashSet<Edge>();
-            foreach (var node in path)
-            {
-                foreach (var edge in node.IncidentEdges)
-                {
-                    if (visitedEdges.Contains(edge) || !edge.IsTramplable)
-                        continue;
+            //var visitedEdges = new HashSet<Edge>();
+            //foreach (var node in path)
+            //{
+            //    foreach (var edge in node.IncidentEdges)
+            //    {
+            //        if (visitedEdges.Contains(edge) || !edge.IsTramplable)
+            //            continue;
 
-                    edge.Weight = Mathf.Max(1.1f, edge.Weight - 0.4f);
-                    visitedEdges.Add(edge);
+            //        edge.Weight = Mathf.Max(1.1f, edge.Weight - 0.4f);
+            //        visitedEdges.Add(edge);
 
-                    Node other = edge.GetOppositeNode(node);
-                    foreach (var edge2 in other.IncidentEdges)
-                    {
-                        if (visitedEdges.Contains(edge2) || !edge2.IsTramplable)
-                            continue;
+            //        Node other = edge.GetOppositeNode(node);
+            //        foreach (var edge2 in other.IncidentEdges)
+            //        {
+            //            if (visitedEdges.Contains(edge2) || !edge2.IsTramplable)
+            //                continue;
 
-                        edge2.Weight = Mathf.Max(1.1f, edge2.Weight - 0.4f);
-                        visitedEdges.Add(edge2);
-                    }
-                }
-            }
+            //            edge2.Weight = Mathf.Max(1.1f, edge2.Weight - 0.4f);
+            //            visitedEdges.Add(edge2);
+            //        }
+            //    }
+            //}
             return path;
 
             void PlannerKernel(Node node)
