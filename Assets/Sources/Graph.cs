@@ -115,21 +115,21 @@ namespace TrailEvolutionModelling
 
     public sealed class Graph
     {
-        public List<Node> Nodes { get; } = new List<Node>();
+        public Node[][] Nodes { get; set; } = new Node[0][];
         public HashSet<Edge> Edges { get; } = new HashSet<Edge>();
 
-        public Node AddNode(Vector2 position)
-        {
-            var node = new Node(position);
-            Nodes.Add(node);
-            return node;
-        }
+        //public Node AddNode(Vector2 position)
+        //{
+        //    var node = new Node(position);
+        //    Nodes.Add(node);
+        //    return node;
+        //}
 
-        public void RemoveNode(Node node)
-        {
-            Nodes.Remove(node);
-            Edges.RemoveWhere(edge => node.IncidentEdges.Contains(edge));
-        }
+        //public void RemoveNode(Node node)
+        //{
+        //    Nodes.Remove(node);
+        //    Edges.RemoveWhere(edge => node.IncidentEdges.Contains(edge));
+        //}
 
         public Edge AddEdge(Node node1, Node node2, float weight, bool isTramplable)
         {

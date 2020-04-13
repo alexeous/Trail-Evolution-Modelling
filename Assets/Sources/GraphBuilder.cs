@@ -56,46 +56,47 @@ namespace TrailEvolutionModelling
         private Graph BuildRectangularMoore()
         {
             var graph = new Graph();
-            Node[,] nodes = BuildRectangularMooreNodes(graph);
-            BuildRectangularMooreEdges(nodes, graph);
+            BuildRectangularMooreNodes(graph);
+            BuildRectangularMooreEdges(graph);
             return graph;
         }
 
         private Graph BuildHexagonal()
         {
             var graph = new Graph();
-            Node[,] nodes = BuildHexagonalNodes(graph);
-            BuildHexagonalEdges(nodes, graph);
+            BuildHexagonalNodes(graph);
+            BuildHexagonalEdges(graph);
             return graph;
         }
 
-        private Node[,] BuildRectangularMooreNodes(Graph graph)
+        private void BuildRectangularMooreNodes(Graph graph)
         {
             Vector2 min = bounds.Min;
             int w = (int)(bounds.Size.x / step);
             int h = (int)(bounds.Size.y / step);
 
-            var nodes = new Node[w, h];
+            var nodes = new Node[w][];
 
             for (int i = 0; i < w; i++)
             {
+                nodes[i] = new Node[h];
                 for (int j = 0; j < h; j++)
                 {
                     var position = min + new Vector2(i, j) * step;
                     if (MapObject.IsPointWalkable(position))
                     {
-                        nodes[i, j] = graph.AddNode(position);
+                        nodes[i][j] = new Node(position);
                     }
                 }
             }
-
-            return nodes;
+            graph.Nodes = nodes;
         }
 
-        private void BuildRectangularMooreEdges(Node[,] nodes, Graph graph)
+        private void BuildRectangularMooreEdges(Graph graph)
         {
-            int w = nodes.GetLength(0);
-            int h = nodes.GetLength(1);
+            var nodes = graph.Nodes;
+            int w = nodes.Length;
+            int h = nodes[0].Length;
 
             for (int i = 0; i < w; i++)
             {
@@ -106,7 +107,7 @@ namespace TrailEvolutionModelling
             }
         }
 
-        private Node[,] BuildHexagonalNodes(Graph graph)
+        private void BuildHexagonalNodes(Graph graph)
         {
             float cos30 = Mathf.Cos(Mathf.PI / 6);
 
@@ -114,7 +115,7 @@ namespace TrailEvolutionModelling
             int w = Mathf.CeilToInt(bounds.Size.x / (step * cos30));
             int h = Mathf.CeilToInt(bounds.Size.y / step);
 
-            var nodes = new Node[w, h];
+            var nodes = new Node[w][];
 
             for (int i = 0; i < w; i++)
             {
@@ -124,18 +125,20 @@ namespace TrailEvolutionModelling
                     var position = min + new Vector2(i * cos30, j + evenOddShift) * step;
                     if (MapObject.IsPointWalkable(position))
                     {
-                        nodes[i, j] = graph.AddNode(position);
+                        nodes[i][j] = new Node(position);
                     }
                 }
             }
 
-            return nodes;
+            graph.Nodes = nodes;
         }
 
-        private void BuildHexagonalEdges(Node[,] nodes, Graph graph)
+        private void BuildHexagonalEdges(Graph graph)
         {
-            int w = nodes.GetLength(0);
-            int h = nodes.GetLength(1);
+            var nodes = graph.Nodes;
+
+            int w = nodes.Length;
+            int h = nodes[0].Length;
 
             for (int i = 0; i < w; i++)
             {
@@ -150,9 +153,9 @@ namespace TrailEvolutionModelling
             }
         }
 
-        private void BuildEdgesAround(Graph graph, Node[,] nodes, int i, int j, (int di, int dj)[] shifts, bool mulByDistance)
+        private void BuildEdgesAround(Graph graph, Node[][] nodes, int i, int j, (int di, int dj)[] shifts, bool mulByDistance)
         {
-            Node node = nodes[i, j];
+            Node node = nodes[i][j];
             if (node == null)
                 return;
 
@@ -173,13 +176,13 @@ namespace TrailEvolutionModelling
             }
         }
 
-        private static Node GetNodeAtOrNull(Node[,] nodes, int i, int j)
+        private static Node GetNodeAtOrNull(Node[][] nodes, int i, int j)
         {
-            int w = nodes.GetLength(0);
-            int h = nodes.GetLength(1);
+            int w = nodes.Length;
+            int h = nodes[0].Length;
             if (i < 0 || j < 0 || i >= w || j >= h)
                 return null;
-            return nodes[i, j];
+            return nodes[i][j];
         }
     }
 }

@@ -89,15 +89,20 @@ namespace TrailEvolutionModelling
             Node closest = null;
             float minSqrDist = float.PositiveInfinity;
 
-            foreach (var node in graph.Nodes)
-            {
-                float sqrDist = (node.Position - position).sqrMagnitude;
-                if (sqrDist < minSqrDist)
+            for (int i = 0; i < graph.Nodes.Length; i++)
+                for (int j = 0; j < graph.Nodes[0].Length; j++)
                 {
-                    minSqrDist = sqrDist;
-                    closest = node;
+                    Node node = graph.Nodes[i][j];
+                    if (node == null)
+                        continue;
+
+                    float sqrDist = (node.Position - position).sqrMagnitude;
+                    if (sqrDist < minSqrDist)
+                    {
+                        minSqrDist = sqrDist;
+                        closest = node;
+                    }
                 }
-            }
 
             return closest;
         }

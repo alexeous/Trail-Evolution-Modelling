@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Priority_Queue;
 using UnityEngine;
+
+using Debug = UnityEngine.Debug;
 
 namespace TrailEvolutionModelling
 {
@@ -15,7 +18,7 @@ namespace TrailEvolutionModelling
     {
         public static Node[] FindPath(Graph graph, Node start, Node goal, PathFindingAlgorithm algorithm)
         {
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var stopwatch = Stopwatch.StartNew();
 
             Node[] result = null;
             switch (algorithm)
@@ -38,7 +41,8 @@ namespace TrailEvolutionModelling
 
         private static Node[] AStar(Graph graph, Node start, Node goal)
         {
-            var open = new FastPriorityQueue<Node>(graph.Nodes.Count);
+            Node[] nodesFlattened = graph.Nodes.SelectMany(t => t).Where(t => t != null).ToArray();
+            var open = new FastPriorityQueue<Node>(graph.Nodes.Length * graph.Nodes[0].Length);
 
             start.G1 = 0;
             start.F1 = Heuristic(start, goal, start);
@@ -51,7 +55,7 @@ namespace TrailEvolutionModelling
                 {
                     Node[] path = ReconstructPath(current);
                     open.Clear();
-                    CleanupGraph(graph);
+                    CleanupGraph(nodesFlattened);
                     return path;
                 }
 
@@ -72,7 +76,7 @@ namespace TrailEvolutionModelling
             }
 
             open.Clear();
-            CleanupGraph(graph);
+            CleanupGraph(nodesFlattened);
             return null;
 
 
@@ -99,23 +103,9 @@ namespace TrailEvolutionModelling
             public override int Compare(Node x, Node y) => x.F2.CompareTo(y.F2);
         }
 
-        public class YoureNotGonnaRecognizeThisThingAtTheFirstGlance
-        {
-            public
-            static
-            YoureNotGonnaRecognizeThisThingAtTheFirstGlance
-            Yeah
-            (
-                object o
-            )
-            {
-                Console.WriteLine("I am the best");
-                return null;
-            }
-        }
-
         private static Node[] NBA(Graph graph, Node start, Node goal)
         {
+            Node[] nodesFlattened = graph.Nodes.SelectMany(t => t).Where(t => t != null).ToArray();
             var open1 = new Heap<Node>(new F1Comparer(), (node, id) => node.H1 = id);
             var open2 = new Heap<Node>(new F2Comparer(), (node, id) => node.H2 = id);
 
@@ -144,7 +134,7 @@ namespace TrailEvolutionModelling
 
             Node[] path = ReconstructPath(minNode);
 
-            CleanupGraph(graph);
+            CleanupGraph(nodesFlattened);
 
             return path;
 
@@ -243,7 +233,8 @@ namespace TrailEvolutionModelling
         public static List<List<Vector2>> gg;
         private static Node[] Wavefront(Graph graph, Node start, Node goal)
         {
-            foreach (var node in graph.Nodes)
+            Node[] nodesFlattened = graph.Nodes.SelectMany(t => t).Where(t => t != null).ToArray();
+            foreach (var node in nodesFlattened)
             {
                 node.G1 = -1;
                 node.G2 = -1;
@@ -257,21 +248,26 @@ namespace TrailEvolutionModelling
             while (!exitFlag)
             {
                 exitFlag = true;
-                Parallel.ForEach(graph.Nodes, PlannerKernel);
+                Parallel.ForEach(nodesFlattened, PlannerKernel);
                 if (start.G1 == -1 || goal.G2 == -1)
                     exitFlag = false;
-                Parallel.ForEach(graph.Nodes, node =>
+                Parallel.ForEach(nodesFlattened, node =>
                 {
                     node.G1 = node.F1;
                     node.G2 = node.F2;
                 });
+                iters++;
             }
+            var stopwatch = Stopwatch.StartNew();
             Node[] path = ReconstructPath(start);
-            RedrawHeatmap(graph);
+            stopwatch.Stop();
+            Debug.Log("Path reconstruction took: " + stopwatch.ElapsedMilliseconds + " ms");
+
+            RedrawHeatmap(nodesFlattened);
 
             Debug.Log("Iterations: " + iters);
-
-            CleanupGraph(graph);
+            
+            CleanupGraph(nodesFlattened);
             var visitedEdges = new HashSet<Edge>();
             foreach (var node in path)
             {
@@ -298,7 +294,6 @@ namespace TrailEvolutionModelling
 
             void PlannerKernel(Node node)
             {
-                Interlocked.Increment(ref iters);
                 node.F1 = node.G1;
                 if (node != goal)
                     foreach (var edge in node.IncidentEdges)
@@ -346,7 +341,7 @@ namespace TrailEvolutionModelling
                 {
                     if (pathNodes.Count > 100000)
                     {
-                        CleanupGraph(graph);
+                        CleanupGraph(nodesFlattened);
                         throw new Exception("Something went wrong");
                     }
 
@@ -501,20 +496,20 @@ namespace TrailEvolutionModelling
             }
         }
 
-        static void RedrawHeatmap(Graph graph)
+        static void RedrawHeatmap(Node[] nodesFlattened)
         {
-            float minG = graph.Nodes.Min(n => n.G1);
-            float maxG = graph.Nodes.Max(n => n.G1);
+            float minG = nodesFlattened.Min(n => n.G1);
+            float maxG = nodesFlattened.Max(n => n.G1);
             Color minColor = Color.green;
             Color maxColor = Color.red;
-            Vector2 deltaPos = graph.Nodes[0].Position - graph.Nodes[1].Position;
+            Vector2 deltaPos = nodesFlattened[0].Position - nodesFlattened[1].Position;
             float step = Mathf.Max(Mathf.Abs(deltaPos.x), Mathf.Abs(deltaPos.y));
             float halfStep = step / 2;
 
             var mesh = new Mesh();
             var vertices = new List<Vector3>();
             var colors = new List<Color>();
-            foreach (var node in graph.Nodes)
+            foreach (var node in nodesFlattened)
             {
                 float t = (node.G1 - minG) / (maxG - minG);
                 var color = node.G1 == -1 ? Color.blue : Color.Lerp(minColor, maxColor, t);
@@ -624,9 +619,9 @@ namespace TrailEvolutionModelling
             return h;
         }
 
-        private static void CleanupGraph(Graph graph)
+        private static void CleanupGraph(Node[] nodesFlattened)
         {
-            foreach (var node in graph.Nodes)
+            foreach (var node in nodesFlattened)
             {
                 node.CleanupAfterPathSearch();
             }
