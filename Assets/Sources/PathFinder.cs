@@ -262,7 +262,6 @@ namespace TrailEvolutionModelling
             Node[] path = ReconstructPath(start);
             stopwatch.Stop();
             Debug.Log("Path reconstruction took: " + stopwatch.ElapsedMilliseconds + " ms");
-            
             RedrawHeatmap(nodesFlattened);
 
             Debug.Log("Iterations: " + iters);

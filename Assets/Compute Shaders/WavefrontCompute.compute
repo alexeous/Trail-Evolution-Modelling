@@ -2,39 +2,108 @@
 
 #include "HLSLSupport.cginc"
 
-#define GROUP_SIZE_X 16
-#define GROUP_SIZE_Y 16
+#define GROUP_SIZE_X 32
+#define GROUP_SIZE_Y 8
+//#define SHARED_ARRAYS_SIZE_X (GROUP_SIZE_X + 2)
+//#define SHARED_ARRAYS_SIZE_Y (GROUP_SIZE_Y + 2)
+//#define SHARED_ARRAYS_SIZE (SHARED_ARRAYS_SIZE_X * SHARED_ARRAYS_SIZE_Y)
 
-struct Node 
-{
+#define NODES_WIDTH_INCLUDING_HALO (nodesWidth + 2)
+#define NODES_1D_INDEX(i, j) ((i) * NODES_WIDTH_INCLUDING_HALO * (j))
+
+#define EDGE_NW(i, j) edgesLeftDiag[(i) + (j) * (nodesWidth + 1)]
+#define EDGE_N(i, j) edgesVert[(i) + 1 + (j) * nodesWidth]
+#define EDGE_NE(i, j) edgesRightDiag[(i) + 1 + (j) * (nodesWidth + 1)]
+#define EDGE_W(i, j) edgesHoriz[(i) + ((j) + 1) * (nodesWidth + 1)]
+#define EDGE_E(i, j) edgesHoriz[(i) + 1 + ((j) + 1) * (nodesWidth + 1)]
+#define EDGE_SW(i, j) edgesRightDiag[(i) + ((j) + 1) * (nodesWidth + 1)]
+#define EDGE_S(i, j) edgesVert[(i) + 1 + ((j) + 1) * nodesWidth]
+#define EDGE_SE(i, j) edgesLeftDiag[(i) + 1 + ((j) + 1) * (nodesWidth + 1)]
+
+struct Node {
     float g;
     int dirNext; // clockwise
 };
 
-RWStructuredBuffer<Node> nodesRead;
-RWStructuredBuffer<Node> nodesWrite;
-
-StructuredBuffer<float> edgesVert;      //  | edges
-StructuredBuffer<float> edgesHoriz;     //  — edges
-StructuredBuffer<float> edgesLeftDiag;  //  \ edges
-StructuredBuffer<float> edgesRightDiag; //  / edges
-
-RWStructuredBuffer<bool> exitFlag;
 
 CBUFFER_START(Params)
 uint readNodesIndex;
 uint nodesWidth;
 uint nodesHeight;
-uint startIndex;
 uint goalIndex;
+float maxAgentsG;
 CBUFFER_END
+
+
+RWStructuredBuffer<Node> nodesBuffer0;
+RWStructuredBuffer<Node> nodesBuffer1;
+StructuredBuffer<float> edgesVert;      //  | edges
+StructuredBuffer<float> edgesHoriz;     //  — edges
+StructuredBuffer<float> edgesLeftDiag;  //  \ edges
+StructuredBuffer<float> edgesRightDiag; //  / edges
+RWStructuredBuffer<bool> exitFlag;
+
+
+//groupshared Node nodesReadShared[SHARED_ARRAYS_SIZE];
+//groupshared Node nodesWriteShared[SHARED_ARRAYS_SIZE];
+//groupshared float edgesVertShared[SHARED_ARRAYS_SIZE];
+//groupshared float edgesHorizShared[SHARED_ARRAYS_SIZE];
+//groupshared float edgesLeftDiagShared[SHARED_ARRAYS_SIZE];
+//groupshared float edgesRightDiagShared[SHARED_ARRAYS_SIZE];
+
+inline Node ReadNodeAt(in int index) 
+{
+    if(readNodesIndex == 0)
+        return nodesBuffer0[index];
+    return nodesBuffer1[index];
+}
+
+inline Node ReadNodeAt2D(in int i, in int j) { return ReadNodeAt(NODES_1D_INDEX(i, j)); }
+
+inline void WriteNodeAt(in Node node, in int index) 
+{
+    if(readNodesIndex == 0)
+        nodesBuffer1[index] = node;
+    else
+        nodesBuffer0[index] = node;
+}
+
+inline void WriteNodeAt2D(in Node node, in int i, in int j) { WriteNodeAt(node, NODES_1D_INDEX(i, j)); }
+
+inline void ReplaceIfXLessThanY(inout int value, in int replacement, in float x, in float y) 
+{
+    // step(x, y) == (x < y) ? 0 : 1
+    value = lerp(value, replacement, 1 - step(x, y));
+}
+
+inline void ProcessNeighbour(in float edge, inout Node node, in Node neighbour, in int dir, inout bool repeat)
+{
+    float neighbourG = neighbour.g;
+    float newG = neighbourG + edge;
+    ReplaceIfXLessThanY(node.dirNext, dir, newG, node.g);
+    node.g = min(node.g, newG);
+    repeat = repeat | (node.g < maxAgentsG);
+}
 
 [numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
 void WavefrontPlannerKernel (uint3 id : SV_DispatchThreadID)
 {
-    uint index = id.x + nodesWidth * id.y;
-    if(id.x >= nodesWidth || id.y >= nodesHeight || index == goalIndex)
+    uint index = NODES_1D_INDEX(id.x, id.y);
+    if((id.x == 0) | (id.y == 0) | (id.x > nodesWidth) | (id.y > nodesHeight) | (index == goalIndex))
         return;
 
+    Node node = ReadNodeAt(index);
+    bool repeat = true;
+    ProcessNeighbour(EDGE_NW(id.x, id.y), node, ReadNodeAt2D(id.x - 1, id.y - 1), 0, repeat);
+    ProcessNeighbour(EDGE_N(id.x, id.y),  node, ReadNodeAt2D(id.x,     id.y - 1), 1, repeat);
+    ProcessNeighbour(EDGE_NE(id.x, id.y), node, ReadNodeAt2D(id.x + 1, id.y - 1), 2, repeat);
+    ProcessNeighbour(EDGE_W(id.x, id.y),  node, ReadNodeAt2D(id.x - 1, id.y    ), 3, repeat);
+    ProcessNeighbour(EDGE_E(id.x, id.y),  node, ReadNodeAt2D(id.x + 1, id.y    ), 4, repeat);
+    ProcessNeighbour(EDGE_SW(id.x, id.y), node, ReadNodeAt2D(id.x - 1, id.y + 1), 5, repeat);
+    ProcessNeighbour(EDGE_S(id.x, id.y),  node, ReadNodeAt2D(id.x    , id.y + 1), 6, repeat);
+    ProcessNeighbour(EDGE_SE(id.x, id.y), node, ReadNodeAt2D(id.x + 1, id.y + 1), 7, repeat);
+    WriteNodeAt(node, index);
 
+    if(repeat)
+        exitFlag[0] = false;
 }
