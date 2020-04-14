@@ -23,6 +23,10 @@ namespace TrailEvolutionModelling
         public Node CameFrom1;
         public Node CameFrom2;
 
+        public int ComputeIndex;
+        public int ComputeIndexI;
+        public int ComputeIndexJ;
+
         public Node(Vector2 position)
         {
             Position = position;
@@ -114,11 +118,25 @@ namespace TrailEvolutionModelling
         public override int GetHashCode() => Node1.GetHashCode() + Node2.GetHashCode();
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
+    //[StructLayout(LayoutKind.Sequential, Pack = 1, Size = StructSize)]
     public struct ComputeNode
     {
+        public const int StructSize = sizeof(float) + sizeof(int) + sizeof(int);
+
         public float G;
         public int DirectionNext;
+        public int IsStartByte;
+
+        public bool IsStart
+        {
+            get => IsStartByte != 0;
+            set => IsStartByte = (value ? 1 : 0);
+        }
+
+        public override string ToString()
+        {
+            return $"G={G}, DirNext={DirectionNext}";
+        }
     }
 
     public sealed class Graph
@@ -137,14 +155,14 @@ namespace TrailEvolutionModelling
             int w = Nodes.Length;
 
             if (di == -1 && dj == -1) return ref ComputeEdgesLeftDiag[nodeI + nodeJ * (w + 1)];
-            if (di == 0 && dj == -1) return ref ComputeEdgesVert[nodeI + 1 + nodeJ * w];
+            if (di == 0 && dj == -1) return ref ComputeEdgesVert[nodeI + 1 + nodeJ * (w + 1)];
             if (di == 1 && dj == -1) return ref ComputeEdgesRightDiag[nodeI + 1 + nodeJ * (w + 1)];
 
             if (di == -1 && dj == 0) return ref ComputeEdgesHoriz[nodeI + (nodeJ + 1) * (w + 1)];
             if (di == 1 && dj == 0) return ref ComputeEdgesHoriz[nodeI + 1 + (nodeJ + 1) * (w + 1)];
 
             if (di == -1 && dj == 1) return ref ComputeEdgesRightDiag[nodeI + (nodeJ + 1) * (w + 1)];
-            if (di == 0 && dj == 1) return ref ComputeEdgesVert[nodeI + 1 + (nodeJ + 1) * w];
+            if (di == 0 && dj == 1) return ref ComputeEdgesVert[nodeI + 1 + (nodeJ + 1) * (w + 1)];
             if (di == 1 && dj == 1) return ref ComputeEdgesLeftDiag[nodeI + 1 + (nodeJ + 1) * (w + 1)];
 
             throw new Exception("Invalid rectangular moore shift");

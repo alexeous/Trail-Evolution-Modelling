@@ -12,14 +12,12 @@ using Debug = UnityEngine.Debug;
 
 namespace TrailEvolutionModelling
 {
-    public enum PathFindingAlgorithm { AStar, NBA, Wavefront }
+    public enum PathFindingAlgorithm { AStar, NBA, Wavefront, WavefrontParallel }
 
     public class PathFinder
     {
         public static Node[] FindPath(Graph graph, Node start, Node goal, PathFindingAlgorithm algorithm)
         {
-            var stopwatch = Stopwatch.StartNew();
-
             Node[] result = null;
             switch (algorithm)
             {
@@ -33,9 +31,6 @@ namespace TrailEvolutionModelling
                     result = Wavefront(graph, start, goal);
                     break;
             };
-            stopwatch.Stop();
-
-            Debug.Log($"Path finding took {stopwatch.ElapsedMilliseconds} ms");
             return result;
         }
 
@@ -396,106 +391,11 @@ namespace TrailEvolutionModelling
                     guide = guide.CameFrom1;
                 }
                 pathNodes.Add(goal);
-
-                //var pathNodes = new List<Node>();
-                //while (current != null)
-                //{
-                //    pathNodes.Add(current);
-                //    if (pathNodes.Count > 100000)
-                //    {
-                //        CleanupGraph(graph);
-                //        throw new Exception("Something went wrong");
-                //    }
-                //    current = current.CameFrom1;
-                //}
-
-                //Vector2 deltaPos = graph.Nodes[0].Position - graph.Nodes[1].Position;
-                //float cellStep = Mathf.Max(Mathf.Abs(deltaPos.x), Mathf.Abs(deltaPos.y));
-
-                //while (true)
-                //{
-                //    pathNodes.Add(current);
-                //    if (pathNodes.Count > 100000)
-                //    {
-                //        pathNodes.RemoveRange(100, pathNodes.Count - 100);
-                //        CleanupGraph(graph);
-                //        Debug.LogError("Something went wrong");
-                //        break;
-                //    }
-                //    if (current == goal)
-                //        break;
-
-                //    Vector2 vector = Vector2.zero;
-
-                //    var visited = new HashSet<Node>();
-                //    float radius = cellStep * 4;
-                //    Node next = null;
-                //    Rec(current, 0);
-
-                //    void Rec(Node node, float prevSqrDist)
-                //    {
-                //        foreach (var edge2 in node.IncidentEdges)
-                //        {
-                //            Node other2 = edge2.GetOppositeNode(node);
-                //            if (visited.Contains(other2))
-                //                continue;
-
-                //            if (other2 == goal)
-                //            {
-                //                next = other2;
-                //                return;
-                //            }
-
-                //            visited.Add(other2);
-                //            if (other2.CameFrom1 == null)
-                //                continue;
-
-                //            float sqrDistFromCenter = (other2.Position - current.Position).sqrMagnitude;
-                //            if (sqrDistFromCenter > radius * radius || sqrDistFromCenter <= prevSqrDist)
-                //                continue;
-
-                //            float t = Mathf.Exp(-sqrDistFromCenter / (radius * radius) / 2);
-                //            t /= Mathf.Sqrt(2 * Mathf.PI);
-                //            vector += t * (other2.CameFrom1.Position - other2.Position).normalized;
-
-                //            Rec(other2, sqrDistFromCenter);
-
-                //            if (next != null)
-                //                return;
-                //        }
-                //    }
-
-                //    vector.Normalize();
-
-                //    float maxDot = float.NegativeInfinity;
-                //    foreach (var edge in current.IncidentEdges)
-                //    {
-                //        Node other = edge.GetOppositeNode(current);
-                //        Vector2 dir = (other.Position - current.Position).normalized;
-                //        float dot = Vector2.Dot(dir, vector);
-                //        if (dot > maxDot)
-                //        {
-                //            maxDot = dot;
-                //            next = other;
-                //        }
-                //    }
-                //    //float min = float.PositiveInfinity;
-                //    //foreach (var edge in current.IncidentEdges)
-                //    //{
-                //    //    Node other = edge.GetOppositeNode(current);
-                //    //    if (other.G1 != -1 && other.G1 < min)
-                //    //    {
-                //    //        next = other;
-                //    //        min = other.G1;
-                //    //    }
-                //    //}
-                //    current = next;
-                //}
                 return pathNodes.ToArray();
             }
         }
 
-        static void RedrawHeatmap(Node[] nodesFlattened)
+        public static void RedrawHeatmap(Node[] nodesFlattened)
         {
             float minG = nodesFlattened.Min(n => n.G1);
             float maxG = nodesFlattened.Max(n => n.G1);

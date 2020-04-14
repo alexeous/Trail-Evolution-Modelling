@@ -1,4 +1,5 @@
 ﻿#pragma kernel WavefrontPlannerKernel
+#pragma kernel WavefrontInitNodesKernel
 
 #include "HLSLSupport.cginc"
 
@@ -9,40 +10,44 @@
 //#define SHARED_ARRAYS_SIZE (SHARED_ARRAYS_SIZE_X * SHARED_ARRAYS_SIZE_Y)
 
 #define NODES_WIDTH_INCLUDING_HALO (nodesWidth + 2)
-#define NODES_1D_INDEX(i, j) ((i) * NODES_WIDTH_INCLUDING_HALO * (j))
+#define NODES_1D_INDEX(i, j) ((i) + NODES_WIDTH_INCLUDING_HALO * (j))
 
-#define EDGE_NW(i, j) edgesLeftDiag[(i) + (j) * (nodesWidth + 1)]
-#define EDGE_N(i, j) edgesVert[(i) + 1 + (j) * nodesWidth]
-#define EDGE_NE(i, j) edgesRightDiag[(i) + 1 + (j) * (nodesWidth + 1)]
-#define EDGE_W(i, j) edgesHoriz[(i) + ((j) + 1) * (nodesWidth + 1)]
-#define EDGE_E(i, j) edgesHoriz[(i) + 1 + ((j) + 1) * (nodesWidth + 1)]
-#define EDGE_SW(i, j) edgesRightDiag[(i) + ((j) + 1) * (nodesWidth + 1)]
-#define EDGE_S(i, j) edgesVert[(i) + 1 + ((j) + 1) * nodesWidth]
-#define EDGE_SE(i, j) edgesLeftDiag[(i) + 1 + ((j) + 1) * (nodesWidth + 1)]
+#define EDGE_NW(i, j) edgesLeftDiag[(i) - 1 + ((j) - 1) * (nodesWidth + 1)]
+#define EDGE_N(i, j) edgesVert[(i) + ((j) - 1) * (nodesWidth + 1)]
+#define EDGE_NE(i, j) edgesRightDiag[(i) + ((j) - 1) * (nodesWidth + 1)]
+#define EDGE_W(i, j) edgesHoriz[(i) - 1 + (j) * (nodesWidth + 1)]
+#define EDGE_E(i, j) edgesHoriz[(i) + (j) * (nodesWidth + 1)]
+#define EDGE_SW(i, j) edgesRightDiag[(i) - 1 + (j) * (nodesWidth + 1)]
+#define EDGE_S(i, j) edgesVert[(i) + (j) * (nodesWidth + 1)]
+#define EDGE_SE(i, j) edgesLeftDiag[(i) + (j) * (nodesWidth + 1)]
 
 struct Node {
     float g;
     int dirNext; // clockwise
+    int isStart;
 };
 
 
 CBUFFER_START(Params)
-uint readNodesIndex;
+//uint readNodesIndex;
 uint nodesWidth;
 uint nodesHeight;
+uint groupsX;
 uint goalIndex;
 float maxAgentsG;
 CBUFFER_END
 
 
-RWStructuredBuffer<Node> nodesBuffer0;
-RWStructuredBuffer<Node> nodesBuffer1;
+//RWStructuredBuffer<Node> nodesBuffer0;
+//RWStructuredBuffer<Node> nodesBuffer1;
+RWStructuredBuffer<Node> nodesRead;
+RWStructuredBuffer<Node> nodesWrite;
 StructuredBuffer<float> edgesVert;      //  | edges
 StructuredBuffer<float> edgesHoriz;     //  — edges
 StructuredBuffer<float> edgesLeftDiag;  //  \ edges
 StructuredBuffer<float> edgesRightDiag; //  / edges
-RWStructuredBuffer<bool> exitFlag;
-
+RWStructuredBuffer<int> exitFlagBuffer;
+RWStructuredBuffer<float> maxAgentsGPerGroup;
 
 //groupshared Node nodesReadShared[SHARED_ARRAYS_SIZE];
 //groupshared Node nodesWriteShared[SHARED_ARRAYS_SIZE];
@@ -53,57 +58,98 @@ RWStructuredBuffer<bool> exitFlag;
 
 inline Node ReadNodeAt(in int index) 
 {
-    if(readNodesIndex == 0)
-        return nodesBuffer0[index];
-    return nodesBuffer1[index];
+    //if(readNodesIndex == 0)
+    //    return nodesBuffer0[index];
+    //return nodesBuffer1[index];
+    return nodesRead[index];
 }
 
 inline Node ReadNodeAt2D(in int i, in int j) { return ReadNodeAt(NODES_1D_INDEX(i, j)); }
 
 inline void WriteNodeAt(in Node node, in int index) 
 {
-    if(readNodesIndex == 0)
-        nodesBuffer1[index] = node;
-    else
-        nodesBuffer0[index] = node;
+    //if(readNodesIndex == 0)
+    //    nodesBuffer1[index] = node;
+    //else
+    //    nodesBuffer0[index] = node;
+    nodesWrite[index] = node;
 }
 
 inline void WriteNodeAt2D(in Node node, in int i, in int j) { WriteNodeAt(node, NODES_1D_INDEX(i, j)); }
 
 inline void ReplaceIfXLessThanY(inout int value, in int replacement, in float x, in float y) 
 {
-    // step(x, y) == (x < y) ? 0 : 1
-    value = lerp(value, replacement, 1 - step(x, y));
+    // step(y, x) == (x < y) ? 0 : 1
+    value = lerp(value, replacement, 1 - step(y, x));
+    //if(x < y)
+    //    value = replacement;
 }
 
 inline void ProcessNeighbour(in float edge, inout Node node, in Node neighbour, in int dir, inout bool repeat)
 {
-    float neighbourG = neighbour.g;
-    float newG = neighbourG + edge;
+    float newG = neighbour.g + edge;
     ReplaceIfXLessThanY(node.dirNext, dir, newG, node.g);
+    float old = node.g;
     node.g = min(node.g, newG);
-    repeat = repeat | (node.g < maxAgentsG);
+    bool changed = node.g != old;
+    repeat = repeat | (changed & (node.g < maxAgentsG));
 }
 
 [numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
-void WavefrontPlannerKernel (uint3 id : SV_DispatchThreadID)
+void WavefrontInitNodesKernel(uint3 id : SV_DispatchThreadID) 
+{
+    if((id.x <= nodesWidth + 1) & (id.y <= nodesHeight + 1)) 
+    {
+        uint index = NODES_1D_INDEX(id.x, id.y);
+        Node node;
+        node.g = index == goalIndex ? 0 : 1.#INF;
+        node.dirNext = 0;
+        node.isStart = nodesRead[index].isStart;
+
+        //nodesBuffer0[index] = node;
+        //nodesBuffer1[index] = node;
+        nodesRead[index] = node;
+        nodesWrite[index] = node;
+    }
+}
+
+groupshared uint maxAgentsGSharedAsUint;
+
+[numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
+void WavefrontPlannerKernel (uint3 id : SV_DispatchThreadID, uint3 groupId : SV_GroupID,
+    uint3 threadId : SV_GroupThreadID)
 {
     uint index = NODES_1D_INDEX(id.x, id.y);
-    if((id.x == 0) | (id.y == 0) | (id.x > nodesWidth) | (id.y > nodesHeight) | (index == goalIndex))
-        return;
+    
+    if((threadId.x == 0) & (threadId.y == 0))
+        maxAgentsGSharedAsUint = asuint(0.0);
 
-    Node node = ReadNodeAt(index);
-    bool repeat = true;
-    ProcessNeighbour(EDGE_NW(id.x, id.y), node, ReadNodeAt2D(id.x - 1, id.y - 1), 0, repeat);
-    ProcessNeighbour(EDGE_N(id.x, id.y),  node, ReadNodeAt2D(id.x,     id.y - 1), 1, repeat);
-    ProcessNeighbour(EDGE_NE(id.x, id.y), node, ReadNodeAt2D(id.x + 1, id.y - 1), 2, repeat);
-    ProcessNeighbour(EDGE_W(id.x, id.y),  node, ReadNodeAt2D(id.x - 1, id.y    ), 3, repeat);
-    ProcessNeighbour(EDGE_E(id.x, id.y),  node, ReadNodeAt2D(id.x + 1, id.y    ), 4, repeat);
-    ProcessNeighbour(EDGE_SW(id.x, id.y), node, ReadNodeAt2D(id.x - 1, id.y + 1), 5, repeat);
-    ProcessNeighbour(EDGE_S(id.x, id.y),  node, ReadNodeAt2D(id.x    , id.y + 1), 6, repeat);
-    ProcessNeighbour(EDGE_SE(id.x, id.y), node, ReadNodeAt2D(id.x + 1, id.y + 1), 7, repeat);
-    WriteNodeAt(node, index);
+    GroupMemoryBarrierWithGroupSync();
 
-    if(repeat)
-        exitFlag[0] = false;
+    if((id.x != 0) & (id.y != 0) & (id.x <= nodesWidth) & (id.y <= nodesHeight) & (index != goalIndex))
+    {
+        Node node = ReadNodeAt(index);
+        bool repeat = false;
+        ProcessNeighbour(EDGE_NW(id.x, id.y), node, ReadNodeAt2D(id.x - 1, id.y - 1), 0, repeat);
+        ProcessNeighbour(EDGE_N(id.x, id.y),  node, ReadNodeAt2D(id.x,     id.y - 1), 1, repeat);
+        ProcessNeighbour(EDGE_NE(id.x, id.y), node, ReadNodeAt2D(id.x + 1, id.y - 1), 2, repeat);
+        ProcessNeighbour(EDGE_W(id.x, id.y),  node, ReadNodeAt2D(id.x - 1, id.y    ), 3, repeat);
+        ProcessNeighbour(EDGE_E(id.x, id.y),  node, ReadNodeAt2D(id.x + 1, id.y    ), 4, repeat);
+        ProcessNeighbour(EDGE_SW(id.x, id.y), node, ReadNodeAt2D(id.x - 1, id.y + 1), 5, repeat);
+        ProcessNeighbour(EDGE_S(id.x, id.y),  node, ReadNodeAt2D(id.x,     id.y + 1), 6, repeat);
+        ProcessNeighbour(EDGE_SE(id.x, id.y), node, ReadNodeAt2D(id.x + 1, id.y + 1), 7, repeat);
+        WriteNodeAt(node, index);
+
+        bool isUninitializedStart = node.isStart & isinf(node.g);
+        if(repeat | isUninitializedStart)
+            exitFlagBuffer[0] = 0;
+
+        if(node.isStart)
+            InterlockedMax(maxAgentsGSharedAsUint, asuint(node.g));
+    }
+
+    GroupMemoryBarrierWithGroupSync();
+
+    if((threadId.x == 0) & (threadId.y == 0))
+        maxAgentsGPerGroup[groupId.x + groupId.y * groupsX] = asfloat(maxAgentsGSharedAsUint);
 }

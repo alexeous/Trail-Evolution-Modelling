@@ -47,6 +47,9 @@ namespace TrailEvolutionModelling.Editor
             if (GUI.Button(new Rect(2, y += 17, 40, 15), "Wave"))
                 FindPaths(PathFindingAlgorithm.Wavefront);
 
+            if (GUI.Button(new Rect(2, y += 17, 40, 15), "||Wav"))
+                FindPaths(PathFindingAlgorithm.WavefrontParallel);
+
             Handles.EndGUI();
         }
 

@@ -85,12 +85,17 @@ namespace TrailEvolutionModelling
                     var position = min + new Vector2(i, j) * step;
                     if (MapObject.IsPointWalkable(position))
                     {
-                        nodes[i][j] = new Node(position);
+                        nodes[i][j] = new Node(position)
+                        {
+                            ComputeIndexI = i + 1,
+                            ComputeIndexJ = j + 1,
+                            ComputeIndex = i + 1 + (j + 1) * (w + 2)
+                        };
                     }
                 }
             }
             graph.Nodes = nodes;
-            graph.ComputeNodes = new ComputeNode[(w + 1) * (h + 1)];
+            graph.ComputeNodes = new ComputeNode[(w + 2) * (h + 2)];
         }
 
         private void BuildRectangularMooreEdges(Graph graph)

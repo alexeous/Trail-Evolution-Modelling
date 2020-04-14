@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using TrailEvolutionModelling.Drawing;
 using UnityEditor;
 using UnityEngine;
+
+using Debug = UnityEngine.Debug;
 
 namespace TrailEvolutionModelling
 {
@@ -12,6 +15,7 @@ namespace TrailEvolutionModelling
     public class PathFinderInvoker : LinesProvider, ILinesChangedNotifier
     {
         [SerializeField] GraphHolder graphHolder = null;
+        [SerializeField] ParallelWavefrontPathFinding parallelWavefront = null;
         [SerializeField] Transform start = null;
         [SerializeField] Transform end = null;
         [SerializeField] Color pathColor = Color.red;
@@ -60,11 +64,22 @@ namespace TrailEvolutionModelling
             Node startNode = FindClosestNode(graph, start.position);
             Node endNode = FindClosestNode(graph, end.position);
 
-            this.path = PathFinder.FindPath(graph, startNode, endNode, algorithm);
+            var stopwatch = Stopwatch.StartNew();
+            if (algorithm == PathFindingAlgorithm.WavefrontParallel)
+            {
+                this.path = parallelWavefront.FindPath(graph, startNode, endNode);
+            }
+            else
+            {
+                this.path = PathFinder.FindPath(graph, startNode, endNode, algorithm);
+            }
             if (this.path == null)
             {
                 Debug.LogWarning("Path not found");
             }
+            stopwatch.Stop();
+
+            Debug.Log($"Path finding took {stopwatch.ElapsedMilliseconds} ms");
 
             LinesChanged?.Invoke(this);
         }
