@@ -132,6 +132,23 @@ namespace TrailEvolutionModelling
         public float[] ComputeEdgesLeftDiag { get; set; }
         public float[] ComputeEdgesRightDiag { get; set; }
 
+        public ref float GetComputeEdgeForNode(int nodeI, int nodeJ, int di, int dj)
+        {
+            int w = Nodes.Length;
+
+            if (di == -1 && dj == -1) return ref ComputeEdgesLeftDiag[nodeI + nodeJ * (w + 1)];
+            if (di == 0 && dj == -1) return ref ComputeEdgesVert[nodeI + 1 + nodeJ * w];
+            if (di == 1 && dj == -1) return ref ComputeEdgesRightDiag[nodeI + 1 + nodeJ * (w + 1)];
+
+            if (di == -1 && dj == 0) return ref ComputeEdgesHoriz[nodeI + (nodeJ + 1) * (w + 1)];
+            if (di == 1 && dj == 0) return ref ComputeEdgesHoriz[nodeI + 1 + (nodeJ + 1) * (w + 1)];
+
+            if (di == -1 && dj == 1) return ref ComputeEdgesRightDiag[nodeI + (nodeJ + 1) * (w + 1)];
+            if (di == 0 && dj == 1) return ref ComputeEdgesVert[nodeI + 1 + (nodeJ + 1) * w];
+            if (di == 1 && dj == 1) return ref ComputeEdgesLeftDiag[nodeI + 1 + (nodeJ + 1) * (w + 1)];
+
+            throw new Exception("Invalid rectangular moore shift");
+        }
         //public Node AddNode(Vector2 position)
         //{
         //    var node = new Node(position);

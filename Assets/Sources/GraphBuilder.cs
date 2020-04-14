@@ -63,10 +63,11 @@ namespace TrailEvolutionModelling
 
         private Graph BuildHexagonal()
         {
-            var graph = new Graph();
-            BuildHexagonalNodes(graph);
-            BuildHexagonalEdges(graph);
-            return graph;
+            throw new NotSupportedException("Not supported more");
+            //var graph = new Graph();
+            //BuildHexagonalNodes(graph);
+            //BuildHexagonalEdges(graph);
+            //return graph;
         }
 
         private void BuildRectangularMooreNodes(Graph graph)
@@ -89,7 +90,7 @@ namespace TrailEvolutionModelling
                 }
             }
             graph.Nodes = nodes;
-            graph.ComputeNodes = new ComputeNode[w * h];
+            graph.ComputeNodes = new ComputeNode[(w + 1) * (h + 1)];
         }
 
         private void BuildRectangularMooreEdges(Graph graph)
@@ -98,92 +99,92 @@ namespace TrailEvolutionModelling
             int w = nodes.Length;
             int h = nodes[0].Length;
 
-            graph.ComputeEdgesHoriz = new float[(w + 1) * h];
-            graph.ComputeEdgesVert = new float[w * (h + 1)];
-            graph.ComputeEdgesLeftDiag = new float[(w + 1) * (h + 1)];
-            graph.ComputeEdgesRightDiag = new float[(w + 1) * (h + 1)];
+            int edgeArraysSize = (w + 1) * (h + 1);
+            graph.ComputeEdgesHoriz = new float[edgeArraysSize];
+            graph.ComputeEdgesVert = new float[edgeArraysSize];
+            graph.ComputeEdgesLeftDiag = new float[edgeArraysSize];
+            graph.ComputeEdgesRightDiag = new float[edgeArraysSize];
 
-            graph.ComputeEdgesLeftDiag[0] = float.PositiveInfinity;
-            graph.ComputeEdgesLeftDiag[graph.ComputeEdgesLeftDiag.Length - 1] = float.PositiveInfinity;
 
-            graph.ComputeEdgesRightDiag[0] = float.PositiveInfinity;
-            graph.ComputeEdgesRightDiag[graph.ComputeEdgesRightDiag.Length - 1] = float.PositiveInfinity;
+            // default. May be parallelized
+            for (int i = 0; i < edgeArraysSize; i++)
+            {
+                graph.ComputeEdgesHoriz[i] = float.PositiveInfinity;
+                graph.ComputeEdgesVert[i] = float.PositiveInfinity;
+                graph.ComputeEdgesLeftDiag[i] = float.PositiveInfinity;
+                graph.ComputeEdgesRightDiag[i] = float.PositiveInfinity;
+            }
 
             for (int i = 0; i < w; i++)
             {
                 for (int j = 0; j < h; j++)
                 {
                     BuildEdgesAround(graph, nodes, i, j, MooreIndexShifts, true);
-
                 }
             }
         }
 
-        private void BuildHexagonalNodes(Graph graph)
-        {
-            float cos30 = Mathf.Cos(Mathf.PI / 6);
+        //private void BuildHexagonalNodes(Graph graph)
+        //{
+        //    float cos30 = Mathf.Cos(Mathf.PI / 6);
 
-            Vector2 min = bounds.Min + new Vector2(0, 0.5f);
-            int w = Mathf.CeilToInt(bounds.Size.x / (step * cos30));
-            int h = Mathf.CeilToInt(bounds.Size.y / step);
+        //    Vector2 min = bounds.Min + new Vector2(0, 0.5f);
+        //    int w = Mathf.CeilToInt(bounds.Size.x / (step * cos30));
+        //    int h = Mathf.CeilToInt(bounds.Size.y / step);
 
-            var nodes = new Node[w][];
+        //    var nodes = new Node[w][];
 
-            for (int i = 0; i < w; i++)
-            {
-                for (int j = 0; j < h; j++)
-                {
-                    float evenOddShift = i % 2 == 0 ? 0 : -0.5f;
-                    var position = min + new Vector2(i * cos30, j + evenOddShift) * step;
-                    if (MapObject.IsPointWalkable(position))
-                    {
-                        nodes[i][j] = new Node(position);
-                    }
-                }
-            }
+        //    for (int i = 0; i < w; i++)
+        //    {
+        //        for (int j = 0; j < h; j++)
+        //        {
+        //            float evenOddShift = i % 2 == 0 ? 0 : -0.5f;
+        //            var position = min + new Vector2(i * cos30, j + evenOddShift) * step;
+        //            if (MapObject.IsPointWalkable(position))
+        //            {
+        //                nodes[i][j] = new Node(position);
+        //            }
+        //        }
+        //    }
 
-            graph.Nodes = nodes;
-        }
+        //    graph.Nodes = nodes;
+        //}
 
-        private void BuildHexagonalEdges(Graph graph)
-        {
-            var nodes = graph.Nodes;
+        //private void BuildHexagonalEdges(Graph graph)
+        //{
+        //    var nodes = graph.Nodes;
 
-            int w = nodes.Length;
-            int h = nodes[0].Length;
+        //    int w = nodes.Length;
+        //    int h = nodes[0].Length;
 
-            for (int i = 0; i < w; i++)
-            {
-                for (int j = 0; j < h; j++)
-                {
-                    (int di, int dj)[] shifts = i % 2 == 0
-                                                    ? HexagonalIndexShiftsEven
-                                                    : HexagonalIndexShiftsOdd;
+        //    for (int i = 0; i < w; i++)
+        //    {
+        //        for (int j = 0; j < h; j++)
+        //        {
+        //            (int di, int dj)[] shifts = i % 2 == 0
+        //                                            ? HexagonalIndexShiftsEven
+        //                                            : HexagonalIndexShiftsOdd;
 
-                    BuildEdgesAround(graph, nodes, i, j, shifts, false);
-                }
-            }
-        }
+        //            BuildEdgesAround(graph, nodes, i, j, shifts, false);
+        //        }
+        //    }
+        //}
 
         private void BuildEdgesAround(Graph graph, Node[][] nodes, int i, int j, (int di, int dj)[] shifts, bool mulByDistance)
         {
-            int w = nodes.Length;
-            int h = nodes[0].Length;
-
             Node node = nodes[i][j];
             if (node == null)
             { 
                 foreach (var shift in shifts)
                 {
-                    GetComputeEdge(shift) = float.PositiveInfinity;
+                    graph.GetComputeEdgeForNode(i, j, shift.di, shift.dj) = float.PositiveInfinity;
                 }
                 return;
             }
 
-
             foreach (var shift in shifts)
             {
-                ref float computeEdge = ref GetComputeEdge(shift);
+                ref float computeEdge = ref graph.GetComputeEdgeForNode(i, j, shift.di, shift.dj);
 
                 Node otherNode = GetNodeAtOrNull(nodes, i + shift.di, j + shift.dj);
                 if (otherNode == null)
@@ -206,28 +207,6 @@ namespace TrailEvolutionModelling
 
                 computeEdge = weight;
             }
-            
-            ref float GetComputeEdge((int di, int dj) shift)
-            {
-                //int newI = i + shift.di;
-                //int newJ = j + shift.dj;
-                int di = shift.di;
-                int dj = shift.dj;
-                
-                if (di == -1 && dj == -1) return ref graph.ComputeEdgesLeftDiag[i + j * (w + 1)];
-                if (di == 0 && dj == -1) return ref graph.ComputeEdgesVert[i + j * w];
-                if (di == 1 && dj == -1) return ref graph.ComputeEdgesRightDiag[i + 1 + j * (w + 1)];
-
-                if (di == -1 && dj == 0) return ref graph.ComputeEdgesHoriz[i + j * (w + 1)];
-                if (di == 1 && dj == 0) return ref graph.ComputeEdgesHoriz[i + 1 + j * (w + 1)];
-
-                if (di == -1 && dj == 1) return ref graph.ComputeEdgesRightDiag[i + (j + 1) * (w + 1)];
-                if (di == 0 && dj == 1) return ref graph.ComputeEdgesVert[i + (j + 1) * w];
-                if (di == 1 && dj == 1) return ref graph.ComputeEdgesLeftDiag[i + 1 + (j + 1) * (w + 1)];
-
-                throw new Exception("Invalid rectangular moore shift");
-            }
-
         }
 
         private static Node GetNodeAtOrNull(Node[][] nodes, int i, int j)
