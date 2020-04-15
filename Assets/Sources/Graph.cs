@@ -135,7 +135,7 @@ namespace TrailEvolutionModelling
 
         public override string ToString()
         {
-            return $"G={G}, DirNext={DirectionNext}";
+            return $"G={G}, DirNext={DirectionNext}, IsStart={IsStart}";
         }
     }
 

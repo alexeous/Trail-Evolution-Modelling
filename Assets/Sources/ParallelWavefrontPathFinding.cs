@@ -24,11 +24,11 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
         int plannerKernel = shader.FindKernel("WavefrontPlannerKernel");
 
 
-        int width = graph.Nodes.Length + 2;
-        int height = graph.Nodes[0].Length + 2;
+        int width = graph.Nodes.Length;
+        int height = graph.Nodes[0].Length;
 
-        shader.SetInt("nodesWidth", width - 2);
-        shader.SetInt("nodesHeight", height - 2);
+        shader.SetInt("nodesWidth", width);
+        shader.SetInt("nodesHeight", height);
 
 
         var edgesVert = NewFloatsBuffer(graph.ComputeEdgesVert);
@@ -77,10 +77,10 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
             (int groupsX, int groupsY) = GetGroupsNumber(plannerKernel, width, height); 
             
             var result = new ComputeNode[nodesWrite.count];
-            nodesRead.GetData(result);
 
-            shader.SetFloat(maxAgentsGID, float.PositiveInfinity);
+            //shader.SetFloat(maxAgentsGID, float.PositiveInfinity);
             shader.SetInt("groupsX", groupsX);
+            shader.SetInt("groupsY", groupsY);
 
             shader.SetBuffer(plannerKernel, nodesReadID, nodesRead);
             shader.SetBuffer(plannerKernel, nodesWriteID, nodesWrite);
@@ -97,34 +97,36 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
             while (true)
             {
                 it++;
+                if (it >= 2000)
+                {
+                    Debug.LogError("Path finding takes too long. Breaking loop...");
+                    break;
+                }
                 exitFlagData[0] = 1;
                 exitFlagBuffer.SetData(exitFlagData);
-
-                shader.Dispatch(plannerKernel, groupsX, groupsY, 1);
-                //nodesWrite.GetData(result);
-                //var ff = result.First(t => t.IsStart);
-
-                exitFlagBuffer.GetData(exitFlagData);
-                if (exitFlagData[0] != 0)
-                    break;
-
-                float maxAgentsG = FetchAndAggregateMaxAgentsG();
-                shader.SetFloat(maxAgentsGID, maxAgentsG);
 
                 (nodesRead, nodesWrite) = (nodesWrite, nodesRead);
                 shader.SetBuffer(plannerKernel, nodesReadID, nodesRead);
                 shader.SetBuffer(plannerKernel, nodesWriteID, nodesWrite);
+
+                shader.Dispatch(plannerKernel, groupsX, groupsY, 1);
+                
+                exitFlagBuffer.GetData(exitFlagData);
+                if (exitFlagData[0] != 0)
+                    break;
+
+                //float maxAgentsG = FetchAndAggregateMaxAgentsG();
+                //shader.SetFloat(maxAgentsGID, maxAgentsG);
             }
-            Debug.Log("Iterations: " + it);
 
             nodesWrite.GetData(result);
             return result;
 
-            float FetchAndAggregateMaxAgentsG()
-            {
-                maxAgentsGPerGroupBuffer.GetData(maxAgentsGPerGroup);
-                return Mathf.Max(maxAgentsGPerGroup);
-            }
+            //float FetchAndAggregateMaxAgentsG()
+            //{
+            //    maxAgentsGPerGroupBuffer.GetData(maxAgentsGPerGroup);
+            //    return Mathf.Max(maxAgentsGPerGroup);
+            //}
         }
 
         void InitNodes(int goalIndex)
@@ -133,7 +135,7 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
             shader.SetBuffer(initKernel, nodesReadID, nodesRead);
             shader.SetBuffer(initKernel, nodesWriteID, nodesWrite);
 
-            (int groupsX, int groupsY) = GetGroupsNumber(initKernel, width, height);
+            (int groupsX, int groupsY) = GetGroupsNumber(initKernel, width + 2, height + 2);
 
             shader.Dispatch(initKernel, groupsX, groupsY, 1);
         }
@@ -157,6 +159,7 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
                 {
                     pathNodes.RemoveRange(100, pathNodes.Count - 100);
                     Debug.LogError("Something went wrong");
+                    pathNodes.RemoveAll(x => x == null);
                     return pathNodes.ToArray();
                 }
                 pathNodes.Add(node);
@@ -234,7 +237,7 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
                     (-1, 0), (1, 0),
                     (-1, 1), (0, 1), (1, 1)
                 };
-                ComputeNode comp = computeNodes[compI + compJ * width];
+                ComputeNode comp = computeNodes[compI + compJ * (width + 2)];
                 var shift = indexShifts[comp.DirectionNext];
                 return (compI + shift.di, compJ + shift.dj);
             }
