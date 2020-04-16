@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TrailEvolutionModelling;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class ParallelWavefrontPathFinding : MonoBehaviour
 {
@@ -48,22 +49,22 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
 
         ReleaseAndDisposeBuffers(allBuffers);
 
-        for (int i = 0; i < graph.Nodes.Length; i++)
-        {
-            for (int j = 0; j < graph.Nodes[0].Length; j++)
-            {
-                if (graph.Nodes[i][j] != null)
-                {
-                    float g = nodesStartToGoal[graph.Nodes[i][j].ComputeIndex].G;
-                    if (float.IsInfinity(g))
-                        graph.Nodes[i][j] = null;
-                    else
-                        graph.Nodes[i][j].G1 = g;
-                }
-            }
-        }
-        Node[] nodesFlattened = graph.Nodes.SelectMany(t => t).Where(t => t != null).ToArray();
-        PathFinder.RedrawHeatmap(nodesFlattened);
+        //for (int i = 0; i < graph.Nodes.Length; i++)
+        //{
+        //    for (int j = 0; j < graph.Nodes[0].Length; j++)
+        //    {
+        //        if (graph.Nodes[i][j] != null)
+        //        {
+        //            float g = nodesStartToGoal[graph.Nodes[i][j].ComputeIndex].G;
+        //            if (float.IsInfinity(g))
+        //                graph.Nodes[i][j] = null;
+        //            else
+        //                graph.Nodes[i][j].G1 = g;
+        //        }
+        //    }
+        //}
+        //Node[] nodesFlattened = graph.Nodes.SelectMany(t => t).Where(t => t != null).ToArray();
+        //PathFinder.RedrawHeatmap(nodesFlattened);
 
         return ReconstructPath(nodesStartToGoal, start.ComputeIndexI, start.ComputeIndexJ);
 
@@ -76,9 +77,6 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
 
             (int groupsX, int groupsY) = GetGroupsNumber(plannerKernel, width, height); 
             
-            var result = new ComputeNode[nodesWrite.count];
-
-            //shader.SetFloat(maxAgentsGID, float.PositiveInfinity);
             shader.SetInt("groupsX", groupsX);
             shader.SetInt("groupsY", groupsY);
 
@@ -92,41 +90,41 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
             shader.SetBuffer(plannerKernel, "maxAgentsGPerGroup", maxAgentsGPerGroupBuffer);
 
             int[] exitFlagData = { 1 };
-            float[] maxAgentsGPerGroup = new float[maxAgentsGPerGroupBuffer.count];
-            int it = 0;
+            const int exitFlagCheckPeriod = 40;
+            int iteration = 0;
             while (true)
             {
-                it++;
-                if (it >= 2000)
+                iteration++;
+                if (iteration >= 2000)
                 {
                     Debug.LogError("Path finding takes too long. Breaking loop...");
                     break;
                 }
-                exitFlagData[0] = 1;
-                exitFlagBuffer.SetData(exitFlagData);
+
+                if (iteration % exitFlagCheckPeriod == 0)
+                {
+                    exitFlagData[0] = 1;
+                    exitFlagBuffer.SetData(exitFlagData);
+                }
 
                 (nodesRead, nodesWrite) = (nodesWrite, nodesRead);
                 shader.SetBuffer(plannerKernel, nodesReadID, nodesRead);
                 shader.SetBuffer(plannerKernel, nodesWriteID, nodesWrite);
 
                 shader.Dispatch(plannerKernel, groupsX, groupsY, 1);
-                
-                exitFlagBuffer.GetData(exitFlagData);
-                if (exitFlagData[0] != 0)
-                    break;
 
-                //float maxAgentsG = FetchAndAggregateMaxAgentsG();
-                //shader.SetFloat(maxAgentsGID, maxAgentsG);
+                if (iteration % exitFlagCheckPeriod == 0)
+                {
+                    exitFlagBuffer.GetData(exitFlagData);
+                    if (exitFlagData[0] != 0)
+                        break;
+                }
             }
+            Debug.Log("Iterations: " + iteration);
 
+            var result = new ComputeNode[nodesWrite.count];
             nodesWrite.GetData(result);
             return result;
-
-            //float FetchAndAggregateMaxAgentsG()
-            //{
-            //    maxAgentsGPerGroupBuffer.GetData(maxAgentsGPerGroup);
-            //    return Mathf.Max(maxAgentsGPerGroup);
-            //}
         }
 
         void InitNodes(int goalIndex)

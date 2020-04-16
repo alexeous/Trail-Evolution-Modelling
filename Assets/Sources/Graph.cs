@@ -121,17 +121,36 @@ namespace TrailEvolutionModelling
     //[StructLayout(LayoutKind.Sequential, Pack = 1, Size = StructSize)]
     public struct ComputeNode
     {
-        public const int StructSize = sizeof(float) + sizeof(int) + sizeof(int);
+        public const int StructSize = sizeof(float) + sizeof(int); //sizeof(float) + sizeof(int) + sizeof(int);
+
+        //private int Data;
 
         public float G;
-        public int DirectionNext;
-        public int IsStartByte;
+        public int DirectionNext_IsStart;
+        //public int IsStartByte;
 
         public bool IsStart
         {
-            get => IsStartByte != 0;
-            set => IsStartByte = (value ? 1 : 0);
+            get => (byte)((DirectionNext_IsStart >> 3) & 1) != 0;
+            set
+            {
+                if (value)
+                    DirectionNext_IsStart |= (1 << 3); 
+                else DirectionNext_IsStart &= ~(1 << 3);
+            }
         }
+
+        public int DirectionNext
+        {
+            get => DirectionNext_IsStart & 7;
+            set => DirectionNext_IsStart = ((DirectionNext_IsStart >> 3) << 3) | (value & 7);
+        }
+
+        //public bool IsStart
+        //{
+        //    get => IsStartByte != 0;
+        //    set => IsStartByte = (value ? 1 : 0);
+        //}
 
         public override string ToString()
         {

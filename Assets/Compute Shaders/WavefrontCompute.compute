@@ -24,24 +24,25 @@
 
 struct Node {
     float g;
-    int dirNext; // clockwise
-    int isStart;
+    uint dirNext_isStart;
+    //int dirNext; // clockwise
+    //int isStart;
+
+    inline bool IsStart() { return dirNext_isStart >> 3;}
+    inline uint GetDirNext() { return dirNext_isStart & 7; }
+    inline void SetDirNext(uint dirNext) { dirNext_isStart = ((dirNext_isStart >> 3) << 3) | dirNext; }
 };
 
 
 CBUFFER_START(Params)
-//uint readNodesIndex;
 uint nodesWidth;
 uint nodesHeight;
 uint groupsX;
 uint groupsY;
 uint goalIndex;
-//float maxAgentsG;
 CBUFFER_END
 
 
-//RWStructuredBuffer<Node> nodesBuffer0;
-//RWStructuredBuffer<Node> nodesBuffer1;
 StructuredBuffer<Node> nodesRead;
 RWStructuredBuffer<Node> nodesWrite;
 StructuredBuffer<float> edgesVert;      //  | edges
@@ -56,10 +57,6 @@ groupshared uint maxAgentsGSharedAsUint = asuint(0.0);
 groupshared uint repeatShared;
 groupshared uint newMaxAgentsGSharedAsUint;
 groupshared Node nodesReadShared[SHARED_ARRAYS_SIZE_X][SHARED_ARRAYS_SIZE_Y];
-//groupshared float edgesVertShared[SHARED_ARRAYS_SIZE];
-//groupshared float edgesHorizShared[SHARED_ARRAYS_SIZE];
-//groupshared float edgesLeftDiagShared[SHARED_ARRAYS_SIZE];
-//groupshared float edgesRightDiagShared[SHARED_ARRAYS_SIZE];
 
 inline void ClampGlobalAndThreadIDToNodesBounds(inout uint3 threadId, inout uint3 globalId)
 {
@@ -70,22 +67,12 @@ inline void ClampGlobalAndThreadIDToNodesBounds(inout uint3 threadId, inout uint
 
 inline void LoadToSharedMemory(uint3 globalId, uint3 threadId, uint flattenedThreadId) 
 {
-    //if(threadId.x == 0 && threadId.y == 0) {
-    //    for(uint i = 0; i <= GROUP_SIZE_X+1; i++) {
-    //        for(uint j = 0; j <= GROUP_SIZE_Y+1; j++) {
-    //            uint3 t = uint3(i, j, 0);
-    //            uint3 g = globalId + uint3(i - 1, j - 1, 0);
-    //            ClampGlobalAndThreadIDToNodesBounds(t, g);
-    //            nodesReadShared[t.x][t.y] = nodesRead[NODES_1D_INDEX(g.x, g.y)];
-    //        }
-    //    }
-    //}
-
     ClampGlobalAndThreadIDToNodesBounds(threadId, globalId);
     nodesReadShared[threadId.x + 1][threadId.y + 1] = nodesRead[NODES_1D_INDEX(globalId.x, globalId.y)];
-    // 0 -- GROUP_SIZE_X+1 => (X; 0)
-    // GROUP_SIZE_X+2 -- 2*GROUP_SIZE_X+3 => (X - (GROUP_SIZE_X + 2); GROUP_SIZE_Y + 1)
-    // else ((X mod 2) * (GROUP_SIZE_X+1); (X - (2*GROUP_SIZE_X+4)) / 2)
+    // X is index of thread - flattenedThreadId - FTID
+    // 0 -- GROUP_SIZE_X+1 => (X; 0)     // top halo row
+    // GROUP_SIZE_X+2 -- 2*GROUP_SIZE_X+3 => (X - (GROUP_SIZE_X + 2); GROUP_SIZE_Y + 1) // bottom halo row
+    // else ((X mod 2) * (GROUP_SIZE_X+1); (X - (2*GROUP_SIZE_X+4)) / 2)  // alternating left and right halo columns
 #define FTID flattenedThreadId
     if(FTID < NUM_SHARED_HALO_NODES)
     {
@@ -101,7 +88,6 @@ inline void LoadToSharedMemory(uint3 globalId, uint3 threadId, uint flattenedThr
         nodesReadShared[threadId.x][threadId.y] = nodesRead[NODES_1D_INDEX(globalId.x, globalId.y)];
     }
 #undef FTID
-    GroupMemoryBarrierWithGroupSync();
 }
 
 inline void CalcMaxAgentsG(uint threadFlattenedId)
@@ -112,43 +98,45 @@ inline void CalcMaxAgentsG(uint threadFlattenedId)
     }
 }
 
-//inline Node ReadNodeAt(in int index) 
-//{
-//    //if(readNodesIndex == 0)
-//    //    return nodesBuffer0[index];
-//    //return nodesBuffer1[index];
-//    return nodesRead[index];
-//}
+inline void InitSharedVariables(uint3 globalId, uint3 threadId, uint flattenedThreadId) 
+{
+    LoadToSharedMemory(globalId, threadId, flattenedThreadId);
+    CalcMaxAgentsG(flattenedThreadId);
+
+    if((threadId.x == 0) & (threadId.y == 0)) 
+    {
+        maxAgentsGShared = asfloat(maxAgentsGSharedAsUint);
+        newMaxAgentsGSharedAsUint = asuint(0.0);
+        repeatShared = 0;
+    }
+}
+
+inline void NodeSetDirNext(inout Node node, uint dirNext) 
+{
+    node.dirNext_isStart = ((node.dirNext_isStart >> 3) << 3) | dirNext;
+}
 
 inline Node ReadNodeAt2D(in int threadIdX, in int threadIdY) { return nodesReadShared[threadIdX + 1][threadIdY + 1]; }
 
 inline void WriteNodeAt(in Node node, in int index) 
 {
-    //if(readNodesIndex == 0)
-    //    nodesBuffer1[index] = node;
-    //else
-    //    nodesBuffer0[index] = node;
     nodesWrite[index] = node;
 }
 
 inline void WriteNodeAt2D(in Node node, in int i, in int j) { WriteNodeAt(node, NODES_1D_INDEX(i, j)); }
 
-inline void ReplaceIfXLessThanY(inout int value, in int replacement, in float x, in float y) 
+inline int ReplaceIfXLessThanY(in int value, in int replacement, in float x, in float y) 
 {
-    // step(y, x) == (x < y) ? 0 : 1
-    value = lerp(value, replacement, 1 - step(y, x));
-    //if(x < y)
-    //    value = replacement;
+    return lerp(value, replacement, (x < y));
 }
 
 inline void ProcessNeighbour(in float edge, inout Node node, in Node neighbour, in int dir, inout bool repeat)
 {
-    float newG = neighbour.g + edge;
-    ReplaceIfXLessThanY(node.dirNext, dir, newG, node.g);
-    float old = node.g;
-    node.g = min(node.g, newG);
-    bool changed = node.g != old;
-    repeat = repeat | (changed & (node.g < maxAgentsGShared));
+    float oldG = node.g;
+    float tentativeNewG = neighbour.g + edge;
+    node.SetDirNext(ReplaceIfXLessThanY(node.GetDirNext(), dir, tentativeNewG, node.g));
+    node.g = min(node.g, tentativeNewG);
+    repeat = repeat | ((node.g != oldG) & (node.g < maxAgentsGShared));
 }
 
 [numthreads(GROUP_SIZE_X, GROUP_SIZE_Y, 1)]
@@ -159,12 +147,7 @@ void WavefrontInitNodesKernel(uint3 id : SV_DispatchThreadID)
         uint index = NODES_1D_INDEX(id.x, id.y);
         Node node;
         node.g = index == goalIndex ? 0 : 1.#INF;
-        node.dirNext = 0;
-        node.isStart = nodesRead[index].isStart;
-
-        //nodesBuffer0[index] = node;
-        //nodesBuffer1[index] = node;
-        //nodesRead[index] = node;
+        node.dirNext_isStart = nodesRead[index].dirNext_isStart;
         nodesWrite[index] = node;
     }
 }
@@ -177,21 +160,12 @@ void WavefrontPlannerKernel (uint3 id : SV_DispatchThreadID, uint3 groupId : SV_
     id.y++;
     uint index = NODES_1D_INDEX(id.x, id.y);
 
-    LoadToSharedMemory(id, threadId, threadFlattenedId);
-    CalcMaxAgentsG(threadFlattenedId);
-
-    if((threadId.x == 0) & (threadId.y == 0)) 
-    {
-        maxAgentsGShared = asfloat(maxAgentsGSharedAsUint);
-        newMaxAgentsGSharedAsUint = asuint(0.0);
-        repeatShared = 0;
-    }
-
+    InitSharedVariables(id, threadId, threadFlattenedId);
     GroupMemoryBarrierWithGroupSync();
 
     if((id.x <= nodesWidth) & (id.y <= nodesHeight) & (index != goalIndex))
     {
-
+        
         Node node = ReadNodeAt2D(threadId.x, threadId.y);
         bool repeat = false;
         ProcessNeighbour(EDGE_NW(id.x, id.y), node, ReadNodeAt2D(threadId.x - 1, threadId.y - 1), 0, repeat);
@@ -204,11 +178,11 @@ void WavefrontPlannerKernel (uint3 id : SV_DispatchThreadID, uint3 groupId : SV_
         ProcessNeighbour(EDGE_SE(id.x, id.y), node, ReadNodeAt2D(threadId.x + 1, threadId.y + 1), 7, repeat);
         WriteNodeAt(node, index);
 
-        bool isUninitializedStart = node.isStart & isinf(node.g);
+        bool isUninitializedStart = node.IsStart() & isinf(node.g);
         InterlockedOr(repeatShared, repeat | isUninitializedStart);
 
-        if(node.isStart)
-            InterlockedMax(newMaxAgentsGSharedAsUint, asuint(node.g));
+        if(node.IsStart())
+            InterlockedMax(newMaxAgentsGSharedAsUint, asuint((float)node.g));
     }
 
     GroupMemoryBarrierWithGroupSync();
