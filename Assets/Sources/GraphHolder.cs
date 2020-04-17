@@ -49,6 +49,10 @@ namespace TrailEvolutionModelling
 
         private Color GetEdgeColor(Edge edge)
         {
+            if (float.IsInfinity(edge.Weight))
+            {
+                return Color.blue;
+            }
             float t = (edge.Weight - minWeight) / (maxWeight - minWeight);
             return Color.Lerp(minWeightColor, maxWeightColor, t);
         }

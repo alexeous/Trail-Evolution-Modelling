@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using TrailEvolutionModelling;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -56,10 +57,7 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
         //        if (graph.Nodes[i][j] != null)
         //        {
         //            float g = nodesStartToGoal[graph.Nodes[i][j].ComputeIndex].G;
-        //            if (float.IsInfinity(g))
-        //                graph.Nodes[i][j] = null;
-        //            else
-        //                graph.Nodes[i][j].G1 = g;
+        //            graph.Nodes[i][j].G1 = g;
         //        }
         //    }
         //}
@@ -89,8 +87,11 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
             shader.SetBuffer(plannerKernel, "exitFlagBuffer", exitFlagBuffer);
             shader.SetBuffer(plannerKernel, "maxAgentsGPerGroup", maxAgentsGPerGroupBuffer);
 
+            GetClosestStepsDistanceNode(_goal, starts, out int closestNodeStepsDistance);
+            int minIterations = closestNodeStepsDistance + 2;
+
             int[] exitFlagData = { 1 };
-            const int exitFlagCheckPeriod = 40;
+            const int exitFlagCheckPeriod = 20;
             int iteration = 0;
             while (true)
             {
@@ -101,10 +102,13 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
                     break;
                 }
 
-                if (iteration % exitFlagCheckPeriod == 0)
+                if (iteration >= minIterations)
                 {
-                    exitFlagData[0] = 1;
-                    exitFlagBuffer.SetData(exitFlagData);
+                    if (iteration % exitFlagCheckPeriod == 0 || iteration == minIterations)
+                    {
+                        exitFlagData[0] = 1;
+                        exitFlagBuffer.SetData(exitFlagData);
+                    }
                 }
 
                 (nodesRead, nodesWrite) = (nodesWrite, nodesRead);
@@ -113,14 +117,17 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
 
                 shader.Dispatch(plannerKernel, groupsX, groupsY, 1);
 
-                if (iteration % exitFlagCheckPeriod == 0)
+                if (iteration >= minIterations)
                 {
-                    exitFlagBuffer.GetData(exitFlagData);
-                    if (exitFlagData[0] != 0)
-                        break;
+                    if (iteration % exitFlagCheckPeriod == 0 || iteration == minIterations)
+                    {
+                        exitFlagBuffer.GetData(exitFlagData);
+                        if (exitFlagData[0] != 0)
+                            break;
+                    }
                 }
             }
-            Debug.Log("Iterations: " + iteration);
+            //Debug.Log("Iterations: " + iteration);
 
             var result = new ComputeNode[nodesWrite.count];
             nodesWrite.GetData(result);
@@ -249,6 +256,29 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
         int groupsX = Mathf.CeilToInt((float)width / groupSizeX);
         int groupsY = Mathf.CeilToInt((float)height / groupSizeY);
         return (groupsX, groupsY);
+    }
+
+    private static Node GetClosestStepsDistanceNode(Node origin, Node[] others, out int minDistance)
+    {
+        Node closest = null;
+        minDistance = int.MaxValue;
+        foreach (var other in others)
+        {
+            int distance = GetNodeStepsDistance(origin, other);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closest = other;
+            }
+        }
+        return closest;
+    }
+
+    private static int GetNodeStepsDistance(Node a, Node b)
+    {
+        int deltaI = a.ComputeIndexI - b.ComputeIndexI;
+        int deltaJ = a.ComputeIndexJ - b.ComputeIndexJ;
+        return Mathf.Max(Mathf.Abs(deltaI), Mathf.Abs(deltaJ));
     }
 
     private ComputeBuffer NewFloatsBuffer(float[] values)

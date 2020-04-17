@@ -397,8 +397,8 @@ namespace TrailEvolutionModelling
 
         public static void RedrawHeatmap(Node[] nodesFlattened)
         {
-            float minG = nodesFlattened.Min(n => n.G1);
-            float maxG = nodesFlattened.Max(n => n.G1);
+            float minG = nodesFlattened.Where(n => !float.IsInfinity(n.G1)).Min(n => n.G1);
+            float maxG = nodesFlattened.Where(n => !float.IsInfinity(n.G1)).Max(n => n.G1);
             Color minColor = Color.green;
             Color maxColor = Color.red;
             Vector2 deltaPos = nodesFlattened[0].Position - nodesFlattened[1].Position;
@@ -411,7 +411,7 @@ namespace TrailEvolutionModelling
             foreach (var node in nodesFlattened)
             {
                 float t = (node.G1 - minG) / (maxG - minG);
-                var color = node.G1 == -1 ? Color.blue : Color.Lerp(minColor, maxColor, t);
+                var color = node.G1 == -1 || float.IsInfinity(node.G1) ? Color.blue : Color.Lerp(minColor, maxColor, t);
                 vertices.Add(node.Position + new Vector2(-halfStep, -halfStep));
                 vertices.Add(node.Position + new Vector2(+halfStep, -halfStep));
                 vertices.Add(node.Position + new Vector2(+halfStep, +halfStep));
