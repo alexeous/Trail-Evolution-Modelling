@@ -91,7 +91,7 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
             int minIterations = closestNodeStepsDistance + 2;
 
             int[] exitFlagData = { 1 };
-            const int exitFlagCheckPeriod = 20;
+            const int exitFlagCheckPeriod = 10;
             int iteration = 0;
             while (true)
             {
@@ -157,11 +157,12 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
 
     private static Node[] ReconstructPath(ComputeNode[] nodesStartToGoal, ComputeNode[] nodesGoalToStart, int i, int j, Graph graph, Node goal)
     {
-        var pathNodes = new List<Node>();
+        var pathNodes = new List<Node> { ComputeToNode(i, j) };
         var (prevGuideI, prevGuideJ) = (i, j);
         var (guideI, guideJ) = NextCompute(i, j);
+        var (prevI, prevJ) = (i, j);
         var (goalI, goalJ) = (goal.ComputeIndexI, goal.ComputeIndexJ);
-        while (guideI != goalI && guideJ != goalJ)
+        while (guideI != goalI || guideJ != goalJ)
         {
             if (pathNodes.Count > 100000)
             {
@@ -189,7 +190,7 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
                 for (int dir = 0; dir < 8; dir++)
                 {
                     var shift = Graph.DirectionToShift(dir);
-                    if (float.IsInfinity(graph.GetComputeEdgeForNode(compI, compJ, shift.di, shift.dj)))
+                    if (float.IsInfinity(graph.GetComputeEdgeForComputeNode(compI, compJ, shift.di, shift.dj)))
                         continue;
 
                     var (otherI, otherJ) = (compI + shift.di, compJ + shift.dj);
@@ -208,28 +209,9 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
                         SimilarCostNodesSearch(otherI, otherJ);
                     }
                 }
-                //foreach (var edge in center.IncidentEdges)
-                //{
-                //    Node other = edge.GetOppositeNode(center);
-                //    var (otherI, otherJ) = (other.ComputeIndexI, other.ComputeIndexJ);
-
-                //    if (visited.Contains((otherI, otherJ)))
-                //        continue;
-
-                //    visited.Add((otherI, otherJ));
-                //    ComputeNode otherForward = GetComputeAt(nodesStartToGoal, otherI, otherJ);
-                //    ComputeNode otherBackward = GetComputeAt(nodesGoalToStart, otherI, otherJ);
-
-                //    if (otherForward.G >= minForwardG && otherForward.G <= maxForwardG &&
-                //        otherBackward.G >= minBackwardG && otherBackward.G <= maxBackwardG)
-                //    {
-                //        similarCostNodes.Add(other);
-                //        averagePos += other.Position;
-                //        SimilarCostNodesSearch(otherI, otherJ);
-                //    }
-                //}
             }
 
+            Vector2 prevPos = new Vector2(prevI, prevJ);
             Vector2 averagePos = (Vector2)sumPos / similarCostNodeIndices.Count;
             int nextI = -1;
             int nextJ = -1;
@@ -252,6 +234,7 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
 
             pathNodes.Add(ComputeToNode(nextI, nextJ));
 
+            (prevI, prevJ) = (nextI, nextJ);
             (prevGuideI, prevGuideJ) = (guideI, guideJ);
             (guideI, guideJ) = (nextGuideI, nextGuideJ);
         }

@@ -34,6 +34,7 @@ namespace TrailEvolutionModelling
 
         public int count;
 
+#if UNITY_EDITOR
         void OnDrawGizmos()
         {
             try
@@ -47,12 +48,13 @@ namespace TrailEvolutionModelling
             }
             catch { }
         }
+#endif
 
-        public void FindPath(PathFindingAlgorithm algorithm)
+        public TimeSpan FindPath(PathFindingAlgorithm algorithm)
         {
             if (graphHolder == null || start == null || end == null)
             {
-                return;
+                return TimeSpan.Zero;
             }
 
             Graph graph = graphHolder.Graph;
@@ -82,6 +84,7 @@ namespace TrailEvolutionModelling
             Debug.Log($"Path finding took {stopwatch.ElapsedMilliseconds} ms");
 
             LinesChanged?.Invoke(this);
+            return stopwatch.Elapsed;
         }
 
         public override IEnumerable<ColoredLine> GetLines()

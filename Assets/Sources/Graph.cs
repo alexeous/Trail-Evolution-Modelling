@@ -185,6 +185,11 @@ namespace TrailEvolutionModelling
         public float[] ComputeEdgesLeftDiag { get; set; }
         public float[] ComputeEdgesRightDiag { get; set; }
 
+        public ref float GetComputeEdgeForComputeNode(int compI, int compJ, int di, int dj)
+        {
+            return ref GetComputeEdgeForNode(compI - 1, compJ - 1, di, dj);
+        }
+
         public ref float GetComputeEdgeForNode(int nodeI, int nodeJ, int di, int dj)
         {
             int w = Nodes.Length;
