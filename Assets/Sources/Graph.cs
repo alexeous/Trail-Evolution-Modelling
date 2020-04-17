@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Priority_Queue;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace TrailEvolutionModelling
 {
@@ -146,6 +147,21 @@ namespace TrailEvolutionModelling
             set => DirectionNext_IsStart = ((DirectionNext_IsStart >> 3) << 3) | (value & 7);
         }
 
+        public override bool Equals(object obj)
+        {
+            return obj is ComputeNode node &&
+                   G == node.G &&
+                   DirectionNext_IsStart == node.DirectionNext_IsStart;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 335743698;
+            hashCode = hashCode * -1521134295 + G.GetHashCode();
+            hashCode = hashCode * -1521134295 + DirectionNext_IsStart.GetHashCode();
+            return hashCode;
+        }
+
         //public bool IsStart
         //{
         //    get => IsStartByte != 0;
@@ -186,18 +202,6 @@ namespace TrailEvolutionModelling
 
             throw new Exception("Invalid rectangular moore shift");
         }
-        //public Node AddNode(Vector2 position)
-        //{
-        //    var node = new Node(position);
-        //    Nodes.Add(node);
-        //    return node;
-        //}
-
-        //public void RemoveNode(Node node)
-        //{
-        //    Nodes.Remove(node);
-        //    Edges.RemoveWhere(edge => node.IncidentEdges.Contains(edge));
-        //}
 
         public Edge AddEdge(Node node1, Node node2, float weight, bool isTramplable)
         {
@@ -216,6 +220,22 @@ namespace TrailEvolutionModelling
             Edges.Remove(edge);
             edge.Node1.RemoveIncidentEdge(edge);
             edge.Node2.RemoveIncidentEdge(edge);
+        }
+
+        public static (int di, int dj) DirectionToShift(int direction)
+        {
+            switch (direction)
+            {
+                case 0: return (-1, -1);
+                case 1: return (0, -1);
+                case 2: return (1, -1);
+                case 3: return (-1, 0);
+                case 4: return (1, 0);
+                case 5: return (-1, 1);
+                case 6: return (0, 1);
+                case 7: return (1, 1);
+                default: throw new ArgumentOutOfRangeException(nameof(direction));
+            };
         }
     }
 }

@@ -64,7 +64,7 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
         //Node[] nodesFlattened = graph.Nodes.SelectMany(t => t).Where(t => t != null).ToArray();
         //PathFinder.RedrawHeatmap(nodesFlattened);
 
-        return ReconstructPath(nodesStartToGoal, start.ComputeIndexI, start.ComputeIndexJ);
+        return ReconstructPath(nodesStartToGoal, nodesGoalToStart, start.ComputeIndexI, start.ComputeIndexJ, graph, goal);
 
 
         ComputeNode[] ComputePaths(Node _goal, params Node[] starts)
@@ -153,100 +153,193 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
                 graph.ComputeNodes[_start.ComputeIndex].IsStart = true;
             }
         }
+    }
 
-        Node[] ReconstructPath(ComputeNode[] computeNodes, int computeI, int computeJ)
+    private static Node[] ReconstructPath(ComputeNode[] nodesStartToGoal, ComputeNode[] nodesGoalToStart, int i, int j, Graph graph, Node goal)
+    {
+        var pathNodes = new List<Node>();
+        var (prevGuideI, prevGuideJ) = (i, j);
+        var (guideI, guideJ) = NextCompute(i, j);
+        var (goalI, goalJ) = (goal.ComputeIndexI, goal.ComputeIndexJ);
+        while (guideI != goalI && guideJ != goalJ)
         {
-            var pathNodes = new List<Node>();
-            Node node = ComputeToNode(computeI, computeJ);
-            while (node != goal)
+            if (pathNodes.Count > 100000)
             {
-                if (pathNodes.Count > 100000)
+                pathNodes.RemoveRange(100, pathNodes.Count - 100);
+                Debug.LogError("Something went wrong");
+                pathNodes.RemoveAll(x => x == null);
+                return pathNodes.ToArray();
+            }
+
+            var (nextGuideI, nextGuideJ) = NextCompute(guideI, guideJ);
+
+            float minForwardG = GetComputeAt(nodesStartToGoal, nextGuideI, nextGuideJ).G;
+            float maxForwardG = GetComputeAt(nodesStartToGoal, prevGuideI, prevGuideJ).G;
+            float minBackwardG = GetComputeAt(nodesGoalToStart, prevGuideI, prevGuideJ).G;
+            float maxBackwardG = GetComputeAt(nodesGoalToStart, nextGuideI, nextGuideJ).G;
+
+            var visited = new HashSet<(int, int)>() { (guideI, guideJ) };
+            var similarCostNodeIndices = new List<(int i, int j)> { (guideI, guideJ) };
+
+            Vector2Int sumPos = new Vector2Int(guideI, guideJ);
+
+            SimilarCostNodesSearch(guideI, guideJ);
+            void SimilarCostNodesSearch(int compI, int compJ)
+            {
+                for (int dir = 0; dir < 8; dir++)
                 {
-                    pathNodes.RemoveRange(100, pathNodes.Count - 100);
-                    Debug.LogError("Something went wrong");
-                    pathNodes.RemoveAll(x => x == null);
-                    return pathNodes.ToArray();
+                    var shift = Graph.DirectionToShift(dir);
+                    if (float.IsInfinity(graph.GetComputeEdgeForNode(compI, compJ, shift.di, shift.dj)))
+                        continue;
+
+                    var (otherI, otherJ) = (compI + shift.di, compJ + shift.dj);
+                    if (visited.Contains((otherI, otherJ)))
+                        continue;
+
+                    visited.Add((otherI, otherJ));
+                    ComputeNode otherForward = GetComputeAt(nodesStartToGoal, otherI, otherJ);
+                    ComputeNode otherBackward = GetComputeAt(nodesGoalToStart, otherI, otherJ);
+
+                    if (otherForward.G >= minForwardG && otherForward.G <= maxForwardG &&
+                        otherBackward.G >= minBackwardG && otherBackward.G <= maxBackwardG)
+                    {
+                        similarCostNodeIndices.Add((otherI, otherJ));
+                        sumPos += new Vector2Int(otherI, otherJ);
+                        SimilarCostNodesSearch(otherI, otherJ);
+                    }
                 }
-                pathNodes.Add(node);
-                (computeI, computeJ) = NextCompute(computeI, computeJ);
-                node = ComputeToNode(computeI, computeJ);
+                //foreach (var edge in center.IncidentEdges)
+                //{
+                //    Node other = edge.GetOppositeNode(center);
+                //    var (otherI, otherJ) = (other.ComputeIndexI, other.ComputeIndexJ);
+
+                //    if (visited.Contains((otherI, otherJ)))
+                //        continue;
+
+                //    visited.Add((otherI, otherJ));
+                //    ComputeNode otherForward = GetComputeAt(nodesStartToGoal, otherI, otherJ);
+                //    ComputeNode otherBackward = GetComputeAt(nodesGoalToStart, otherI, otherJ);
+
+                //    if (otherForward.G >= minForwardG && otherForward.G <= maxForwardG &&
+                //        otherBackward.G >= minBackwardG && otherBackward.G <= maxBackwardG)
+                //    {
+                //        similarCostNodes.Add(other);
+                //        averagePos += other.Position;
+                //        SimilarCostNodesSearch(otherI, otherJ);
+                //    }
+                //}
             }
-            pathNodes.Add(goal);
-            //Node prevGuide = current;
-            //Node guide = current.CameFrom1;
-            //while (guide != goal)
-            //{
-            //    if (pathNodes.Count > 100000)
-            //    {
-            //        throw new Exception("Something went wrong");
-            //    }
 
-            //    Node nextGuide = guide.CameFrom1;
-
-            //    float minG1 = nextGuide.G1;
-            //    float maxG1 = prevGuide.G1;
-            //    float minG2 = prevGuide.G2;
-            //    float maxG2 = nextGuide.G2;
-
-            //    var visited = new HashSet<Node> { guide };
-            //    var similarCostNodes = new List<Node> { guide };
-            //    Vector2 averagePos = guide.Position;
-
-            //    Rec(guide);
-            //    void Rec(Node center)
-            //    {
-            //        foreach (var edge in center.IncidentEdges)
-            //        {
-            //            Node other = edge.GetOppositeNode(center);
-            //            if (visited.Contains(other))
-            //                continue;
-
-            //            visited.Add(other);
-
-            //            if (other.G1 >= minG1 && other.G1 <= maxG1 &&
-            //                other.G2 >= minG2 && other.G2 <= maxG2)
-            //            {
-            //                similarCostNodes.Add(other);
-            //                averagePos += other.Position;
-            //                Rec(other);
-            //            }
-            //        }
-            //    }
-
-            //    averagePos /= similarCostNodes.Count;
-            //    Node next = null;
-            //    float minSqrDist = float.PositiveInfinity;
-            //    foreach (var node in similarCostNodes)
-            //    {
-            //        float sqrDist = (averagePos - node.Position).sqrMagnitude;
-            //        if (sqrDist < minSqrDist)
-            //        {
-            //            minSqrDist = sqrDist;
-            //            next = node;
-            //        }
-            //    }
-            //    pathNodes.Add(next);
-
-            //    prevGuide = guide;
-            //    guide = guide.CameFrom1;
-            //}
-            pathNodes.Add(goal);
-            return pathNodes.ToArray();
-
-            Node ComputeToNode(int compI, int compJ) => graph.Nodes[compI - 1][compJ - 1];
-            (int nextI, int nextJ) NextCompute(int compI, int compJ)
+            Vector2 averagePos = (Vector2)sumPos / similarCostNodeIndices.Count;
+            int nextI = -1;
+            int nextJ = -1;
+            float minSqrDist = float.PositiveInfinity;
+            foreach (var nodeIndex in similarCostNodeIndices)
             {
-                (int di, int dj)[] indexShifts =
+                float sqrDist = (averagePos - new Vector2(nodeIndex.i, nodeIndex.j)).sqrMagnitude;
+                if (sqrDist < minSqrDist)
                 {
-                    (-1, -1), (0, -1), (1, -1),
-                    (-1, 0), (1, 0),
-                    (-1, 1), (0, 1), (1, 1)
-                };
-                ComputeNode comp = computeNodes[compI + compJ * (width + 2)];
-                var shift = indexShifts[comp.DirectionNext];
-                return (compI + shift.di, compJ + shift.dj);
+                    minSqrDist = sqrDist;
+                    nextI = nodeIndex.i;
+                    nextJ = nodeIndex.j;
+                }
             }
+
+            if (nextI == -1)
+            {
+                throw new Exception("There are no similarCostNodeIndices found");
+            }
+
+            pathNodes.Add(ComputeToNode(nextI, nextJ));
+
+            (prevGuideI, prevGuideJ) = (guideI, guideJ);
+            (guideI, guideJ) = (nextGuideI, nextGuideJ);
         }
+        pathNodes.Add(goal);
+        return pathNodes.ToArray();
+
+
+        Node ComputeToNode(int compI, int compJ)
+        {
+            return graph.Nodes[compI - 1][compJ - 1];
+        }
+
+        ComputeNode GetComputeAt(ComputeNode[] array, int compI, int compJ)
+        {
+            return array[compI + compJ * (graph.Nodes.Length + 2)];
+        }
+
+        (int nextI, int nextJ) NextCompute(int compI, int compJ)
+        {
+            (int di, int dj)[] indexShifts =
+            {
+                (-1, -1), (0, -1), (1, -1),
+                (-1, 0), (1, 0),
+                (-1, 1), (0, 1), (1, 1)
+            };
+            ComputeNode comp = GetComputeAt(nodesStartToGoal, compI, compJ);
+            var shift = indexShifts[comp.DirectionNext];
+            return (compI + shift.di, compJ + shift.dj);
+        }
+
+        //Node prevGuide = current;
+        //Node guide = current.CameFrom1;
+        //while (guide != goal)
+        //{
+        //    if (pathNodes.Count > 100000)
+        //    {
+        //        throw new Exception("Something went wrong");
+        //    }
+
+        //    Node nextGuide = guide.CameFrom1;
+
+        //    float minG1 = nextGuide.G1;
+        //    float maxG1 = prevGuide.G1;
+        //    float minG2 = prevGuide.G2;
+        //    float maxG2 = nextGuide.G2;
+
+        //    var visited = new HashSet<Node> { guide };
+        //    var similarCostNodes = new List<Node> { guide };
+        //    Vector2 averagePos = guide.Position;
+
+        //    Rec(guide);
+        //    void Rec(Node center)
+        //    {
+        //        foreach (var edge in center.IncidentEdges)
+        //        {
+        //            Node other = edge.GetOppositeNode(center);
+        //            if (visited.Contains(other))
+        //                continue;
+
+        //            visited.Add(other);
+
+        //            if (other.G1 >= minG1 && other.G1 <= maxG1 &&
+        //                other.G2 >= minG2 && other.G2 <= maxG2)
+        //            {
+        //                similarCostNodes.Add(other);
+        //                averagePos += other.Position;
+        //                Rec(other);
+        //            }
+        //        }
+        //    }
+
+        //    averagePos /= similarCostNodes.Count;
+        //    Node next = null;
+        //    float minSqrDist = float.PositiveInfinity;
+        //    foreach (var node in similarCostNodes)
+        //    {
+        //        float sqrDist = (averagePos - node.Position).sqrMagnitude;
+        //        if (sqrDist < minSqrDist)
+        //        {
+        //            minSqrDist = sqrDist;
+        //            next = node;
+        //        }
+        //    }
+        //    pathNodes.Add(next);
+
+        //    prevGuide = guide;
+        //    guide = guide.CameFrom1;
+        //}
     }
 
     private (int groupsX, int groupsY) GetGroupsNumber(int plannerKernel, int width, int height)
