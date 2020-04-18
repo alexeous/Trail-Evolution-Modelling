@@ -201,8 +201,8 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
                     ComputeNode otherForward = GetComputeAt(nodesStartToGoal, otherI, otherJ);
                     ComputeNode otherBackward = GetComputeAt(nodesGoalToStart, otherI, otherJ);
 
-                    if (otherForward.G >= minForwardG && otherForward.G <= maxForwardG &&
-                        otherBackward.G >= minBackwardG && otherBackward.G <= maxBackwardG)
+                    if (otherForward.G >= minForwardG && otherForward.G < maxForwardG &&
+                        otherBackward.G > minBackwardG && otherBackward.G <= maxBackwardG)
                     {
                         similarCostNodeIndices.Add((otherI, otherJ));
                         sumPos += new Vector2Int(otherI, otherJ);
@@ -230,6 +230,20 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
             if (nextI == -1)
             {
                 throw new Exception("There are no similarCostNodeIndices found");
+            }
+
+            int intermediateI = prevI;
+            int intermediateJ = prevJ;
+
+            int deltaI = nextI - intermediateI;
+            int deltaJ = nextJ - intermediateJ;
+            while (Mathf.Abs(deltaI) > 1 || Mathf.Abs(deltaJ) > 1)
+            {
+                intermediateI += Math.Sign(deltaI);
+                intermediateJ += Math.Sign(deltaJ);
+                deltaI = nextI - intermediateI;
+                deltaJ = nextJ - intermediateJ;
+                pathNodes.Add(ComputeToNode(intermediateI, intermediateJ));
             }
 
             pathNodes.Add(ComputeToNode(nextI, nextJ));
