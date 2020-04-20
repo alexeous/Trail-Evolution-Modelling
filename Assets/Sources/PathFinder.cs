@@ -262,28 +262,28 @@ namespace TrailEvolutionModelling
             Debug.Log("Iterations: " + iters);
             
             CleanupGraph(nodesFlattened);
-            //var visitedEdges = new HashSet<Edge>();
-            //foreach (var node in path)
-            //{
-            //    foreach (var edge in node.IncidentEdges)
-            //    {
-            //        if (visitedEdges.Contains(edge) || !edge.IsTramplable)
-            //            continue;
+            var visitedEdges = new HashSet<Edge>();
+            foreach (var node in path)
+            {
+                foreach (var edge in node.IncidentEdges)
+                {
+                    if (visitedEdges.Contains(edge) || !edge.IsTramplable)
+                        continue;
 
-            //        edge.Weight = Mathf.Max(1.1f, edge.Weight - 0.4f);
-            //        visitedEdges.Add(edge);
+                    edge.Weight = Mathf.Max(1.1f, edge.Weight - 0.4f);
+                    visitedEdges.Add(edge);
 
-            //        Node other = edge.GetOppositeNode(node);
-            //        foreach (var edge2 in other.IncidentEdges)
-            //        {
-            //            if (visitedEdges.Contains(edge2) || !edge2.IsTramplable)
-            //                continue;
+                    Node other = edge.GetOppositeNode(node);
+                    foreach (var edge2 in other.IncidentEdges)
+                    {
+                        if (visitedEdges.Contains(edge2) || !edge2.IsTramplable)
+                            continue;
 
-            //            edge2.Weight = Mathf.Max(1.1f, edge2.Weight - 0.4f);
-            //            visitedEdges.Add(edge2);
-            //        }
-            //    }
-            //}
+                        edge2.Weight = Mathf.Max(1.1f, edge2.Weight - 0.2f);
+                        visitedEdges.Add(edge2);
+                    }
+                }
+            }
             return path;
 
             void PlannerKernel(Node node)
@@ -327,7 +327,7 @@ namespace TrailEvolutionModelling
                 }
 
                 gg = new List<List<Vector2>>();
-
+                var (prevI, prevJ) = (current.ComputeIndexI - 1, current.ComputeIndexJ - 1);
                 var pathNodes = new List<Node> { current };
                 Node prevGuide = current;
                 Node guide = current.CameFrom1;
@@ -361,8 +361,8 @@ namespace TrailEvolutionModelling
 
                             visited.Add(other);
 
-                            if (other.G1 >= minG1 && other.G1 <= maxG1 &&
-                                other.G2 >= minG2 && other.G2 <= maxG2)
+                            if (other.G1 > minG1 && other.G1 < maxG1 &&
+                                other.G2 > minG2 && other.G2 < maxG2)
                             {
                                 similarCostNodes.Add(other);
                                 averagePos += other.Position;
@@ -385,8 +385,24 @@ namespace TrailEvolutionModelling
                             next = node;
                         }
                     }
-                    pathNodes.Add(next);
+                    int intermediateI = prevI;
+                    int intermediateJ = prevJ;
+                    int nextI = next.ComputeIndexI - 1;
+                    int nextJ = next.ComputeIndexJ - 1;
 
+                    int deltaI = nextI - intermediateI;
+                    int deltaJ = nextJ - intermediateJ;
+                    while (Mathf.Abs(deltaI) > 1 || Mathf.Abs(deltaJ) > 1)
+                    {
+                        intermediateI += Math.Sign(deltaI);
+                        intermediateJ += Math.Sign(deltaJ);
+                        deltaI = nextI - intermediateI;
+                        deltaJ = nextJ - intermediateJ;
+                        pathNodes.Add(graph.Nodes[intermediateI][intermediateJ]);
+                    }
+
+                    pathNodes.Add(next);
+                    (prevI, prevJ) = (nextI, nextJ);
                     prevGuide = guide;
                     guide = guide.CameFrom1;
                 }
