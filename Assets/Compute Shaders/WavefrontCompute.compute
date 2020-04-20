@@ -163,9 +163,8 @@ void WavefrontPlannerKernel (uint3 id : SV_DispatchThreadID, uint3 groupId : SV_
     InitSharedVariables(id, threadId, threadFlattenedId);
     GroupMemoryBarrierWithGroupSync();
 
-    if((id.x <= nodesWidth) & (id.y <= nodesHeight) & (index != goalIndex))
+    if((id.x <= nodesWidth) & (id.y <= nodesHeight))
     {
-        
         Node node = ReadNodeAt2D(threadId.x, threadId.y);
         bool repeat = false;
         ProcessNeighbour(EDGE_NW(id.x, id.y), node, ReadNodeAt2D(threadId.x - 1, threadId.y - 1), 0, repeat);
