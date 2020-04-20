@@ -193,7 +193,6 @@ void WavefrontPlannerKernel (uint3 id : SV_DispatchThreadID, uint3 groupId : SV_
     if((threadId.x == 0) & (threadId.y == 0)) 
     {
         maxAgentsGPerGroup[groupId.x + groupId.y * groupsX] = asfloat(newMaxAgentsGSharedAsUint);
-        if(repeatShared)
-            exitFlagBuffer[0] = 0;
+        InterlockedAnd(exitFlagBuffer[0], !repeatShared);
     }
 }
