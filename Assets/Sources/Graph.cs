@@ -28,10 +28,24 @@ namespace TrailEvolutionModelling
         public int ComputeIndexI;
         public int ComputeIndexJ;
 
+        private Node componentParent;
+        private int componentRank;
+
+        public Node ComponentParent
+        {
+            get
+            {
+                if (componentParent != this)
+                    componentParent = componentParent.ComponentParent;
+                return componentParent;
+            }
+        }
+
         public Node(Vector2 position)
         {
             Position = position;
             IncidentEdges = new List<Edge>();
+            componentParent = this;
 
             CleanupAfterPathSearch();
         }
@@ -51,6 +65,28 @@ namespace TrailEvolutionModelling
                 return true;
             }
             return false;
+        }
+
+        public bool UnionComponents(Node other)
+        {
+            Node x = this.ComponentParent;
+            Node y = other.ComponentParent;
+
+            if (x == y)
+                return false;
+
+            if (x.componentRank < y.componentRank)
+            {
+                x.componentParent = y;
+            }
+            else
+            {
+                if (x.componentRank == y.componentRank)
+                    x.componentRank++;
+                y.componentParent = x;
+            }
+
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -178,7 +214,7 @@ namespace TrailEvolutionModelling
     {
         public Node[][] Nodes { get; set; }
         public HashSet<Edge> Edges { get; } = new HashSet<Edge>();
-        
+
         public ComputeNode[] ComputeNodes { get; set; }
         public float[] ComputeEdgesVert { get; set; }
         public float[] ComputeEdgesHoriz { get; set; }
@@ -215,6 +251,9 @@ namespace TrailEvolutionModelling
             {
                 node1.AddIncidentEdge(edge);
                 node2.AddIncidentEdge(edge);
+
+                node1.UnionComponents(node2);
+
                 return edge;
             }
             return null;

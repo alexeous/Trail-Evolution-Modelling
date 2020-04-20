@@ -58,6 +58,7 @@ namespace TrailEvolutionModelling
             var graph = new Graph();
             BuildRectangularMooreNodes(graph);
             BuildRectangularMooreEdges(graph);
+            
             return graph;
         }
 

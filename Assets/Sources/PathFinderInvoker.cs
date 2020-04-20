@@ -78,6 +78,11 @@ namespace TrailEvolutionModelling
             Node startNode = FindClosestNode(graph, start.position);
             Node endNode = FindClosestNode(graph, end.position);
 
+            if (startNode.ComponentParent != endNode.ComponentParent)
+            {
+                throw new Exception("Start and End are unreachable");
+            }
+
             var stopwatch = Stopwatch.StartNew();
             if (algorithm == PathFindingAlgorithm.WavefrontParallel)
             {
