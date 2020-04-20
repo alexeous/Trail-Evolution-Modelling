@@ -47,6 +47,18 @@ namespace TrailEvolutionModelling
                 count = PathFinder.gg[ind].Count;
             }
             catch { }
+
+            try
+            {
+                foreach (var n in ParallelWavefrontPathFinding.neigh)
+                {
+                    Color color = Color.red;
+                    color.a = 1 - n.F1 / 7f;
+                    Handles.color = color;
+                    Handles.DrawSolidDisc(n.Position, Vector3.forward, 0.2f);
+                }
+            }
+            catch { }
         }
 #endif
 

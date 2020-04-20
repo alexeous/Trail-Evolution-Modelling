@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
 using TMPro;
 using TrailEvolutionModelling;
 using UnityEngine;
@@ -61,11 +63,40 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
         //        }
         //    }
         //}
-        //Node[] nodesFlattened = graph.Nodes.SelectMany(t => t).Where(t => t != null).ToArray();
+        Node[] nodesFlattened = graph.Nodes.SelectMany(t => t).Where(t => t != null).ToArray();
         //PathFinder.RedrawHeatmap(nodesFlattened);
 
-        return ReconstructPath(nodesStartToGoal, nodesGoalToStart, start.ComputeIndexI, start.ComputeIndexJ, graph, goal);
+        Node[] path = ReconstructPath(nodesStartToGoal, nodesGoalToStart, start.ComputeIndexI, start.ComputeIndexJ, graph, goal);
 
+        /*foreach (var node in nodesFlattened)
+            node.F1 = float.PositiveInfinity;
+
+        foreach (var node in path)
+            node.F1 = 0;
+
+        for (int it = 0; it < 5; it++)
+        {
+            Parallel.ForEach(nodesFlattened, node =>
+            {
+                float min = node.F1;
+                foreach (var edge in node.IncidentEdges)
+                {
+                    Node other = edge.GetOppositeNode(node);
+                    float dist = Vector2.Distance(new Vector2(other.ComputeIndexI, other.ComputeIndexJ),
+                        new Vector2(node.ComputeIndexI, node.ComputeIndexJ));
+                    min = Mathf.Min(min, other.F1 + dist);
+                }
+                node.F2 = min;
+            });
+            Parallel.ForEach(nodesFlattened, node =>
+            {
+                node.F1 = node.F2;
+            });
+        }
+
+        neigh = nodesFlattened.Where(n => !float.IsInfinity(n.F1)).ToList();*/
+
+        return path;
 
         ComputeNode[] ComputePaths(Node _goal, params Node[] starts)
         {
@@ -155,6 +186,8 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
         }
     }
 
+    public static List<Node> neigh;
+
     private static Node[] ReconstructPath(ComputeNode[] nodesStartToGoal, ComputeNode[] nodesGoalToStart, int i, int j, Graph graph, Node goal)
     {
         var pathNodes = new List<Node> { ComputeToNode(i, j) };
@@ -201,8 +234,8 @@ public class ParallelWavefrontPathFinding : MonoBehaviour
                     ComputeNode otherForward = GetComputeAt(nodesStartToGoal, otherI, otherJ);
                     ComputeNode otherBackward = GetComputeAt(nodesGoalToStart, otherI, otherJ);
 
-                    if (otherForward.G >= minForwardG && otherForward.G < maxForwardG &&
-                        otherBackward.G > minBackwardG && otherBackward.G <= maxBackwardG)
+                    if (otherForward.G > minForwardG && otherForward.G < maxForwardG &&
+                        otherBackward.G > minBackwardG && otherBackward.G < maxBackwardG)
                     {
                         similarCostNodeIndices.Add((otherI, otherJ));
                         sumPos += new Vector2Int(otherI, otherJ);
