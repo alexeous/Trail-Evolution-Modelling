@@ -10,6 +10,10 @@
 #define SHARED_ARRAYS_SIZE (SHARED_ARRAYS_SIZE_X * SHARED_ARRAYS_SIZE_Y)
 #define NUM_SHARED_HALO_NODES (2 * (GROUP_SIZE_X + GROUP_SIZE_Y + 2))
 
+#if GROUP_SIZE_X * GROUP_SIZE_Y < NUM_SHARED_HALO_NODES
+#error Too small group! Not enough nodes within group to load all halo nodes at once!
+#endif
+
 #define NODES_WIDTH_INCLUDING_HALO (nodesWidth + 2)
 #define NODES_1D_INDEX(i, j) ((i) + NODES_WIDTH_INCLUDING_HALO * (j))
 
