@@ -11,8 +11,8 @@ using Debug = UnityEngine.Debug;
 
 namespace TrailEvolutionModelling
 {
-    [ExecuteInEditMode]
-    public class PathFinderInvoker : LinesProvider, ILinesChangedNotifier
+    //[ExecuteInEditMode]
+    public class PathFinderInvoker : MonoBehaviour// : LinesProvider, ILinesChangedNotifier
     {
         [SerializeField] GraphHolder graphHolder = null;
         [SerializeField] ParallelWavefrontPathFinding parallelWavefront = null;
@@ -21,135 +21,135 @@ namespace TrailEvolutionModelling
         [SerializeField] Color pathColor = Color.red;
         [SerializeField] int ind = 0;
 
-        private Color oldPathColor;
-        private Node[] path;
+        //        private Color oldPathColor;
+        //        private Node[] path;
 
-        public event Action<ILinesChangedNotifier> LinesChanged;
+        //        public event Action<ILinesChangedNotifier> LinesChanged;
 
-        [ContextMenu("Invoke A*")]
-        public void InvokeAStar()
-        {
-            FindPath(PathFindingAlgorithm.AStar);
-        }
+        //        [ContextMenu("Invoke A*")]
+        //        public void InvokeAStar()
+        //        {
+        //            FindPath(PathFindingAlgorithm.AStar);
+        //        }
 
-        public int count;
+        //        public int count;
 
-#if UNITY_EDITOR
-        void OnDrawGizmos()
-        {
-            try
-            {
-                Handles.color = Color.white;
-                foreach (var p in PathFinder.gg[ind])
-                {
-                    Handles.DrawSolidDisc(p, Vector3.forward, 0.2f);
-                }
-                count = PathFinder.gg[ind].Count;
-            }
-            catch { }
+        //#if UNITY_EDITOR
+        //        void OnDrawGizmos()
+        //        {
+        //            try
+        //            {
+        //                Handles.color = Color.white;
+        //                foreach (var p in PathFinder.gg[ind])
+        //                {
+        //                    Handles.DrawSolidDisc(p, Vector3.forward, 0.2f);
+        //                }
+        //                count = PathFinder.gg[ind].Count;
+        //            }
+        //            catch { }
 
-            try
-            {
-                foreach (var n in ParallelWavefrontPathFinding.neigh)
-                {
-                    Color color = Color.red;
-                    color.a = 1 - n.F1 / 7f;
-                    Handles.color = color;
-                    Handles.DrawSolidDisc(n.Position, Vector3.forward, 0.2f);
-                }
-            }
-            catch { }
-        }
-#endif
+        //            try
+        //            {
+        //                foreach (var n in ParallelWavefrontPathFinding.neigh)
+        //                {
+        //                    Color color = Color.red;
+        //                    color.a = 1 - n.F1 / 7f;
+        //                    Handles.color = color;
+        //                    Handles.DrawSolidDisc(n.Position, Vector3.forward, 0.2f);
+        //                }
+        //            }
+        //            catch { }
+        //        }
+        //#endif
 
-        public TimeSpan FindPath(PathFindingAlgorithm algorithm)
-        {
-            if (graphHolder == null || start == null || end == null)
-            {
-                return TimeSpan.Zero;
-            }
+        //        public TimeSpan FindPath(PathFindingAlgorithm algorithm)
+        //        {
+        //            if (graphHolder == null || start == null || end == null)
+        //            {
+        //                return TimeSpan.Zero;
+        //            }
 
-            Graph graph = graphHolder.Graph;
-            if (graph == null)
-            {
-                throw new InvalidOperationException("GraphHolder contains no Graph");
-            }
+        //            Graph graph = graphHolder.Graph;
+        //            if (graph == null)
+        //            {
+        //                throw new InvalidOperationException("GraphHolder contains no Graph");
+        //            }
 
-            Node startNode = FindClosestNode(graph, start.position);
-            Node endNode = FindClosestNode(graph, end.position);
+        //            Node startNode = FindClosestNode(graph, start.position);
+        //            Node endNode = FindClosestNode(graph, end.position);
 
-            if (startNode.ComponentParent != endNode.ComponentParent)
-            {
-                throw new Exception("Start and End are unreachable");
-            }
+        //            if (startNode.ComponentParent != endNode.ComponentParent)
+        //            {
+        //                throw new Exception("Start and End are unreachable");
+        //            }
 
-            var stopwatch = Stopwatch.StartNew();
-            if (algorithm == PathFindingAlgorithm.WavefrontParallel)
-            {
-                this.path = parallelWavefront.FindPath(graph, startNode, endNode);
-            }
-            else
-            {
-                this.path = PathFinder.FindPath(graph, startNode, endNode, algorithm);
-            }
-            if (this.path == null)
-            {
-                Debug.LogWarning("Path not found");
-            }
-            stopwatch.Stop();
+        //            var stopwatch = Stopwatch.StartNew();
+        //            if (algorithm == PathFindingAlgorithm.WavefrontParallel)
+        //            {
+        //                this.path = parallelWavefront.FindPath(graph, startNode, endNode);
+        //            }
+        //            else
+        //            {
+        //                this.path = PathFinder.FindPath(graph, startNode, endNode, algorithm);
+        //            }
+        //            if (this.path == null)
+        //            {
+        //                Debug.LogWarning("Path not found");
+        //            }
+        //            stopwatch.Stop();
 
-            Debug.Log($"Path finding took {stopwatch.ElapsedMilliseconds} ms");
+        //            Debug.Log($"Path finding took {stopwatch.ElapsedMilliseconds} ms");
 
-            LinesChanged?.Invoke(this);
-            return stopwatch.Elapsed;
-        }
+        //            LinesChanged?.Invoke(this);
+        //            return stopwatch.Elapsed;
+        //        }
 
-        public override IEnumerable<ColoredLine> GetLines()
-        {
-            if (path == null || path.Length < 2)
-                yield break;
+        //        public override IEnumerable<ColoredLine> GetLines()
+        //        {
+        //            if (path == null || path.Length < 2)
+        //                yield break;
 
-            Node prev = path[0];
-            foreach (var node in path.Skip(1))
-            {
-                Vector3 start = prev.Position;
-                Vector3 end = node.Position;
-                prev = node;
-                yield return new ColoredLine(start, end, pathColor);
-            }
-        }
+        //            Node prev = path[0];
+        //            foreach (var node in path.Skip(1))
+        //            {
+        //                Vector3 start = prev.Position;
+        //                Vector3 end = node.Position;
+        //                prev = node;
+        //                yield return new ColoredLine(start, end, pathColor);
+        //            }
+        //        }
 
-        private Node FindClosestNode(Graph graph, Vector2 position)
-        {
-            Node closest = null;
-            float minSqrDist = float.PositiveInfinity;
+        //        private Node FindClosestNode(Graph graph, Vector2 position)
+        //        {
+        //            Node closest = null;
+        //            float minSqrDist = float.PositiveInfinity;
 
-            for (int i = 0; i < graph.Nodes.Length; i++)
-                for (int j = 0; j < graph.Nodes[0].Length; j++)
-                {
-                    Node node = graph.Nodes[i][j];
-                    if (node == null)
-                        continue;
+        //            for (int i = 0; i < graph.Nodes.Length; i++)
+        //                for (int j = 0; j < graph.Nodes[0].Length; j++)
+        //                {
+        //                    Node node = graph.Nodes[i][j];
+        //                    if (node == null)
+        //                        continue;
 
-                    float sqrDist = (node.Position - position).sqrMagnitude;
-                    if (sqrDist < minSqrDist)
-                    {
-                        minSqrDist = sqrDist;
-                        closest = node;
-                    }
-                }
+        //                    float sqrDist = (node.Position - position).sqrMagnitude;
+        //                    if (sqrDist < minSqrDist)
+        //                    {
+        //                        minSqrDist = sqrDist;
+        //                        closest = node;
+        //                    }
+        //                }
 
-            return closest;
-        }
+        //            return closest;
+        //        }
 
-        private void Update()
-        {
-            if (oldPathColor != pathColor)
-            {
-                oldPathColor = pathColor;
+        //        private void Update()
+        //        {
+        //            if (oldPathColor != pathColor)
+        //            {
+        //                oldPathColor = pathColor;
 
-                LinesChanged?.Invoke(this);
-            }
-        }
+        //                LinesChanged?.Invoke(this);
+        //            }
+        //        }
     }
 }
