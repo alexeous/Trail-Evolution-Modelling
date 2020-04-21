@@ -10,7 +10,7 @@ namespace TrailEvolutionModelling.GraphTypes
     {
         public int I { get; internal set; }
         public int J { get; internal set; }
-        public IReadOnlyDictionary<Direction, Edge> IncidentEdges => incidentEdges;
+        public IReadOnlyList<IncidentEdge> IncidentEdges => incidentEdges;
         public Node ComponentParent
         {
             get
@@ -22,7 +22,7 @@ namespace TrailEvolutionModelling.GraphTypes
         }
 
 
-        private Dictionary<Direction, Edge> incidentEdges;
+        private List<IncidentEdge> incidentEdges;
         private Node componentParent;
         private int componentRank;
 
@@ -32,13 +32,14 @@ namespace TrailEvolutionModelling.GraphTypes
             I = i;
             J = j;
 
-            incidentEdges = new Dictionary<Direction, Edge>();
+            incidentEdges = new List<IncidentEdge>();
             componentParent = this;
         }
 
-        internal void SetIncidentEdge(Direction direction, Edge edge)
+        internal void AddIncidentEdge(Direction direction, Edge edge)
         {
-            incidentEdges[direction] = edge;
+            Node oppositeNode = edge.GetOppositeNode(this);
+            incidentEdges.Add(new IncidentEdge(direction, edge, oppositeNode));
         }
 
         internal bool UnionComponents(Node other)

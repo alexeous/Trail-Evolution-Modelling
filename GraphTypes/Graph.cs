@@ -10,6 +10,8 @@ namespace TrailEvolutionModelling.GraphTypes
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
+        public float OriginX { get; set; }
+        public float OriginY { get; set; }
         public float Step { get; set; }
         public IReadOnlyList<Edge> Edges => edges;
 
@@ -18,10 +20,12 @@ namespace TrailEvolutionModelling.GraphTypes
         private List<Edge> edges;
 
 
-        public Graph(int width, int height, float step)
+        public Graph(int width, int height, float originX, float originY, float step)
         {
             Width = width;
             Height = height;
+            OriginX = originX;
+            OriginY = originY;
             Step = step;
 
             nodes = new Node[width, height];
@@ -38,11 +42,20 @@ namespace TrailEvolutionModelling.GraphTypes
 
         public Node GetNodeNeighbourOrNull(Node node, Direction direction)
         {
-            if (node == null)
-                throw new ArgumentNullException(nameof(node));
-            
             var shift = direction.ToShift();
             return GetNodeAtOrNull(node.I + shift.di, node.J + shift.dj);
+        }
+
+        public (float x, float y) GetNodePosition(Node node)
+        {
+            return GetNodePosition(node.I, node.J);
+        }
+
+        public (float x, float y) GetNodePosition(int i, int j)
+        {
+            float x = OriginX + Step * i;
+            float y = OriginY + Step * j;
+            return (x, y);
         }
 
         public Node AddNode(int i, int j)
@@ -55,14 +68,10 @@ namespace TrailEvolutionModelling.GraphTypes
         public Edge AddEdge(Node node, Direction direction, float weight, bool isTramplable)
         {
             Node neighbour = GetNodeNeighbourOrNull(node, direction);
-            if (neighbour == null)
-            {
-                throw new ArgumentException("Neighbour node doesn't exist");
-            }
 
             var edge = new Edge(node, neighbour, weight, isTramplable);
-            node.SetIncidentEdge(direction, edge);
-            neighbour.SetIncidentEdge(direction.Opposite(), edge);
+            node.AddIncidentEdge(direction, edge);
+            neighbour.AddIncidentEdge(direction.Opposite(), edge);
             node.UnionComponents(neighbour);
 
             edges.Add(edge);
@@ -71,11 +80,6 @@ namespace TrailEvolutionModelling.GraphTypes
 
         public float Distance(Node a, Node b)
         {
-            if (a == null)
-                throw new ArgumentNullException(nameof(a));
-            if (b == null)
-                throw new ArgumentNullException(nameof(b));
-
             int di = a.I - b.I;
             int dj = a.J - b.J;
 
