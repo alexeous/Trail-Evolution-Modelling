@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using TrailEvolutionModelling.GPUProxyCommunicator;
+using TrailEvolutionModelling.GraphTypes;
 using UnityEditor;
 using UnityEngine;
 
@@ -35,6 +38,8 @@ namespace TrailEvolutionModelling.Editor
             if (GUI.Button(new Rect(2, y, 60, 15), "Build 8"))
                 BuildGraphs();
 
+            if (GUI.Button(new Rect(2, y += 17, 60, 15), "Compute"))
+                InvokeComputations();
             //if (GUI.Button(new Rect(2, y += 20, 40, 15), "A*"))
             //    FindPaths(PathFindingAlgorithm.AStar);
 
@@ -55,6 +60,25 @@ namespace TrailEvolutionModelling.Editor
             foreach (var builder in FindObjectsOfType<GraphBuilder>())
             {
                 builder.Build();
+            }
+        }
+
+        private static void InvokeComputations()
+        {
+            string basePath = Application.dataPath;
+            string path = Path.Combine(basePath, @"ExternalTools\UnityToTrailsGPUProxyCommunicatorProcess\UnityToTrailsGPUProxyCommunicatorProcess.exe");
+            using (var communicator = new TrailsGPUProxyCommunicator(path))
+            {
+                communicator.ProcessError += (s, e) =>
+                    Debug.LogError($"Exit code: {e.ExitCode}, Message: {e.ErrorMessage}");
+                var input = new TrailsComputationsInput
+                {
+                    Attractors = new Attractor[0],
+                    Graph = FindObjectOfType<GraphHolder>().Graph
+                };
+                var task = communicator.ComputeAsync(input);
+                TrailsComputationsOutput output = task.GetAwaiter().GetResult();
+                Debug.Log("Output: " + output.Graph.Width + output.Graph.Height);
             }
         }
 

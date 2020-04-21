@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 30de7103b0ade5147816d31a1f5618f7
+guid: 9a2802bf393d1d74283556209ae10be9
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -8,8 +8,8 @@ PluginImporter:
   defineConstraints: []
   isPreloaded: 0
   isOverridable: 0
-  isExplicitlyReferenced: 0
-  validateReferences: 1
+  isExplicitlyReferenced: 1
+  validateReferences: 0
   platformData:
   - first:
       : Any
@@ -45,7 +45,7 @@ PluginImporter:
     second:
       enabled: 0
       settings:
-        CPU: None
+        CPU: x86
   - first:
       Standalone: Win
     second:
@@ -58,6 +58,12 @@ PluginImporter:
       enabled: 0
       settings:
         CPU: None
+  - first:
+      Windows Store Apps: WindowsStoreApps
+    second:
+      enabled: 0
+      settings:
+        CPU: AnyCPU
   userData: 
   assetBundleName: 
   assetBundleVariant: 

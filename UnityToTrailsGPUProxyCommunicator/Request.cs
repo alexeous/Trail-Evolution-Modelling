@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TrailEvolutionModelling.GPUProxyCommunicator.Internal
+namespace TrailEvolutionModelling.GPUProxyCommunicator
 {
     [Serializable]
-    abstract class Request
+    public abstract class Request
     {
-        public abstract Response Process();
+        internal int ID { get; set; }
     }
 }

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using TrailEvolutionModelling.GraphTypes;
 
 namespace TrailEvolutionModelling.GPUProxyCommunicator
@@ -15,7 +18,8 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
         private Process process;
         private AnonymousPipeServerStream toExePipe;
         private AnonymousPipeServerStream fromExePipe;
-        private BinaryFormatter formatter;
+        private RequestSender requestSender;
+        private ResponseReceiver responseReceiver;
         private bool processClosedViaDispose;
 
         public TrailsGPUProxyCommunicator(string executablePath)
@@ -41,10 +45,11 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
                 process.Exited += OnProcessExited;
                 process.Start();
 
+                requestSender = new RequestSender(toExePipe);
+                responseReceiver = new ResponseReceiver(fromExePipe);
+
                 toExePipe.DisposeLocalCopyOfClientHandle();
                 fromExePipe.DisposeLocalCopyOfClientHandle();
-
-                formatter = new BinaryFormatter();
             }
             catch (Exception ex)
             {
@@ -53,12 +58,15 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
             }
         }
 
-        public Task<TrailsComputationsOutput> Compute(TrailsComputationsInput input)
+
+        public Task<TrailsComputationsOutput> ComputeAsync(TrailsComputationsInput input)
         {
             if (process == null)
                 throw new InvalidOperationException("Process was already closed");
 
-
+            var request = new TrailsComputationsRequest(input);
+            requestSender.Send(request);
+            return responseReceiver.ReceiveResultAsync<TrailsComputationsOutput>(request);
         }
 
         #region IDisposable Support
@@ -90,6 +98,8 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
         {
             if (processClosedViaDispose)
                 return;
+
+            responseReceiver.CancelAll();
 
             toExePipe?.Dispose();
             fromExePipe?.Dispose();

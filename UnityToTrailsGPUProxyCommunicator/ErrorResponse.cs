@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 namespace TrailEvolutionModelling.GPUProxyCommunicator
 {
     [Serializable]
-    public abstract class Response
+    public class ErrorResponse : Response
     {
-        internal int RequestID { get; }
+        public Exception Exception { get; }
 
-        public Response(Request request)
+        public ErrorResponse(Request request, Exception exception)
+            : base(request)
         {
-            RequestID = request.ID;
+            Exception = exception;
         }
     }
 }
