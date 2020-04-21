@@ -5,9 +5,16 @@ namespace TrailEvolutionModelling.GraphTypes
 {
     public enum Direction
     {
-        NW, N, NE,
-        W, E,
-        SW, S, SE
+        NW = 0, 
+        N = 1, 
+        NE = 2,
+        W = 3, 
+        E = 4,
+        SW = 5, 
+        S = 6, 
+        SE = 7,
+        First = NW,
+        Last = SE
     }
 
     public static class DirectionUtil
