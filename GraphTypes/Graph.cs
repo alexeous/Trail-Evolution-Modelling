@@ -8,6 +8,9 @@ namespace TrailEvolutionModelling.GraphTypes
 {
     public class Graph
     {
+        public static readonly int MaximumWidth = 500;
+        public static readonly int MaximumHeight = 500;
+
         public int Width { get; private set; }
         public int Height { get; private set; }
         public float OriginX { get; set; }
@@ -22,8 +25,24 @@ namespace TrailEvolutionModelling.GraphTypes
 
         public Graph(int width, int height, float originX, float originY, float step)
         {
+            if (width < 0 || height < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            if (width > MaximumWidth)
+            {
+                throw new ArgumentOutOfRangeException(nameof(width), 
+                    $"Width is too large. Must not be greater than {MaximumWidth}");
+            }
+            if (height > MaximumHeight)
+            {
+                throw new ArgumentOutOfRangeException(nameof(height),
+                    $"Height is too large. Must not be greater than {MaximumHeight}");
+            }
+
             Width = width;
             Height = height;
+
             OriginX = originX;
             OriginY = originY;
             Step = step;
