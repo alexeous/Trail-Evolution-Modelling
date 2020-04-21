@@ -1,0 +1,6 @@
+E:\Programs\Trail Evolution Modelling\Assets\Libs\GraphTypes\GraphTypes.dll
+E:\Programs\Trail Evolution Modelling\Assets\Libs\GraphTypes\GraphTypes.pdb
+E:\Programs\Trail Evolution Modelling\GraphTypes\obj\Debug\GraphTypes.csprojAssemblyReference.cache
+E:\Programs\Trail Evolution Modelling\GraphTypes\obj\Debug\GraphTypes.csproj.CoreCompileInputs.cache
+E:\Programs\Trail Evolution Modelling\GraphTypes\obj\Debug\GraphTypes.dll
+E:\Programs\Trail Evolution Modelling\GraphTypes\obj\Debug\GraphTypes.pdb
