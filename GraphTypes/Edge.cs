@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace TrailEvolutionModelling.GraphTypes
 {
+    [Serializable]
     public class Edge : IEquatable<Edge>
     {
         public Node Node1 { get; internal set; }

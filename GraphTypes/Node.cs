@@ -6,6 +6,7 @@ using System.Text;
 
 namespace TrailEvolutionModelling.GraphTypes
 {
+    [Serializable]
     public class Node
     {
         public int I { get; internal set; }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TrailEvolutionModelling.GraphTypes
 {
+    [Serializable]
     public class Graph
     {
         public static readonly int MaximumWidth = 500;

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TrailEvolutionModelling.GraphTypes
 {
+    [Serializable]
     public struct IncidentEdge : IEquatable<IncidentEdge>
     {
         public readonly Direction Direction;
