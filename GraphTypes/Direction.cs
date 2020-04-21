@@ -21,9 +21,9 @@ namespace TrailEvolutionModelling.GraphTypes
     {
         private static readonly (int, int)[] dirsToShift =
         {
-            (-1, -1), (-1, 0), (-1, 1),
-            (0, -1), (0, 1),
-            (1, -1), (1, 0), (1, 1)
+            (-1, -1), (0, -1), (1, -1),
+            (-1, 0), (1, 0),
+            (-1, 1), (0, 1), (1, 1)
         };
 
         private static readonly Direction[] oppositeDirs =

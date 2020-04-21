@@ -79,6 +79,9 @@ namespace TrailEvolutionModelling.GraphTypes
 
         public Node AddNode(int i, int j)
         {
+            if (nodes[i, j] != null)
+                return null;
+
             var node = new Node(i, j);
             nodes[i, j] = node;
             return node;
@@ -86,6 +89,9 @@ namespace TrailEvolutionModelling.GraphTypes
 
         public Edge AddEdge(Node node, Direction direction, float weight, bool isTramplable)
         {
+            if (node.HasIncidentEdge(direction))
+                return null;
+
             Node neighbour = GetNodeNeighbourOrNull(node, direction);
 
             var edge = new Edge(node, neighbour, weight, isTramplable);

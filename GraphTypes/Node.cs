@@ -23,6 +23,7 @@ namespace TrailEvolutionModelling.GraphTypes
 
 
         private List<IncidentEdge> incidentEdges;
+        private int hasEdgesBits = 0;
         private Node componentParent;
         private int componentRank;
 
@@ -36,10 +37,16 @@ namespace TrailEvolutionModelling.GraphTypes
             componentParent = this;
         }
 
+        public bool HasIncidentEdge(Direction direction)
+        {
+            return ((hasEdgesBits >> (int)direction) & 1) != 0;
+        }
+
         internal void AddIncidentEdge(Direction direction, Edge edge)
         {
             Node oppositeNode = edge.GetOppositeNode(this);
             incidentEdges.Add(new IncidentEdge(direction, edge, oppositeNode));
+            hasEdgesBits |= 1 << (int)direction;
         }
 
         internal bool UnionComponents(Node other)
