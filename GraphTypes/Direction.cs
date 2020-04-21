@@ -33,6 +33,8 @@ namespace TrailEvolutionModelling.GraphTypes
             Direction.NE, Direction.W, Direction.NW
         };
 
+        private static readonly float Sqrt2 = (float)Math.Sqrt(2);
+
         public static (int di, int dj) ToShift(this Direction dir)
         {
             return dirsToShift[(int)dir];
@@ -74,6 +76,21 @@ namespace TrailEvolutionModelling.GraphTypes
                     break;
             }
             throw new ArgumentException("Invalid octile shift");
+        }
+
+        public static float WeightMultiplier(this Direction dir)
+        {
+            switch (dir)
+            {
+                case Direction.NW:
+                case Direction.NE:
+                case Direction.SW:
+                case Direction.SE:
+                    return Sqrt2;
+
+                default:
+                    return 1f;
+            }
         }
     }
 }
