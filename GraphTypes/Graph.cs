@@ -31,12 +31,12 @@ namespace TrailEvolutionModelling.GraphTypes
             }
             if (width > MaximumWidth)
             {
-                throw new ArgumentOutOfRangeException(nameof(width), 
+                throw new ArgumentOutOfRangeException(nameof(width), width,
                     $"Width is too large. Must not be greater than {MaximumWidth}");
             }
             if (height > MaximumHeight)
             {
-                throw new ArgumentOutOfRangeException(nameof(height),
+                throw new ArgumentOutOfRangeException(nameof(height), height,
                     $"Height is too large. Must not be greater than {MaximumHeight}");
             }
 
