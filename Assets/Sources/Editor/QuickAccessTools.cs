@@ -70,7 +70,10 @@ namespace TrailEvolutionModelling.Editor
             using (var communicator = new TrailsGPUProxyCommunicator(path))
             {
                 communicator.ProcessError += (s, e) =>
-                    Debug.LogError($"Exit code: {e.ExitCode}, Message: {e.ErrorMessage}");
+                    Debug.LogError($"Process exited. Exit code: {e.ExitCode}, Message: {e.ErrorMessage}");
+                
+                communicator.Start();
+                
                 var input = new TrailsComputationsInput
                 {
                     Attractors = new Attractor[0],

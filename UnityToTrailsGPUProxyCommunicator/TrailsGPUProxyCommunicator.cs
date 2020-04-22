@@ -3,7 +3,10 @@ using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -16,10 +19,12 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
         public event EventHandler<ProcessErrorEventArgs> ProcessError;
 
         private Process process;
-        private AnonymousPipeServerStream toExePipe;
-        private AnonymousPipeServerStream fromExePipe;
+        private TcpListener tcpListener;
+        private TcpClient tcpClient;
+        private NetworkStream stream;
         private RequestSender requestSender;
         private ResponseReceiver responseReceiver;
+        private CancellationTokenSource cancellationSource;
         private bool processClosedViaDispose;
 
         public TrailsGPUProxyCommunicator(string executablePath)
@@ -31,31 +36,58 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
 
             try
             {
-                toExePipe = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
-                fromExePipe = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
+                //toExePipe = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
+                //fromExePipe = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
 
-                string toExeHandle = toExePipe.GetClientHandleAsString();
-                string fromExeHandle = fromExePipe.GetClientHandleAsString();
-                string processArgs = $"{toExeHandle} {fromExeHandle}";
+                //string toExeHandle = toExePipe.GetClientHandleAsString();
+                //string fromExeHandle = fromExePipe.GetClientHandleAsString();
+                //string processArgs = $"{toExeHandle} {fromExeHandle}";
+
+                tcpListener = new TcpListener(IPAddress.Loopback, 0);
+                int port = (tcpListener.LocalEndpoint as IPEndPoint).Port;
 
                 process = new Process();
                 process.StartInfo.FileName = executablePath;
-                process.StartInfo.Arguments = processArgs;
+                process.StartInfo.Arguments = port.ToString();
                 process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardError = true;
+                process.StartInfo.StandardErrorEncoding = Encoding.Unicode;
+                process.EnableRaisingEvents = true;
                 process.Exited += OnProcessExited;
-                process.Start();
 
-                requestSender = new RequestSender(toExePipe);
-                responseReceiver = new ResponseReceiver(fromExePipe);
-
-                toExePipe.DisposeLocalCopyOfClientHandle();
-                fromExePipe.DisposeLocalCopyOfClientHandle();
+                cancellationSource = new CancellationTokenSource();
             }
             catch (Exception ex)
             {
                 Dispose(true);
                 throw new Exception("Failed to start GPU proxy communicator", ex);
             }
+        }
+
+        public void Start()
+        {
+            tcpListener.Start();
+            process.Start();
+
+            Task<TcpClient> acceptTask = tcpListener.AcceptTcpClientAsync();
+            try
+            {
+                acceptTask.Wait(1000, cancellationSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (!acceptTask.IsCompleted)
+            {
+                throw new Exception("Waiting too long for child process to connect");
+            }
+            tcpClient = acceptTask.Result;
+            stream = tcpClient.GetStream();
+
+            requestSender = new RequestSender(stream);
+            responseReceiver = new ResponseReceiver(stream);
         }
 
 
@@ -79,8 +111,8 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
                 if (disposing)
                 {
                     processClosedViaDispose = true;
-                    toExePipe?.Dispose();
-                    fromExePipe?.Dispose();
+                    stream?.Dispose();
+                    tcpClient?.Dispose();
                     requestSender?.Dispose();
                     process?.Close();
                 }
@@ -99,14 +131,15 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
             if (processClosedViaDispose)
                 return;
 
-            responseReceiver.CancelAll();
-
             int exitCode = process.ExitCode;
             string errorMsg = process.StandardError.ReadToEnd();
             process = null;
 
             ProcessError?.Invoke(this, new ProcessErrorEventArgs(exitCode, errorMsg));
-            
+
+            cancellationSource?.Cancel();
+            responseReceiver.CancelAll();
+
             Dispose(true);
         }
     }

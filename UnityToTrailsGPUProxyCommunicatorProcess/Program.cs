@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 
@@ -11,20 +12,23 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
     {
         static int Main(string[] args)
         {
-            if (args.Length != 2)
+            Console.OutputEncoding = Encoding.Unicode;
+            if (args.Length != 1)
             {
-                Console.Error.WriteLine("There must be exactly 2 args: handles of pipes");
+                Console.Error.WriteLine("There must be exactly 1 argument: port");
+                Console.ReadLine();
                 return -1;
             }
             try
             {
-                using (var client = new TrailsGPUProxyCommunicatorClient(args[0], args[1]))
+                using (var client = new TrailsGPUProxyCommunicatorClient(args[0]))
                 {
                     client.Run();
                 }
             } catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.Message);
+                Console.ReadLine();
                 return -2;
             }
 

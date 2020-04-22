@@ -6,25 +6,29 @@ using System.Text;
 using System.Threading.Tasks;
 using TrailEvolutionModelling.GraphTypes;
 using TrailEvolutionModelling.GPUProxy;
+using System.Net.Sockets;
+using System.Net;
 
 namespace TrailEvolutionModelling.GPUProxyCommunicator
 {
     class TrailsGPUProxyCommunicatorClient : IDisposable
     {
-        private AnonymousPipeClientStream fromCommunicatorPipe;
-        private AnonymousPipeClientStream toCommunicatorPipe;
+        private TcpClient tcpClient;
+        private NetworkStream stream;
         private RequestReceiver requestReceiver;
         private ResponseSender responseSender;
 
-        public TrailsGPUProxyCommunicatorClient(string fromHandle, string toHandle)
+        public TrailsGPUProxyCommunicatorClient(string portString)
         {
             try
             {
-                fromCommunicatorPipe = new AnonymousPipeClientStream(PipeDirection.In, fromHandle);
-                toCommunicatorPipe = new AnonymousPipeClientStream(PipeDirection.Out, toHandle);
+                int port = int.Parse(portString);
+                tcpClient = new TcpClient(new IPEndPoint(IPAddress.Loopback, 0));
+                tcpClient.Connect(IPAddress.Loopback, port);
+                stream = tcpClient.GetStream();
 
-                requestReceiver = new RequestReceiver(fromCommunicatorPipe);
-                responseSender = new ResponseSender(toCommunicatorPipe);
+                requestReceiver = new RequestReceiver(stream);
+                responseSender = new ResponseSender(stream);
             }
             catch (Exception ex)
             {
@@ -78,8 +82,8 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
             {
                 if (disposing)
                 {
-                    toCommunicatorPipe?.Dispose();
-                    fromCommunicatorPipe?.Dispose();
+                    stream?.Dispose();
+                    tcpClient?.Dispose();
                 }
 
                 disposedValue = true;
