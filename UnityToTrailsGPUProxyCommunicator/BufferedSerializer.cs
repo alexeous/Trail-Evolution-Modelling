@@ -8,28 +8,27 @@ using System.Threading.Tasks;
 
 namespace TrailEvolutionModelling.GPUProxyCommunicator
 {
-    public class ResponseSender : IDisposable
+    public class BufferedSerializer : IDisposable
     {
-        private Stream stream;
-        private BufferedSerializer serializer;
+        private MemoryStream memoryStream;
+        private BinaryWriter writer;
+        private BinaryFormatter formatter;
 
-        public ResponseSender(Stream stream)
+        public BufferedSerializer(Stream stream)
         {
-            this.stream = stream;
-            serializer = new BufferedSerializer(stream);
+            memoryStream = new MemoryStream();
+            writer = new BinaryWriter(stream);
+            formatter = new BinaryFormatter();
         }
 
-        public Task SendAsync(Response response)
+        public void Serialize(object obj)
         {
-            return Task.Run(() => Send(response));
-        }
-
-        public void Send(Response response)
-        {
-            lock (stream)
-            {
-                serializer.Serialize(response);
-            }
+            formatter.Serialize(memoryStream, obj);
+            writer.Write(memoryStream.Position);
+            writer.Flush();
+            memoryStream.CopyTo(writer.BaseStream);
+            memoryStream.Position = 0;
+            writer.BaseStream.Flush();
         }
 
         #region IDisposable Support
@@ -41,12 +40,12 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
             {
                 if (disposing)
                 {
-                    serializer?.Dispose();
+                    memoryStream?.Dispose();
                 }
+
                 disposedValue = true;
             }
         }
-
         public void Dispose()
         {
             Dispose(true);

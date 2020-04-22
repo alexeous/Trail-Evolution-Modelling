@@ -8,17 +8,25 @@ using System.Threading.Tasks;
 
 namespace TrailEvolutionModelling.GPUProxyCommunicator
 {
-    class RequestSender
+    class RequestSender : IDisposable
     {
         private static int requestIdCounter;
 
         private Stream stream;
-        private BinaryFormatter formatter;
+        private BufferedSerializer serializer;
 
         public RequestSender(Stream stream)
         {
             this.stream = stream;
-            formatter = new BinaryFormatter();
+            serializer = new BufferedSerializer(stream);
+        }
+
+        public Task SendAsync(Request request)
+        {
+            return Task.Run(() =>
+            {
+                Send(request);
+            });
         }
 
         public void Send(Request request)
@@ -26,8 +34,7 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
             lock (stream)
             {
                 AssignNextID(request);
-                formatter.Serialize(stream, request);
-                stream.Flush();
+                serializer.Serialize(request);
             }
         }
 
@@ -35,5 +42,26 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
         {
             request.ID = requestIdCounter++;
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    serializer?.Dispose();
+                }
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
     }
 }

@@ -54,19 +54,19 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
             catch (Exception ex)
             {
                 Dispose(true);
-                throw ex;
+                throw new Exception("Failed to start GPU proxy communicator", ex);
             }
         }
 
 
-        public Task<TrailsComputationsOutput> ComputeAsync(TrailsComputationsInput input)
+        public async Task<TrailsComputationsOutput> ComputeAsync(TrailsComputationsInput input)
         {
             if (process == null)
                 throw new InvalidOperationException("Process was already closed");
 
             var request = new TrailsComputationsRequest(input);
-            requestSender.Send(request);
-            return responseReceiver.ReceiveResultAsync<TrailsComputationsOutput>(request);
+            await requestSender.SendAsync(request);
+            return await responseReceiver.ReceiveResultAsync<TrailsComputationsOutput>(request);
         }
 
         #region IDisposable Support
@@ -81,8 +81,8 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
                     processClosedViaDispose = true;
                     toExePipe?.Dispose();
                     fromExePipe?.Dispose();
+                    requestSender?.Dispose();
                     process?.Close();
-                    process?.Dispose();
                 }
                 disposedValue = true;
             }
@@ -101,14 +101,13 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
 
             responseReceiver.CancelAll();
 
-            toExePipe?.Dispose();
-            fromExePipe?.Dispose();
-
             int exitCode = process.ExitCode;
             string errorMsg = process.StandardError.ReadToEnd();
             process = null;
 
             ProcessError?.Invoke(this, new ProcessErrorEventArgs(exitCode, errorMsg));
+            
+            Dispose(true);
         }
     }
 }

@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace TrailEvolutionModelling.GPUProxyCommunicator
 {
-    public class RequestReceiver
+    public class RequestReceiver : IDisposable
     {
         private Stream stream;
-        private BinaryFormatter formatter;
+        private BufferedDeserializer deserializer;
 
         public RequestReceiver(Stream stream)
         {
             this.stream = stream;
-            formatter = new BinaryFormatter();
+            deserializer = new BufferedDeserializer(stream);
         }
 
         public Task<Request> ReceiveAsync()
@@ -26,7 +26,31 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
 
         public Request Receive()
         {
-            return (Request)formatter.Deserialize(stream);
+            lock (stream) 
+            {
+                return deserializer.Deserialize<Request>();
+            }
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // Для определения избыточных вызовов
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    deserializer?.Dispose();
+                }
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
     }
 }

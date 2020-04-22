@@ -36,7 +36,7 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
     class ResponseReceiver : IDisposable
     {
         private Stream stream;
-        private BinaryFormatter formatter;
+        private BufferedDeserializer deserializer;
         private CancellationTokenSource cancellationSource;
         private Thread responseThread;
         private ConcurrentDictionary<int, TaskCompletionSource<Response>> responseWaiters;
@@ -44,7 +44,7 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
         public ResponseReceiver(Stream stream)
         {
             this.stream = stream;
-            formatter = new BinaryFormatter();
+            deserializer = new BufferedDeserializer(stream);
             cancellationSource = new CancellationTokenSource();
             responseWaiters = new ConcurrentDictionary<int, TaskCompletionSource<Response>>();
             StartReceiveThread();
@@ -84,7 +84,7 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
         {
             while (true)
             {
-                var response = (Response)formatter.Deserialize(stream);
+                var response = deserializer.Deserialize<Response>();
                 int requestID = response.RequestID;
                 var tcs = responseWaiters.GetOrAdd(requestID, _ => new TaskCompletionSource<Response>());
                 tcs.SetResult(response);
@@ -100,8 +100,9 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
             {
                 if (disposing)
                 {
-                    responseThread.Abort();
-                    cancellationSource.Dispose();
+                    responseThread?.Abort();
+                    cancellationSource?.Dispose();
+                    deserializer?.Dispose();
                 }
 
                 disposedValue = true;
