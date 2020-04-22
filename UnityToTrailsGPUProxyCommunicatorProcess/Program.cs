@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,10 +14,10 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
         static int Main(string[] args)
         {
             Console.OutputEncoding = Encoding.Unicode;
+
             if (args.Length != 1)
             {
                 Console.Error.WriteLine("There must be exactly 1 argument: port");
-                Console.ReadLine();
                 return -1;
             }
             try
@@ -27,8 +28,7 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
                 }
             } catch (Exception ex)
             {
-                Console.Error.WriteLine(ex.Message);
-                Console.ReadLine();
+                Console.Error.WriteLine(ex.ToString());
                 return -2;
             }
 

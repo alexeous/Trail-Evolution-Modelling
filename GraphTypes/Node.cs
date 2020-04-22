@@ -29,6 +29,8 @@ namespace TrailEvolutionModelling.GraphTypes
         private int componentRank;
 
 
+        private Node() { }
+
         internal Node(int i, int j)
         {
             I = i;

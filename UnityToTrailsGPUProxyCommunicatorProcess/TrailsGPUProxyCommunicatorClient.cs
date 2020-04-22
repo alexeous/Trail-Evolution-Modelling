@@ -8,6 +8,7 @@ using TrailEvolutionModelling.GraphTypes;
 using TrailEvolutionModelling.GPUProxy;
 using System.Net.Sockets;
 using System.Net;
+using System.IO;
 
 namespace TrailEvolutionModelling.GPUProxyCommunicator
 {
@@ -23,7 +24,7 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
             try
             {
                 int port = int.Parse(portString);
-                tcpClient = new TcpClient(new IPEndPoint(IPAddress.Loopback, 0));
+                tcpClient = new TcpClient();
                 tcpClient.Connect(IPAddress.Loopback, port);
                 stream = tcpClient.GetStream();
 
@@ -41,36 +42,30 @@ namespace TrailEvolutionModelling.GPUProxyCommunicator
         {
             while (true)
             {
-                Request request = requestReceiver.Receive();
-                ProcessRequestAsync(request).ContinueWith(task =>
-                {
-                    Response response = task.Result;
-                    responseSender.Send(response);
-                });
+                Request request = requestReceiver.ReceiveAsync().GetAwaiter().GetResult();
+                Response response = ProcessRequest(request);
+                responseSender.Send(response);
             }
         }
 
-        private Task<Response> ProcessRequestAsync(Request request)
+        private Response ProcessRequest(Request request)
         {
-            return Task.Run<Response>(() =>
+            try
             {
-                try
+                if (request is TrailsComputationsRequest trailsComputationsRequest)
                 {
-                    if (request is TrailsComputationsRequest trailsComputationsRequest)
-                    {
-                        TrailsComputationsInput input = trailsComputationsRequest.ComputationsInput;
+                    TrailsComputationsInput input = trailsComputationsRequest.ComputationsInput;
 
-                        TrailsComputationsOutput output = TrailsGPUProxy.ComputeTrails(input);
-                        var response = new ResultResponse(request, output);
-                        return response;
-                    }
-                    throw new ArgumentException("Unknown request type");
+                    TrailsComputationsOutput output = TrailsGPUProxy.ComputeTrails(input);
+                    var response = new ResultResponse(request, output);
+                    return response;
                 }
-                catch (Exception ex)
-                {
-                    return new ErrorResponse(request, ex);
-                }
-            });
+                throw new ArgumentException("Unknown request type");
+            }
+            catch (Exception ex)
+            {
+                return new ErrorResponse(request, ex);
+            }
         }
 
         #region IDisposable Support

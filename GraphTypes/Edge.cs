@@ -13,6 +13,8 @@ namespace TrailEvolutionModelling.GraphTypes
         public float Trampledness { get; set; }
 
 
+        private Edge() { }
+
         internal Edge(Node node1, Node node2, float weight, bool isTramplable)
         {
             Node1 = node1;

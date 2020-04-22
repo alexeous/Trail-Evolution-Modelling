@@ -23,6 +23,7 @@ namespace TrailEvolutionModelling.GraphTypes
         private Node[,] nodes;
         private List<Edge> edges;
 
+        private Graph() { }
 
         public Graph(int width, int height, float originX, float originY, float step)
         {
