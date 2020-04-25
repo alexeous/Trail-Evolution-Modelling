@@ -16,20 +16,7 @@ namespace TrailEvolutionModelling.Polygons
         private static readonly IStyle highlightedStyle = CreateHighlighedStyle();
 
         private readonly MapsuiPolygon mapsuiPolygon;
-        private string name;
         private bool isHighlighted;
-        private LabelStyle labelStyle;
-
-        public int ID { get; set; }
-        public string Name
-        {
-            get => name;
-            set
-            {
-                name = value;
-                UpdateLabelStyle();
-            }
-        }
 
         public IList<Point> Vertices => mapsuiPolygon.ExteriorRing.Vertices;
 
@@ -66,21 +53,18 @@ namespace TrailEvolutionModelling.Polygons
         // because Style.Equals() is bugged.
         private List<IStyle> StylesList => Styles as List<IStyle>;
 
-        public Polygon(IEnumerable<Point> vertices, int id = 0, string name = null)
-            : this(new MapsuiPolygon(new LinearRing(vertices)), id, name)
+        public Polygon(IEnumerable<Point> vertices)
+            : this(new MapsuiPolygon(new LinearRing(vertices)))
         {
         }
 
-        private Polygon(MapsuiPolygon mapsuiPolygon, int id, string name)
+        private Polygon(MapsuiPolygon mapsuiPolygon)
         {
             Styles = new List<IStyle>();
-
-            ID = id;
-            Name = name;
             Geometry = this.mapsuiPolygon = mapsuiPolygon;
         }
 
-        public static Polygon FromGeomText(string geometryText, int id = 0, string name = null)
+        public static Polygon FromGeomText(string geometryText)
         {
             if (string.IsNullOrWhiteSpace(geometryText))
             {
@@ -91,7 +75,7 @@ namespace TrailEvolutionModelling.Polygons
                 var geometry = Mapsui.Geometries.Geometry.GeomFromText(geometryText) as MapsuiPolygon;
                 if (geometry is MapsuiPolygon mp)
                 {
-                    return new Polygon(mp, id, name);
+                    return new Polygon(mp);
                 }
                 else
                 {
@@ -115,30 +99,6 @@ namespace TrailEvolutionModelling.Polygons
                     Width = 2
                 }
             };
-        }
-
-        private void UpdateLabelStyle()
-        {
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                if (labelStyle == null)
-                {
-                    StylesList.Add(labelStyle = new LabelStyle());
-                }
-                labelStyle.Text = Name;
-            }
-            else
-            {
-                if (labelStyle != null)
-                {
-                    // Style.Equals() is not symmetric, i. e.
-                    // style1.Equals(style2) could return false whilst
-                    // style2.Equals(style1) could return true.
-                    // That causes bugs.
-                    StylesList.RemoveAll(s => ReferenceEquals(s, labelStyle));
-                    labelStyle = null;
-                }
-            }
         }
     }
 }

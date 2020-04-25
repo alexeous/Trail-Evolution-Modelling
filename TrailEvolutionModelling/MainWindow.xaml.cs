@@ -1,22 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using BruTile.Predefined;
 using Mapsui.Geometries;
 using Mapsui.Layers;
-using Mapsui.Projection;
-using Mapsui.UI;
 using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
 using TrailEvolutionModelling.Polygons;
@@ -193,9 +183,9 @@ namespace TrailEvolutionModelling
                 }
             }
 
-            IEnumerable<Polygon> GetPolygonsAt(Mapsui.Geometries.Point point)
+            IEnumerable<Polygon> GetPolygonsAt(Point point)
             {
-                var boundingBox = new Mapsui.Geometries.BoundingBox(point, point);
+                var boundingBox = new BoundingBox(point, point);
                 var polygons = polygonLayer.GetFeaturesInView(boundingBox, resolution: 1f).OfType<Polygon>();
                 return polygons.Where(p => p.Geometry.Distance(point) <= 0);
             }
