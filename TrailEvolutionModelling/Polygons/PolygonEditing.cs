@@ -58,13 +58,13 @@ namespace TrailEvolutionModelling.Polygons
             {
                 draggingLayer.Add(new DraggingFeature(polygon, vertex));
             }
-            //draggingFeaturesLayer.Refresh();
+            draggingLayer.Refresh();
         }
 
         public bool EndEditing()
         {
             draggingLayer.Clear();
-            //draggingFeaturesLayer.Refresh();
+            draggingLayer.Refresh();
             insertionPreviewFeature = null;
             if (editedPolygon != null)
             {
@@ -136,8 +136,8 @@ namespace TrailEvolutionModelling.Polygons
             {
                 Point mousePoint = ScreenPointToGlobal(e.GetPosition(mapControl).ToMapsui());
                 draggingFeature.Vertex = mousePoint - draggingOffset;
-                //draggingFeaturesLayer.Refresh();
-                //polygonLayer.Refresh();
+                draggingLayer.Refresh();
+                polygonLayer.Refresh();
             }
             else
             {
@@ -171,7 +171,7 @@ namespace TrailEvolutionModelling.Polygons
                 {
                     draggingLayer.TryRemove(insertionPreviewFeature);
                     insertionPreviewFeature = null;
-                    //draggingFeaturesLayer.Refresh();
+                    draggingLayer.Refresh();
                 }
             }
 
@@ -183,7 +183,7 @@ namespace TrailEvolutionModelling.Polygons
                     draggingLayer.Add(insertionPreviewFeature);
                 }
                 insertionPreviewFeature.Update(previewPoint, index);
-                //draggingFeaturesLayer.Refresh();
+                draggingLayer.Refresh();
             }
 
             void GetInsertionPreviewPoint(Point mouseScreenPoint, Point mouseWorldPoint, out Point previewPoint, out int index)
@@ -231,7 +231,7 @@ namespace TrailEvolutionModelling.Polygons
             editedPolygon.Vertices.Insert(index, vertex);
             draggingFeature = new DraggingFeature(editedPolygon, vertex);
             draggingLayer.Add(draggingFeature);
-            //draggingFeaturesLayer.Refresh();
+            draggingLayer.Refresh();
             return draggingFeature;
         }
 
@@ -243,7 +243,7 @@ namespace TrailEvolutionModelling.Polygons
             if(correspondingDraggingFeature != null)
             {
                 draggingLayer.TryRemove(correspondingDraggingFeature);
-                //draggingFeaturesLayer.Refresh();
+                draggingLayer.Refresh();
             }
         }
 

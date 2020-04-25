@@ -32,26 +32,14 @@ namespace TrailEvolutionModelling.Polygons
                 isHighlighted = value;
                 if(isHighlighted)
                 {
-                    // Style.Equals() is not symmetric, i. e.
-                    // style1.Equals(style2) could return false whilst
-                    // style2.Equals(style1) could return true.
-                    // That causes bugs.
-                    bool contains = StylesList.Any(s => ReferenceEquals(s, highlightedStyle));
-                    if (!contains)
-                    {
-                        StylesList.Add(highlightedStyle);
-                    }
+                    Styles.Add(highlightedStyle);
                 }
                 else
                 {
-                    StylesList.RemoveAll(s => ReferenceEquals(s, highlightedStyle));
+                    Styles.Remove(highlightedStyle);
                 }
             }
         }
-
-        // Introduced to have an opportunity to remove items by using a predicate
-        // because Style.Equals() is bugged.
-        private List<IStyle> StylesList => Styles as List<IStyle>;
 
         public Polygon(IEnumerable<Point> vertices)
             : this(new MapsuiPolygon(new LinearRing(vertices)))
