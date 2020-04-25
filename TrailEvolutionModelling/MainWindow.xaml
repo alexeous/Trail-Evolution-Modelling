@@ -9,6 +9,22 @@
         Title="MainWindow" Height="600" Width="900"
         WindowStartupLocation="CenterScreen" Loaded="OnWindowLoaded">
     <Grid>
-        <mapsui:MapControl Name="mapControl"></mapsui:MapControl>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="25"/>
+            <ColumnDefinition Width="798*"/>
+            <ColumnDefinition Width="32"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="25"/>
+        </Grid.RowDefinitions>
+        <mapsui:MapControl x:Name="mapControl" Grid.ColumnSpan="2" Margin="0" Grid.RowSpan="2"/>
+        <ToolBarTray Orientation="Vertical" Grid.Column="2" Grid.RowSpan="2">
+            <ToolBar Margin="0" ToolBarTray.IsLocked="True">
+                <ToggleButton Name="polygonToolButton" Height="27" Checked="PolygonTool_Checked" Unchecked="PolygonTool_Unchecked">
+                    <Image Source="Resources/PolygonTool.png" d:IsLocked="True"/>
+                </ToggleButton>
+            </ToolBar>
+        </ToolBarTray>
     </Grid>
 </Window>

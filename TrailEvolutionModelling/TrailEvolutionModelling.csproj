@@ -94,6 +94,7 @@
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.IO.4.3.0\lib\net462\System.IO.dll</HintPath>
       <Private>True</Private>
@@ -159,6 +160,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Polygons\DraggingFeature.cs" />
+    <Compile Include="Polygons\DraggingLayer.cs" />
+    <Compile Include="Polygons\InsertionPreviewFeature.cs" />
+    <Compile Include="Util\BitmapResources.cs" />
+    <Compile Include="Util\ILayerExtensions.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -173,6 +179,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Polygons\Polygon.cs" />
+    <Compile Include="Polygons\PolygonEditing.cs" />
+    <Compile Include="Polygons\PolygonLayer.cs" />
+    <Compile Include="Polygons\PolygonTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -209,6 +219,16 @@
       <Project>{e1bff95e-3a00-4f38-b6d8-c4bbcd3cae32}</Project>
       <Name>TrailsGPUProxy</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Dragging.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Delete.png" />
+    <Resource Include="Resources\EditPolygon.png" />
+    <EmbeddedResource Include="Resources\Pin.png" />
+    <Resource Include="Resources\PolygonTool.png" />
+    <Resource Include="Resources\Rename.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
