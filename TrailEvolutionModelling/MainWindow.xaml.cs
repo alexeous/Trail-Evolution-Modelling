@@ -13,10 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using BruTile.Predefined;
+using Mapsui.Geometries;
 using Mapsui.Layers;
+using Mapsui.Projection;
+using Mapsui.UI;
+using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
-using TrailEvolutionModelling.GraphTypes;
-using TrailEvolutionModelling.GPUProxy;
+
+using Point = Mapsui.Geometries.Point;
 
 namespace TrailEvolutionModelling
 {
@@ -30,13 +34,17 @@ namespace TrailEvolutionModelling
             InitializeComponent();
 
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
-            
-            var input = new TrailsComputationsInput
-            {
-                Attractors = new Attractor[0]
-            };
-            TrailsComputationsOutput output = TrailsGPUProxy.ComputeTrails(input);
-            MessageBox.Show(output.Graph.Height.ToString()); ;
+        }
+
+        private void OnWindowLoaded(object sender, RoutedEventArgs e)
+        {
+            ZoomToPoint(new Point(9231625, 7402608));
+        }
+
+        private void ZoomToPoint(Point center)
+        {
+            var extent = new Point(1000, 1000);
+            mapControl.ZoomToBox(center - extent, center + extent);
         }
     }
 }
