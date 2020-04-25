@@ -91,6 +91,7 @@
     <ClCompile Include="TrailsGPUProxy.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="kernel.h" />
     <ClInclude Include="TrailsGPUProxy.h" />
   </ItemGroup>
   <ItemGroup>
