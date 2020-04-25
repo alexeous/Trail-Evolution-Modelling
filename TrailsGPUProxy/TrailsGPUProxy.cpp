@@ -1,4 +1,5 @@
 #include "TrailsGPUProxy.h"
+
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 		TrailsComputationsOutput^ TrailsGPUProxy::ComputeTrails(TrailsComputationsInput^ input) {
