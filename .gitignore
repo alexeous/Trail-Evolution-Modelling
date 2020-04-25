@@ -2,16 +2,16 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
 #
-/[Ll]ibrary/
-/[Tt]emp/
-/[Oo]bj/
-/[Bb]uild/
-/[Bb]uilds/
-/[Ll]ogs/
-/[Mm]emoryCaptures/
+Trail Evolution Modelling Unity/[Ll]ibrary/
+Trail Evolution Modelling Unity/[Tt]emp/
+Trail Evolution Modelling Unity/[Oo]bj/
+Trail Evolution Modelling Unity/[Bb]uild/
+Trail Evolution Modelling Unity/[Bb]uilds/
+Trail Evolution Modelling Unity/[Ll]ogs/
+Trail Evolution Modelling Unity/[Mm]emoryCaptures/
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
-!/[Aa]ssets/**/*.meta
+!/Trail Evolution Modelling Unity/[Aa]ssets/**/*.meta
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*
