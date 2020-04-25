@@ -9,6 +9,7 @@ using Mapsui.Geometries;
 using Mapsui.Layers;
 using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
+using TrailEvolutionModelling.GPUProxy;
 using TrailEvolutionModelling.Polygons;
 using TrailEvolutionModelling.Util;
 using Point = Mapsui.Geometries.Point;
@@ -153,7 +154,7 @@ namespace TrailEvolutionModelling
                 var clickScreenPos = e.GetPosition(mapControl).ToMapsui();
                 var clickWorldPos = mapControl.Viewport.ScreenToWorld(clickScreenPos);
                 IEnumerable<Polygon> polygons = GetPolygonsAt(clickWorldPos);
-                //var info = mapControl.GetMapInfo(e.GetPosition(mapControl).ToMapsui());
+
                 int count = polygons.Count();
                 if (count == 0)
                 {
@@ -168,12 +169,15 @@ namespace TrailEvolutionModelling
                     var contextMenu = new ContextMenu();
                     contextMenu.Items.Add(new Label
                     {
-                        Content = "Выберете полигон:",
+                        Content = "Выберите объект:",
                         IsEnabled = false
                     });
                     foreach (var polygon in polygons)
                     {
-                        var item = new MenuItem();
+                        var item = new MenuItem
+                        {
+                            Header = polygon.ObjectKindName
+                        };
                         item.GotFocus += (s, ee) => { polygon.IsHighlighted = true; polygonLayer.Refresh(); };
                         item.LostFocus += (s, ee) => { polygon.IsHighlighted = false; polygonLayer.Refresh(); };
                         item.Click += (s, ee) => OnPolygonRightClick(polygon);

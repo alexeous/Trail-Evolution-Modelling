@@ -41,6 +41,8 @@ namespace TrailEvolutionModelling.Polygons
             }
         }
 
+        public string ObjectKindName => "Препятствие";
+
         public Polygon(IEnumerable<Point> vertices)
             : this(new MapsuiPolygon(new LinearRing(vertices)))
         {
@@ -49,6 +51,15 @@ namespace TrailEvolutionModelling.Polygons
         private Polygon(MapsuiPolygon mapsuiPolygon)
         {
             Styles = new List<IStyle>();
+            Styles.Add(new VectorStyle
+            {
+                Fill = new Brush(new Color(240, 20, 20, 70)),
+                Outline = new Pen
+                {
+                    Color = new Color(240, 20, 20),
+                    Width = 2
+                }
+            });
             Geometry = this.mapsuiPolygon = mapsuiPolygon;
         }
 
@@ -58,14 +69,12 @@ namespace TrailEvolutionModelling.Polygons
             {
                 throw new ArgumentException("geometryText is null or blank");
             }
+            MapsuiPolygon mapsuiPolygon = null;
             try
             {
                 var geometry = Mapsui.Geometries.Geometry.GeomFromText(geometryText) as MapsuiPolygon;
-                if (geometry is MapsuiPolygon mp)
-                {
-                    return new Polygon(mp);
-                }
-                else
+                mapsuiPolygon = geometry as MapsuiPolygon;
+                if (mapsuiPolygon == null)
                 {
                     throw new ArgumentException($"Geometry text is invalid: {geometryText}", nameof(geometryText));
                 }
@@ -74,6 +83,7 @@ namespace TrailEvolutionModelling.Polygons
             {
                 throw new ArgumentException($"Geometry text is invalid: {geometryText}", nameof(geometryText), ex);
             }
+            return new Polygon(mapsuiPolygon);
         }
 
         private static VectorStyle CreateHighlighedStyle()
