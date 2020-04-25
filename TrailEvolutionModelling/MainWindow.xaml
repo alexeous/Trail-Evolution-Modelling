@@ -6,7 +6,8 @@
         xmlns:mapsui="clr-namespace:Mapsui.UI.Wpf;assembly=Mapsui.UI.Wpf"
         xmlns:local="clr-namespace:TrailEvolutionModelling"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen" Loaded="OnWindowLoaded">
     <Grid>
         <mapsui:MapControl Name="mapControl"></mapsui:MapControl>
     </Grid>
