@@ -12,13 +12,20 @@ using TrailEvolutionModelling.Styles;
 namespace TrailEvolutionModelling.MapObjects
 {
     [Serializable]
-    class AreaType
+    public class AreaType
     {
-        public AreaAttributes Attributes { get; private set; }
-        public AreaStyle Style { get; private set; }
-        public string Name { get; private set; }
-        public string DisplayedName { get; private set; }
+        public AreaAttributes Attributes { get; set; }
+        
+        [XmlElement(typeof(LineStyle))]
+        [XmlElement(typeof(PolygonStyle))]
+        public MapObjectStyle Style { get; set; }
+        
+        [XmlAttribute]
+        public string Name { get; set; }
+        
+        [XmlAttribute]
+        public string DisplayedName { get; set; }
 
-        private AreaType() { }
+        public AreaType() { }
     }
 }

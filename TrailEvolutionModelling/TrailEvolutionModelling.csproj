@@ -161,6 +161,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="MapObjects\AreaAttributes.cs" />
+    <Compile Include="MapObjects\AreaType.cs" />
+    <Compile Include="MapObjects\AreaTypes.cs" />
     <Compile Include="MapObjects\DraggingFeature.cs" />
     <Compile Include="MapObjects\DraggingLayer.cs" />
     <Compile Include="MapObjects\Highlighter.cs" />
