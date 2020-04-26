@@ -160,6 +160,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MapObjects\AreaAttributes.cs" />
     <Compile Include="MapObjects\DraggingFeature.cs" />
     <Compile Include="MapObjects\DraggingLayer.cs" />
     <Compile Include="MapObjects\Highlighter.cs" />
