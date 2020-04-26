@@ -166,6 +166,9 @@
     <Compile Include="MapObjects\Highlighter.cs" />
     <Compile Include="MapObjects\InsertionPreviewFeature.cs" />
     <Compile Include="MapObjects\MapObject.cs" />
+    <Compile Include="Styles\LineStyle.cs" />
+    <Compile Include="Styles\MapObjectStyle.cs" />
+    <Compile Include="Styles\PolygonStyle.cs" />
     <Compile Include="Util\BitmapResources.cs" />
     <Compile Include="Util\ILayerExtensions.cs" />
     <Page Include="MainWindow.xaml">
