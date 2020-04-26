@@ -18,7 +18,6 @@ namespace TrailEvolutionModelling.MapObjects
         public abstract IList<Point> Vertices { get; }
         
 
-        [field:NonSerialized]
         public Highlighter Highlighter { get; }
 
 
