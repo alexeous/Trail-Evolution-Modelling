@@ -45,11 +45,12 @@ namespace TrailEvolutionModelling.MapObjects
         {
             return new VectorStyle
             {
-                Fill = new Brush(new Color(240, 240, 20, 70)),
+                //Fill = new Brush(new Color(240, 240, 20, 70)),
+                Fill = new Brush(),
                 Outline = new Pen
                 {
                     Color = new Color(240, 20, 20),
-                    Width = 2
+                    Width = 7
                 }
             };
         }
