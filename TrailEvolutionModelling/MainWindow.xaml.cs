@@ -111,6 +111,7 @@ namespace TrailEvolutionModelling
                 {
                     polygons.Remove(polygon);
                     polygonLayer.TryRemove(polygon);
+                    polygonLayer.Refresh();
                 };
                 return item;
             }

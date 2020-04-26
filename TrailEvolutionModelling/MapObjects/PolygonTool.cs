@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using TrailEvolutionModelling.Util;
 
 namespace TrailEvolutionModelling.MapObjects
 {
@@ -100,8 +101,7 @@ namespace TrailEvolutionModelling.MapObjects
 
         private void Update()
         {
-            //mapControl.BringIntoView()
-            //polygonLayer.ViewChanged(true, polygonLayer.Envelope, resolution: 1);
+            polygonLayer.Refresh();
         }
 
         public void BeginDrawing()
