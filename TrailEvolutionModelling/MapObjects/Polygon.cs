@@ -11,45 +11,15 @@ using MapsuiPolygon = Mapsui.Geometries.Polygon;
 
 namespace TrailEvolutionModelling.MapObjects
 {
-    class Polygon : Feature
+    class Polygon : MapObject
     {
-        private static readonly IStyle highlightedStyle = CreateHighlighedStyle();
+        public override IList<Point> Vertices => MapsuiPolygon.ExteriorRing.Vertices;
 
-        private readonly MapsuiPolygon mapsuiPolygon;
-        private bool isHighlighted;
+        private MapsuiPolygon MapsuiPolygon => (MapsuiPolygon)Geometry;
 
-        public IList<Point> Vertices => mapsuiPolygon.ExteriorRing.Vertices;
-
-        public string GeometryText => mapsuiPolygon.AsText();
-
-        public bool IsHighlighted
+        public Polygon()
         {
-            get => isHighlighted;
-            set
-            {
-                if (value == isHighlighted) return;
-
-                isHighlighted = value;
-                if(isHighlighted)
-                {
-                    Styles.Add(highlightedStyle);
-                }
-                else
-                {
-                    Styles.Remove(highlightedStyle);
-                }
-            }
-        }
-
-        public string ObjectKindName => "Препятствие";
-
-        public Polygon(IEnumerable<Point> vertices)
-            : this(new MapsuiPolygon(new LinearRing(vertices)))
-        {
-        }
-
-        private Polygon(MapsuiPolygon mapsuiPolygon)
-        {
+            Geometry = new MapsuiPolygon(new LinearRing());
             Styles = new List<IStyle>();
             Styles.Add(new VectorStyle
             {
@@ -60,16 +30,16 @@ namespace TrailEvolutionModelling.MapObjects
                     Width = 2
                 }
             });
-            Geometry = this.mapsuiPolygon = mapsuiPolygon;
         }
 
-        public static Polygon FromGeomText(string geometryText)
+        protected override void InitGeometryFromText(string geometryText)
         {
             if (string.IsNullOrWhiteSpace(geometryText))
             {
                 throw new ArgumentException("geometryText is null or blank");
             }
-            MapsuiPolygon mapsuiPolygon = null;
+
+            MapsuiPolygon mapsuiPolygon;
             try
             {
                 var geometry = Mapsui.Geometries.Geometry.GeomFromText(geometryText) as MapsuiPolygon;
@@ -83,20 +53,8 @@ namespace TrailEvolutionModelling.MapObjects
             {
                 throw new ArgumentException($"Geometry text is invalid: {geometryText}", nameof(geometryText), ex);
             }
-            return new Polygon(mapsuiPolygon);
-        }
 
-        private static VectorStyle CreateHighlighedStyle()
-        {
-            return new VectorStyle
-            {
-                Fill = new Brush(new Color(240, 240, 20, 70)),
-                Outline = new Pen
-                {
-                    Color = new Color(240, 20, 20),
-                    Width = 2
-                }
-            };
+            Geometry = mapsuiPolygon;
         }
     }
 }

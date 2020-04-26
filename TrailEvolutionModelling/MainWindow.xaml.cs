@@ -178,10 +178,10 @@ namespace TrailEvolutionModelling
                     {
                         var item = new MenuItem
                         {
-                            Header = polygon.ObjectKindName
+                            //Header = polygon.ObjectKindName
                         };
-                        item.GotFocus += (s, ee) => { polygon.IsHighlighted = true; polygonLayer.Refresh(); };
-                        item.LostFocus += (s, ee) => { polygon.IsHighlighted = false; polygonLayer.Refresh(); };
+                        item.GotFocus += (s, ee) => { polygon.Highlighter.IsHighlighted = true; polygonLayer.Refresh(); };
+                        item.LostFocus += (s, ee) => { polygon.Highlighter.IsHighlighted = false; polygonLayer.Refresh(); };
                         item.Click += (s, ee) => OnPolygonRightClick(polygon);
                         contextMenu.Items.Add(item);
                     }
@@ -204,7 +204,7 @@ namespace TrailEvolutionModelling
 
         private void OnPolygonRightClick(Polygon polygon)
         {
-            polygon.IsHighlighted = true;
+            polygon.Highlighter.IsHighlighted = true;
             polygonLayer.Refresh();
 
             var contextMenu = CreatePolygonContextMenu(polygon);
@@ -215,7 +215,7 @@ namespace TrailEvolutionModelling
         {
             foreach (var polygon in polygonLayer.GetFeatures().OfType<Polygon>())
             {
-                polygon.IsHighlighted = false;
+                polygon.Highlighter.IsHighlighted = false;
             }
             polygonLayer.Refresh();
         }

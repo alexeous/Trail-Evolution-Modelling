@@ -72,7 +72,7 @@ namespace TrailEvolutionModelling.MapObjects
             
             if (currentPolygon == null)
             {
-                currentPolygon = new Polygon(new Mapsui.Geometries.Point[0]);
+                currentPolygon = new Polygon();
                 polygonLayer.Add(currentPolygon);
             }
             if (previewPoint != null)
