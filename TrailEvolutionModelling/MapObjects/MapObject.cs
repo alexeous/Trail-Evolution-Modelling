@@ -13,7 +13,7 @@ using Mapsui.Styles;
 
 namespace TrailEvolutionModelling.MapObjects
 {
-    abstract class MapObject : Feature, IXmlSerializable
+    public abstract class MapObject : Feature, IXmlSerializable
     {
         public abstract IList<Point> Vertices { get; }
         

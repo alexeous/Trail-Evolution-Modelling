@@ -8,7 +8,7 @@ using Mapsui.Styles;
 
 namespace TrailEvolutionModelling.MapObjects
 {
-    class Highlighter
+    public class Highlighter
     {
         private Feature target;
         private bool isHighlighted;

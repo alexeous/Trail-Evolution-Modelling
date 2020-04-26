@@ -11,7 +11,7 @@ using MapsuiPolygon = Mapsui.Geometries.Polygon;
 
 namespace TrailEvolutionModelling.MapObjects
 {
-    class Polygon : MapObject
+    public class Polygon : MapObject
     {
         public override IList<Point> Vertices => MapsuiPolygon.ExteriorRing.Vertices;
 
