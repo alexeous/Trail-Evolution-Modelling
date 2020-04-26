@@ -3,7 +3,7 @@ using Mapsui.Providers;
 using System;
 using System.Collections.Generic;
 
-namespace TrailEvolutionModelling.Polygons
+namespace TrailEvolutionModelling.MapObjects
 {
     partial class PolygonEditing
     {

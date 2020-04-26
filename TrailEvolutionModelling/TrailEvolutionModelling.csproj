@@ -160,9 +160,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Polygons\DraggingFeature.cs" />
-    <Compile Include="Polygons\DraggingLayer.cs" />
-    <Compile Include="Polygons\InsertionPreviewFeature.cs" />
+    <Compile Include="MapObjects\DraggingFeature.cs" />
+    <Compile Include="MapObjects\DraggingLayer.cs" />
+    <Compile Include="MapObjects\InsertionPreviewFeature.cs" />
     <Compile Include="Util\BitmapResources.cs" />
     <Compile Include="Util\ILayerExtensions.cs" />
     <Page Include="MainWindow.xaml">
@@ -179,10 +179,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Polygons\Polygon.cs" />
-    <Compile Include="Polygons\PolygonEditing.cs" />
-    <Compile Include="Polygons\PolygonLayer.cs" />
-    <Compile Include="Polygons\PolygonTool.cs" />
+    <Compile Include="MapObjects\Polygon.cs" />
+    <Compile Include="MapObjects\PolygonEditing.cs" />
+    <Compile Include="MapObjects\PolygonLayer.cs" />
+    <Compile Include="MapObjects\PolygonTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

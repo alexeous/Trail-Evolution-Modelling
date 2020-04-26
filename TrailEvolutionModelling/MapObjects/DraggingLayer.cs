@@ -7,7 +7,7 @@ using Mapsui.Layers;
 using Mapsui.Styles;
 using TrailEvolutionModelling.Util;
 
-namespace TrailEvolutionModelling.Polygons
+namespace TrailEvolutionModelling.MapObjects
 {
     class DraggingLayer : WritableLayer
     {

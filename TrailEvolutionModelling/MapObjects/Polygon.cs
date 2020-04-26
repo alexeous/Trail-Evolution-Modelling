@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 using MapsuiPolygon = Mapsui.Geometries.Polygon;
 
-namespace TrailEvolutionModelling.Polygons
+namespace TrailEvolutionModelling.MapObjects
 {
     class Polygon : Feature
     {

@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace TrailEvolutionModelling.Polygons
+namespace TrailEvolutionModelling.MapObjects
 {
     class PolygonTool
     {

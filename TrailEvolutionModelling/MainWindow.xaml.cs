@@ -7,13 +7,14 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Mapsui.Geometries;
 using Mapsui.Layers;
+using Mapsui.Projection;
 using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
 using TrailEvolutionModelling.GPUProxy;
-using TrailEvolutionModelling.Polygons;
+using TrailEvolutionModelling.MapObjects;
 using TrailEvolutionModelling.Util;
 using Point = Mapsui.Geometries.Point;
-using Polygon = TrailEvolutionModelling.Polygons.Polygon;
+using Polygon = TrailEvolutionModelling.MapObjects.Polygon;
 
 namespace TrailEvolutionModelling
 {
@@ -55,6 +56,7 @@ namespace TrailEvolutionModelling
             polygonTool = new PolygonTool(mapControl, polygonLayer);
             polygonEditing = new PolygonEditing(mapControl, polygonLayer);
 
+            
             ZoomToPoint(new Point(9231625, 7402608));
         }
 

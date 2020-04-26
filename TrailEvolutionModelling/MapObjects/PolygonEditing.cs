@@ -13,7 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TrailEvolutionModelling.Util;
 
-namespace TrailEvolutionModelling.Polygons
+namespace TrailEvolutionModelling.MapObjects
 {
     partial class PolygonEditing
     {
