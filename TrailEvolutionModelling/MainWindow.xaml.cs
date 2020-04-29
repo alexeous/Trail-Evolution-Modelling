@@ -58,6 +58,9 @@ namespace TrailEvolutionModelling
 
             
             ZoomToPoint(new Point(9231625, 7402608));
+
+            var t = typeof(AreaTypes);
+            var x = AreaTypes.Vegetation;
         }
 
         private void ZoomToPoint(Point center)

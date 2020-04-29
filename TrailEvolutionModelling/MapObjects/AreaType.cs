@@ -27,5 +27,13 @@ namespace TrailEvolutionModelling.MapObjects
         public string DisplayedName { get; set; }
 
         public AreaType() { }
+
+        public void CopyValuesFrom(AreaType other) 
+        {
+            this.Attributes = other.Attributes;
+            this.Style = other.Style;
+            this.Name = other.Name;
+            this.DisplayedName = other.DisplayedName;
+        }
     }
 }

@@ -12,36 +12,186 @@ namespace TrailEvolutionModelling.MapObjects
     [Serializable]
     public class AreaTypes
     {
-        private const string DefaultAreaTypeName = "Lawn";
-        private static readonly string Filename = "AreaTypes.xml";
-        
-        private static readonly AreaTypes Instance = Load();
+        #region Area Types Properties
 
-        public static AreaType Default { get; private set; }
+        public static AreaType[] All => new[]
+        {
+            Lawn, PavedPath, CarRoad, Vegetation, WalkthroughableFence,
+            Building, Fence, Water, OtherUnwalkthroughable
+        };
+
+        public static AreaType Default => Lawn;
+
+        public static AreaType Lawn { get; private set; } = new AreaType
+        {
+            Name = "Lawn",
+            DisplayedName = "Газон",
+            Style = new PolygonStyle(97, 170, 77) { PenStyle = PenStyle.LongDash },
+            Attributes = new AreaAttributes
+            {
+                IsWalkable = true,
+                IsTramplable = true,
+                Weight = 2.7f
+            }
+        };
+
+        public static AreaType PavedPath {get; private set;} = new AreaType
+        {
+            Name = "PavedPath",
+            DisplayedName = "Пешеходная дорожка",
+            Style = new PolygonStyle(140, 140, 140) { PenStyle = PenStyle.LongDash },
+            Attributes = new AreaAttributes
+            {
+                IsWalkable = true,
+                IsTramplable = false,
+                Weight = 1
+            }
+        };
+
+        public static AreaType CarRoad {get; private set;} = new AreaType
+        {
+            Name = "CarRoad",
+            DisplayedName = "Проезжая часть",
+            Style = new PolygonStyle(57, 74, 84) { PenStyle = PenStyle.LongDash },
+            Attributes = new AreaAttributes
+            {
+                IsWalkable = true,
+                IsTramplable = false,
+                Weight = 1.2f
+            }
+        };
+
+        public static AreaType Vegetation {get; private set;} = new AreaType
+        {
+            Name = "Vegetation",
+            DisplayedName = "Растительность",
+            Style = new PolygonStyle(41, 122, 47) { PenStyle = PenStyle.LongDash },
+            Attributes = new AreaAttributes
+            {
+                IsWalkable = true,
+                IsTramplable = true,
+                Weight = 1.5f
+            }
+        };
+
+        public static AreaType WalkthroughableFence {get; private set;} = new AreaType
+        {
+            Name = "WalkthroughableFence",
+            DisplayedName = "Проходимый забор",
+            Style = new LineStyle(63, 76, 96) { PenStyle = PenStyle.LongDash },
+            Attributes = new AreaAttributes
+            {
+                IsWalkable = true,
+                IsTramplable = false,
+                Weight = 3.4f
+            }
+        };
+
+        public static AreaType Building {get; private set;} = new AreaType
+        {
+            Name = "Building",
+            DisplayedName = "Здание",
+            Style = new PolygonStyle(50, 45, 45),
+            Attributes = AreaAttributes.Unwalkable
+        };
+
+        public static AreaType Fence {get; private set;} = new AreaType
+        {
+            Name = "Fence",
+            DisplayedName = "Забор",
+            Style = new LineStyle(76, 76, 76),
+            Attributes = AreaAttributes.Unwalkable
+        };
+
+        public static AreaType Water {get; private set;} = new AreaType
+        {
+            Name = "Water",
+            DisplayedName = "Водоём",
+            Style = new PolygonStyle(116, 179, 224),
+            Attributes = AreaAttributes.Unwalkable
+        };
+
+        public static AreaType OtherUnwalkthroughable {get; private set;} = new AreaType
+        {
+            Name = "OtherUnwalkthroughable",
+            DisplayedName = "Прочее непроходимое препятствие",
+            Style = new PolygonStyle(12, 12, 12),
+            Attributes = AreaAttributes.Unwalkable
+        };
+
+        #endregion
+
+        private static Dictionary<string, AreaType> areaTypeDict;
+        private static readonly string Filename = "AreaTypes.xml";
 
         public AreaType[] AreaTypeArray { get; set; }
-
-        private Dictionary<string, AreaType> areaTypeDict;
-
         private AreaTypes() { }
 
-        private void Init()
+
+        static AreaTypes()
+        {
+            InitDictionaryDefault();
+
+            try
+            {
+                AreaTypes instance = Load();
+                OverrideDefaultAreaTypes(instance);
+            }
+            catch (Exception ex) when (
+                  ex is XmlException
+               || ex is InvalidOperationException
+               || ex is ArgumentException
+            )
+            {
+                MessageBox.Show($"Не удалось загрузить свойства областей из {Filename}. " +
+                        "Будут использованы значения по умолчанию. Техническая информация:\n" + ex.ToString(),
+                        "Предупреждение",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+            }
+        }
+
+        private static void InitDictionaryDefault()
         {
             areaTypeDict = new Dictionary<string, AreaType>();
-            foreach (var entry in AreaTypeArray)
+            foreach (var areaType in All)
             {
-                areaTypeDict[entry.Name] = entry;
+                areaTypeDict[areaType.Name] = areaType;
             }
-            Default = areaTypeDict[DefaultAreaTypeName];
-            AreaTypeArray = null;
+        }
+
+        private static void OverrideDefaultAreaTypes(AreaTypes instance)
+        {
+            foreach (var areaType in instance.AreaTypeArray)
+            {
+                if (areaTypeDict.TryGetValue(areaType.Name, out AreaType target))
+                {
+                    target.CopyValuesFrom(areaType);
+                }
+            }
         }
 
         public static AreaType GetByName(string name)
         {
-            if (Instance.areaTypeDict.TryGetValue(name, out AreaType result))
+            if (areaTypeDict.TryGetValue(name, out AreaType result))
                 return result;
 
             throw new ArgumentException($"Unknown area type '{name}'");
+        }
+
+        private static AreaTypes Load()
+        {
+            if (!File.Exists(Filename))
+            {
+                CreateDefaultFile();
+            }
+
+            using (var stream = File.OpenRead(Filename))
+            {
+                var serializer = new XmlSerializer(typeof(AreaTypes));
+                var instance = (AreaTypes)serializer.Deserialize(stream);
+                return instance;
+            }
         }
 
         private static AreaTypes CreateDefaultFile()
@@ -57,141 +207,7 @@ namespace TrailEvolutionModelling.MapObjects
 
         private static AreaTypes CreateDefaultAreaTypes()
         {
-            return new AreaTypes
-            {
-                AreaTypeArray = new AreaType[]
-                {
-                    new AreaType
-                    {
-                        Name = DefaultAreaTypeName,
-                        DisplayedName = "Газон",
-                        Style = new PolygonStyle(97, 170, 77) { PenStyle = PenStyle.LongDash },
-                        Attributes = new AreaAttributes
-                        {
-                            IsWalkable = true,
-                            IsTramplable = true,
-                            Weight = 2.7f
-                        }
-                    },
-
-                    new AreaType
-                    {
-                        Name = "PavedPath",
-                        DisplayedName = "Пешеходная дорожка",
-                        Style = new PolygonStyle(140, 140, 140) { PenStyle = PenStyle.LongDash },
-                        Attributes = new AreaAttributes
-                        {
-                            IsWalkable = true,
-                            IsTramplable = false,
-                            Weight = 1
-                        }
-                    },
-
-                    new AreaType
-                    {
-                        Name = "CarRoad",
-                        DisplayedName = "Проезжая часть",
-                        Style = new PolygonStyle(57, 74, 84) { PenStyle = PenStyle.LongDash },
-                        Attributes = new AreaAttributes
-                        {
-                            IsWalkable = true,
-                            IsTramplable = false,
-                            Weight = 1.2f
-                        }
-                    },
-
-                    new AreaType
-                    {
-                        Name = "Vegetation",
-                        DisplayedName = "Растительность",
-                        Style = new PolygonStyle(41, 122, 47) { PenStyle = PenStyle.LongDash },
-                        Attributes = new AreaAttributes
-                        {
-                            IsWalkable = true,
-                            IsTramplable = true,
-                            Weight = 1.5f
-                        }
-                    },
-
-                    new AreaType
-                    {
-                        Name = "WalkthroughableFence",
-                        DisplayedName = "Проходимый забор",
-                        Style = new LineStyle(63, 76, 96) { PenStyle = PenStyle.LongDash },
-                        Attributes = new AreaAttributes
-                        {
-                            IsWalkable = true,
-                            IsTramplable = false,
-                            Weight = 3.4f
-                        }
-                    },
-
-                    new AreaType
-                    {
-                        Name = "Building",
-                        DisplayedName = "Здание",
-                        Style = new PolygonStyle(50, 45, 45),
-                        Attributes = AreaAttributes.Unwalkable
-                    },
-
-                    new AreaType
-                    {
-                        Name = "Fence",
-                        DisplayedName = "Забор",
-                        Style = new LineStyle(76, 76, 76),
-                        Attributes = AreaAttributes.Unwalkable
-                    },
-
-                    new AreaType
-                    {
-                        Name = "Water",
-                        DisplayedName = "Водоём",
-                        Style = new PolygonStyle(116, 179, 224),
-                        Attributes = AreaAttributes.Unwalkable
-                    },
-
-                    new AreaType
-                    {
-                        Name = "OtherUnwalkthroughable",
-                        DisplayedName = "Прочее непроходимое препятствие",
-                        Style = new PolygonStyle(12, 12, 12),
-                        Attributes = AreaAttributes.Unwalkable
-                    }
-                }
-            };
-        }
-
-        private static AreaTypes Load()
-        {
-            if (!File.Exists(Filename))
-            {
-                CreateDefaultFile();
-            }
-
-            try
-            {
-                using (var stream = File.OpenRead(Filename))
-                {
-                    var serializer = new XmlSerializer(typeof(AreaTypes));
-                    var instance = (AreaTypes)serializer.Deserialize(stream);
-                    instance.Init();
-                    return instance;
-                }
-            }
-            catch (Exception ex) when (
-                  ex is XmlException
-               || ex is InvalidOperationException
-               || ex is ArgumentException
-            )
-            {
-                MessageBox.Show($"Не удалось загрузить свойства областей из {Filename}. " +
-                    "Будут использованы значения по умолчанию. Техническая информация:\n" + ex.ToString(), 
-                    "Предупреждение", 
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-                
-                return CreateDefaultAreaTypes();
-            }
+            return new AreaTypes { AreaTypeArray = All };
         }
     }
 }
