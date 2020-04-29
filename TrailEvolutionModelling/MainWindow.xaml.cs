@@ -58,9 +58,6 @@ namespace TrailEvolutionModelling
 
             
             ZoomToPoint(new Point(9231625, 7402608));
-
-            var t = typeof(AreaTypes);
-            var x = AreaTypes.Vegetation;
         }
 
         private void ZoomToPoint(Point center)
@@ -137,8 +134,6 @@ namespace TrailEvolutionModelling
             if (polygonTool.IsInDrawingMode)
             {
                 var polygon = polygonTool.EndDrawing();
-
-                polygonToolButton.IsChecked = false;
 
                 if (polygon != null)
                 {
@@ -222,6 +217,16 @@ namespace TrailEvolutionModelling
                 polygon.Highlighter.IsHighlighted = false;
             }
             polygonLayer.Refresh();
+        }
+
+        private void OnPolygonDrawClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnLineDrawClick(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

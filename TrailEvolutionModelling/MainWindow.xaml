@@ -6,25 +6,28 @@
         xmlns:mapsui="clr-namespace:Mapsui.UI.Wpf;assembly=Mapsui.UI.Wpf"
         xmlns:local="clr-namespace:TrailEvolutionModelling"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="900"
+        Title="MainWindow" Height="600" Width="1044"
         WindowStartupLocation="CenterScreen" Loaded="OnWindowLoaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="25"/>
-            <ColumnDefinition Width="798*"/>
-            <ColumnDefinition Width="32"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="142"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
         <mapsui:MapControl x:Name="mapControl" Grid.ColumnSpan="2" Margin="0" Grid.RowSpan="2"/>
-        <ToolBarTray Orientation="Vertical" Grid.Column="2" Grid.RowSpan="2">
-            <ToolBar Margin="0" ToolBarTray.IsLocked="True">
-                <ToggleButton Name="polygonToolButton" Height="27" Checked="PolygonTool_Checked" Unchecked="PolygonTool_Unchecked">
-                    <Image Source="Resources/PolygonTool.png" d:IsLocked="True"/>
-                </ToggleButton>
-            </ToolBar>
-        </ToolBarTray>
+        <StackPanel Grid.Column="2">
+            <Button Name="buttonPavedPath" Content="Пешеходная&#xD;&#xA;дорожка" HorizontalContentAlignment="Left" Padding="9,3,1,3" Margin="0,8,0,0" Click="OnPolygonDrawClick"/>
+            <Button Name="buttonCarRoad" Content="Проезжая&#xD;&#xA;часть" HorizontalContentAlignment="Left" Padding="9,3,1,3" Margin="0,8,0,0" Click="OnPolygonDrawClick"/>
+            <Button Name="buttonVegetation" Content="Растительность" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnPolygonDrawClick"/>
+            <Button Name="buttonWalkthroughableFence" Content="Проходимый забор" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnLineDrawClick"/>
+            <Button Name="buttonBuilding" Content="Здание" HorizontalContentAlignment="Left" Padding="9,3,1,3" Margin="0,8,0,0" Click="OnPolygonDrawClick"/>
+            <Button Name="buttonFence" Content="Непроходимый забор" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnLineDrawClick"/>
+            <Button Name="buttonWater" Content="Водоём" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnPolygonDrawClick"/>
+            <Button Name="buttonOtherUnwalkthroughable" Content="Другое непроходимое&#xD;&#xA;препятствие" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnPolygonDrawClick"/>
+        </StackPanel>
     </Grid>
 </Window>
