@@ -98,7 +98,7 @@ namespace TrailEvolutionModelling.EditorTools
         {
             Point mouseScreenPoint = e.GetPosition(mapControl).ToMapsui();
             var draggingFeature = GetFeaturesAtScreenPoint(mouseScreenPoint).OfType<DraggingFeature>().FirstOrDefault();
-            if(draggingFeature != null)
+            if(draggingFeature != null && editedObject.Vertices.Count > 2)
             {
                 // Preventing editing end
                 e.Handled = true;
