@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -27,6 +28,7 @@ namespace TrailEvolutionModelling
         private WritableLayer mapObjectLayer;
 
         private PolygonTool polygonTool;
+        private LineTool lineTool;
         private MapObjectEditing mapObjectEditing;
         private Tool[] allTools;
 
@@ -60,8 +62,10 @@ namespace TrailEvolutionModelling
         private void InitTools()
         {
             polygonTool = new PolygonTool(mapControl, mapObjectLayer);
+            lineTool = new LineTool(mapControl, mapObjectLayer);
             mapObjectEditing = new MapObjectEditing(mapControl, mapObjectLayer);
-            allTools = new Tool[] { polygonTool, mapObjectEditing };
+            
+            allTools = new Tool[] { polygonTool, lineTool, mapObjectEditing };
         }
 
         private void ZoomToPoint(Point center)
@@ -81,7 +85,7 @@ namespace TrailEvolutionModelling
             mapControl.MouseRightButtonDown += OnMapRightClick;
         }
 
-        private ContextMenu CreatePolygonContextMenu(Polygon polygon)
+        private ContextMenu CreateMapObjectContextMenu(MapObject mapObject)
         {
             var contextMenu = new ContextMenu();
             contextMenu.Items.Add(CreateModifyItem());
@@ -98,9 +102,9 @@ namespace TrailEvolutionModelling
                 };
                 item.Click += (s, e) =>
                 {
-                    UnhighlightAllPolygons();
+                    UnhighlightAllMapObjects();
                     EndAllTools();
-                    mapObjectEditing.TargetObject = polygon;
+                    mapObjectEditing.TargetObject = mapObject;
                     mapObjectEditing.Begin();
                 };
                 return item;
@@ -115,7 +119,7 @@ namespace TrailEvolutionModelling
                 };
                 item.Click += (s, e) =>
                 {
-                    mapObjectLayer.TryRemove(polygon);
+                    mapObjectLayer.TryRemove(mapObject);
                     mapObjectLayer.Refresh();
                 };
                 return item;
@@ -125,7 +129,7 @@ namespace TrailEvolutionModelling
 
         private void OnMapRightClick(object sender, MouseButtonEventArgs e)
         {
-            UnhighlightAllPolygons();
+            UnhighlightAllMapObjects();
 
             bool anyToolWasAcitve = EndAllTools();
             if (anyToolWasAcitve)
@@ -135,16 +139,16 @@ namespace TrailEvolutionModelling
 
             var clickScreenPos = e.GetPosition(mapControl).ToMapsui();
             var clickWorldPos = mapControl.Viewport.ScreenToWorld(clickScreenPos);
-            IEnumerable<Polygon> polygons = GetPolygonsAt(clickWorldPos);
+            IEnumerable<MapObject> mapObjects = GetMapObjectsAt(clickWorldPos);
 
-            int count = polygons.Count();
+            int count = mapObjects.Count();
             if (count == 0)
             {
                 return;
             }
             if (count == 1)
             {
-                OnPolygonRightClick(polygons.First());
+                OnMapObjectRightClich(mapObjects.First());
             }
             else
             {
@@ -154,26 +158,28 @@ namespace TrailEvolutionModelling
                     Content = "Выберите объект:",
                     IsEnabled = false
                 });
-                foreach (var polygon in polygons)
+                foreach (var mapObject in mapObjects)
                 {
                     var item = new MenuItem
                     {
                         //Header = polygon.ObjectKindName
                     };
-                    item.GotFocus += (s, ee) => { polygon.Highlighter.IsHighlighted = true; mapObjectLayer.Refresh(); };
-                    item.LostFocus += (s, ee) => { polygon.Highlighter.IsHighlighted = false; mapObjectLayer.Refresh(); };
-                    item.Click += (s, ee) => OnPolygonRightClick(polygon);
+                    item.GotFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = true; mapObjectLayer.Refresh(); };
+                    item.LostFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = false; mapObjectLayer.Refresh(); };
+                    item.Click += (s, ee) => OnMapObjectRightClich(mapObject);
                     contextMenu.Items.Add(item);
                 }
                 contextMenu.IsOpen = true;
             }
         }
 
-        private IEnumerable<Polygon> GetPolygonsAt(Point point)
+        private IEnumerable<MapObject> GetMapObjectsAt(Point point)
         {
+            const double tolerance = 15;
+
             var boundingBox = new BoundingBox(point, point);
-            var polygons = mapObjectLayer.GetFeaturesInView(boundingBox, resolution: 1f).OfType<Polygon>();
-            return polygons.Where(p => p.Geometry.Distance(point) <= 0);
+            var mapObjects = mapObjectLayer.GetFeaturesInView(boundingBox, resolution: 1f).OfType<MapObject>();
+            return mapObjects.Where(p => p.Geometry.Distance(point) <= tolerance);
         }
 
         private bool EndAllTools()
@@ -188,23 +194,23 @@ namespace TrailEvolutionModelling
 
         private void OnMapLeftClick(object sender, MouseButtonEventArgs e)
         {
-            UnhighlightAllPolygons();
+            UnhighlightAllMapObjects();
         }
 
-        private void OnPolygonRightClick(Polygon polygon)
+        private void OnMapObjectRightClich(MapObject mapObject)
         {
-            polygon.Highlighter.IsHighlighted = true;
+            mapObject.Highlighter.IsHighlighted = true;
             mapObjectLayer.Refresh();
 
-            var contextMenu = CreatePolygonContextMenu(polygon);
+            var contextMenu = CreateMapObjectContextMenu(mapObject);
             contextMenu.IsOpen = true;
         }
 
-        private void UnhighlightAllPolygons()
+        private void UnhighlightAllMapObjects()
         {
-            foreach (var polygon in mapObjectLayer.GetFeatures().OfType<Polygon>())
+            foreach (var mapObject in mapObjectLayer.GetFeatures().OfType<MapObject>())
             {
-                polygon.Highlighter.IsHighlighted = false;
+                mapObject.Highlighter.IsHighlighted = false;
             }
             mapObjectLayer.Refresh();
         }
@@ -220,7 +226,11 @@ namespace TrailEvolutionModelling
 
         private void OnLineDrawClick(object sender, RoutedEventArgs e)
         {
+            EndAllTools();
 
+            string areaTypeName = (string)((Button)sender).Tag;
+            lineTool.AreaType = AreaTypes.GetByName(areaTypeName);
+            lineTool.Begin();
         }
     }
 }

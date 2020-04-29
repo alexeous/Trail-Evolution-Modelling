@@ -160,6 +160,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EditorTools\LineTool.cs" />
     <Compile Include="EditorTools\Tool.cs" />
     <Compile Include="EditorTools\MapObjectTool.cs" />
     <Compile Include="MapObjects\AreaAttributes.cs" />
