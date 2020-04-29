@@ -21,6 +21,7 @@ namespace TrailEvolutionModelling.MapObjects
 
         private IStyle mainStyle;
         private AreaType areaType;
+
         public AreaType AreaType
         {
             get => areaType;
@@ -49,6 +50,7 @@ namespace TrailEvolutionModelling.MapObjects
 
         public MapObject()
         {
+            Geometry = CreateGeometry();
             Highlighter = new Highlighter(this, CreateHighlighedStyle());
             Styles = new List<IStyle>();
         }
@@ -65,7 +67,8 @@ namespace TrailEvolutionModelling.MapObjects
             throw new NotImplementedException();
         }
 
-        protected abstract void InitGeometryFromText(string text);
+        protected abstract IGeometry CreateGeometry();
+        protected abstract void InitGeometryFromText(string geometryText);
 
         private static VectorStyle CreateHighlighedStyle()
         {

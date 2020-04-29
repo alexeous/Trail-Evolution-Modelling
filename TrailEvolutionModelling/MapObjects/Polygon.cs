@@ -17,22 +17,22 @@ namespace TrailEvolutionModelling.MapObjects
 
         private MapsuiPolygon MapsuiPolygon => (MapsuiPolygon)Geometry;
 
-        public Polygon()
+        protected override IGeometry CreateGeometry()
         {
-            Geometry = new MapsuiPolygon(new LinearRing());
+            return new MapsuiPolygon(new LinearRing());
         }
 
         protected override void InitGeometryFromText(string geometryText)
         {
             if (string.IsNullOrWhiteSpace(geometryText))
             {
-                throw new ArgumentException("geometryText is null or blank");
+                throw new ArgumentException($"{nameof(geometryText)} is null or blank");
             }
 
             MapsuiPolygon mapsuiPolygon;
             try
             {
-                var geometry = Mapsui.Geometries.Geometry.GeomFromText(geometryText) as MapsuiPolygon;
+                var geometry = Mapsui.Geometries.Geometry.GeomFromText(geometryText);
                 mapsuiPolygon = geometry as MapsuiPolygon;
                 if (mapsuiPolygon == null)
                 {
