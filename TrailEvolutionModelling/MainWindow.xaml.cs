@@ -118,17 +118,6 @@ namespace TrailEvolutionModelling
             ///////// END BUTTONS CREATION LOCAL FUNCS
         }
 
-        private void PolygonTool_Checked(object sender, RoutedEventArgs e)
-        {
-            polygonEditing.EndEditing();
-            polygonTool.BeginDrawing();
-        }
-
-        private void PolygonTool_Unchecked(object sender, RoutedEventArgs e)
-        {
-            EndPolygonDrawing();
-        }
-
         private Polygon EndPolygonDrawing()
         {
             if (polygonTool.IsInDrawingMode)
@@ -221,7 +210,18 @@ namespace TrailEvolutionModelling
 
         private void OnPolygonDrawClick(object sender, RoutedEventArgs e)
         {
+            if (!polygonTool.IsInDrawingMode)
+            {
+                string areaTypeNmae = (string)((Button)sender).Tag;
+                AreaType areaType = AreaTypes.GetByName(areaTypeNmae);
 
+                polygonEditing.EndEditing();
+                polygonTool.BeginDrawing(areaType);
+            }
+            else
+            {
+                EndPolygonDrawing();
+            }
         }
 
         private void OnLineDrawClick(object sender, RoutedEventArgs e)

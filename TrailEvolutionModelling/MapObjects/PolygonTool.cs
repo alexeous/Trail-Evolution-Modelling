@@ -19,6 +19,7 @@ namespace TrailEvolutionModelling.MapObjects
         private MapControl mapControl;
         private WritableLayer polygonLayer;
 
+        private AreaType currentAreaType;
         private System.Windows.Point mouseDownPos;
         private Polygon currentPolygon;
         private Mapsui.Geometries.Point previewPoint;
@@ -74,6 +75,7 @@ namespace TrailEvolutionModelling.MapObjects
             if (currentPolygon == null)
             {
                 currentPolygon = new Polygon();
+                currentPolygon.AreaType = currentAreaType;
                 polygonLayer.Add(currentPolygon);
             }
             if (previewPoint != null)
@@ -104,7 +106,7 @@ namespace TrailEvolutionModelling.MapObjects
             polygonLayer.Refresh();
         }
 
-        public void BeginDrawing()
+        public void BeginDrawing(AreaType areaType)
         {
             if (IsInDrawingMode)
             {
@@ -112,6 +114,7 @@ namespace TrailEvolutionModelling.MapObjects
             }
 
             IsInDrawingMode = true;
+            currentAreaType = areaType;
             mapControl.Cursor = Cursors.Pen;
         }
 
