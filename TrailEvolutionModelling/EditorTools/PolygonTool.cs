@@ -17,8 +17,8 @@ namespace TrailEvolutionModelling.EditorTools
 {
     class PolygonTool : MapObjectTool<Polygon>
     {
-        public PolygonTool(MapControl mapControl, WritableLayer polygonLayer)
-            : base(mapControl, polygonLayer)
+        public PolygonTool(MapControl mapControl, WritableLayer targetLayer)
+            : base(mapControl, targetLayer)
         {
         }
 
