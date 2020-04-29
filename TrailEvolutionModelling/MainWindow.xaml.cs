@@ -10,6 +10,7 @@ using Mapsui.Layers;
 using Mapsui.Projection;
 using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
+using TrailEvolutionModelling.EditorTools;
 using TrailEvolutionModelling.GPUProxy;
 using TrailEvolutionModelling.MapObjects;
 using TrailEvolutionModelling.Util;

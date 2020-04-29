@@ -163,10 +163,10 @@
     <Compile Include="MapObjects\AreaAttributes.cs" />
     <Compile Include="MapObjects\AreaType.cs" />
     <Compile Include="MapObjects\AreaTypes.cs" />
-    <Compile Include="MapObjects\DraggingFeature.cs" />
-    <Compile Include="MapObjects\DraggingLayer.cs" />
+    <Compile Include="EditorTools\DraggingFeature.cs" />
+    <Compile Include="EditorTools\DraggingLayer.cs" />
     <Compile Include="MapObjects\Highlighter.cs" />
-    <Compile Include="MapObjects\InsertionPreviewFeature.cs" />
+    <Compile Include="EditorTools\InsertionPreviewFeature.cs" />
     <Compile Include="MapObjects\MapObject.cs" />
     <Compile Include="Styles\LineStyle.cs" />
     <Compile Include="Styles\MapObjectStyle.cs" />
@@ -188,9 +188,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MapObjects\Polygon.cs" />
-    <Compile Include="MapObjects\PolygonEditing.cs" />
+    <Compile Include="EditorTools\PolygonEditing.cs" />
     <Compile Include="MapObjects\PolygonLayer.cs" />
-    <Compile Include="MapObjects\PolygonTool.cs" />
+    <Compile Include="EditorTools\PolygonTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -2,8 +2,10 @@
 using Mapsui.Providers;
 using System;
 using System.Collections.Generic;
+using TrailEvolutionModelling.MapObjects;
+using Polygon = TrailEvolutionModelling.MapObjects.Polygon;
 
-namespace TrailEvolutionModelling.MapObjects
+namespace TrailEvolutionModelling.EditorTools
 {
     partial class PolygonEditing
     {

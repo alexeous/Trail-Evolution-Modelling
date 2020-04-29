@@ -10,9 +10,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using TrailEvolutionModelling.MapObjects;
 using TrailEvolutionModelling.Util;
 
-namespace TrailEvolutionModelling.MapObjects
+namespace TrailEvolutionModelling.EditorTools
 {
     class PolygonTool
     {

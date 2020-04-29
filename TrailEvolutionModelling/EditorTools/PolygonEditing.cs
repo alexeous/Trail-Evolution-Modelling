@@ -12,8 +12,11 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TrailEvolutionModelling.Util;
+using TrailEvolutionModelling.MapObjects;
+using Polygon = TrailEvolutionModelling.MapObjects.Polygon;
+using MapsuiPolygon = Mapsui.Geometries.Polygon;
 
-namespace TrailEvolutionModelling.MapObjects
+namespace TrailEvolutionModelling.EditorTools
 {
     partial class PolygonEditing
     {
