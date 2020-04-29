@@ -69,19 +69,6 @@ namespace TrailEvolutionModelling.MapObjects
 
         protected abstract IGeometry CreateGeometry();
         protected abstract void InitGeometryFromText(string geometryText);
-
-        private static VectorStyle CreateHighlighedStyle()
-        {
-            return new VectorStyle
-            {
-                //Fill = new Brush(new Color(240, 240, 20, 70)),
-                Fill = new Brush(),
-                Outline = new Pen
-                {
-                    Color = new Color(240, 20, 20),
-                    Width = 7
-                }
-            };
-        }
+        protected abstract VectorStyle CreateHighlighedStyle();
     }
 }

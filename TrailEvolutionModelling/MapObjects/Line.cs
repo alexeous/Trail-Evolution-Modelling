@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Mapsui.Geometries;
+using Mapsui.Styles;
 
 namespace TrailEvolutionModelling.MapObjects
 {
@@ -41,6 +42,18 @@ namespace TrailEvolutionModelling.MapObjects
             }
 
             Geometry = lineString;
+        }
+
+        protected override VectorStyle CreateHighlighedStyle()
+        {
+            return new VectorStyle
+            {
+                Line = new Pen
+                {
+                    Color = new Color(240, 20, 20),
+                    Width = 7
+                }
+            };
         }
     }
 }

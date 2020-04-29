@@ -46,5 +46,18 @@ namespace TrailEvolutionModelling.MapObjects
 
             Geometry = mapsuiPolygon;
         }
+
+        protected override VectorStyle CreateHighlighedStyle()
+        {
+            return new VectorStyle
+            {
+                Fill = new Brush(Color.Transparent),
+                Outline = new Pen
+                {
+                    Color = new Color(240, 20, 20),
+                    Width = 7
+                }
+            };
+        }
     }
 }
