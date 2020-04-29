@@ -16,6 +16,7 @@ namespace TrailEvolutionModelling.MapObjects
     public abstract class MapObject : Feature, IXmlSerializable
     {
         public abstract IList<Point> Vertices { get; }
+        public abstract bool AreVerticesLooped { get; }
         
         public Highlighter Highlighter { get; }
 

@@ -176,8 +176,22 @@ namespace TrailEvolutionModelling.EditorTools
                 previewPoint = null;
                 index = -1;
                 double minDistance = double.PositiveInfinity;
-                int prevI = vertices.Count - 1;
-                for (int i = 0; i < vertices.Count; i++)
+
+                int prevI, i;
+                if (editedObject.AreVerticesLooped)
+                {
+                    prevI = vertices.Count - 1;
+                    i = 0;
+                }
+                else
+                {
+                    // The branch above allows to insert points between end and start vertices.
+                    // If the shape is not like a ring, we should be able to to this
+                    prevI = 0;
+                    i = 1;
+                }
+                
+                for (; i < vertices.Count; i++)
                 {
 
                     Point closestPoint = GetClosestPoint(mouseWorldPoint, vertices[prevI], vertices[i]);

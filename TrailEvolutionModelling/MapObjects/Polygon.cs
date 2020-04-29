@@ -14,6 +14,7 @@ namespace TrailEvolutionModelling.MapObjects
     public class Polygon : MapObject
     {
         public override IList<Point> Vertices => MapsuiPolygon.ExteriorRing.Vertices;
+        public override bool AreVerticesLooped => true;
 
         private MapsuiPolygon MapsuiPolygon => (MapsuiPolygon)Geometry;
 
