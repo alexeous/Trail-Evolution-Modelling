@@ -28,7 +28,6 @@ namespace TrailEvolutionModelling
 
         private PolygonTool polygonTool;
         private PolygonEditing polygonEditing;
-        private List<Polygon> polygons;
 
         public MainWindow()
         {
@@ -42,7 +41,7 @@ namespace TrailEvolutionModelling
             base.OnKeyDown(e);
             if (e.Key == Key.Escape)
             {
-                EndPolygonDrawing();
+                polygonTool.EndDrawing();
             }
         }
 
@@ -50,8 +49,6 @@ namespace TrailEvolutionModelling
         {
             polygonLayer = new PolygonLayer();
             InitializeMapControl();
-
-            polygons = new List<Polygon>();
             //polygonLayer.AddRange(polygonStorage.Polygons);
 
             polygonTool = new PolygonTool(mapControl, polygonLayer);
@@ -110,7 +107,6 @@ namespace TrailEvolutionModelling
                 };
                 item.Click += (s, e) =>
                 {
-                    polygons.Remove(polygon);
                     polygonLayer.TryRemove(polygon);
                     polygonLayer.Refresh();
                 };
@@ -119,26 +115,11 @@ namespace TrailEvolutionModelling
             ///////// END BUTTONS CREATION LOCAL FUNCS
         }
 
-        private Polygon EndPolygonDrawing()
-        {
-            if (polygonTool.IsInDrawingMode)
-            {
-                var polygon = polygonTool.EndDrawing();
-
-                if (polygon != null)
-                {
-                    polygons.Add(polygon);
-                }
-                return polygon;
-            }
-            return null;
-        }
-
         private void OnMapRightClick(object sender, MouseButtonEventArgs e)
         {
             UnhighlightAllPolygons();
 
-            bool wasntDrawing = EndPolygonDrawing() == null;
+            bool wasntDrawing = polygonTool.EndDrawing() == null;
             bool wasntEditing = !polygonEditing.EndEditing();
             if (wasntDrawing && wasntEditing)
             {
@@ -221,7 +202,7 @@ namespace TrailEvolutionModelling
             }
             else
             {
-                EndPolygonDrawing();
+                polygonTool.EndDrawing();
             }
         }
 

@@ -26,10 +26,10 @@ namespace TrailEvolutionModelling.EditorTools
         private Feature previewPointFeature;
 
 
-        public MapObjectTool(MapControl mapControl, WritableLayer polygonLayer)
+        public MapObjectTool(MapControl mapControl, WritableLayer targetLayer)
         {
             this.MapControl = mapControl;
-            this.TargetLayer = polygonLayer;
+            this.TargetLayer = targetLayer;
 
             this.MapControl.MouseLeftButtonDown += OnLeftMouseDown;
             this.MapControl.MouseLeftButtonUp += OnLeftMouseUp;
