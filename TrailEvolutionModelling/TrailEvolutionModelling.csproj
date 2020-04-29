@@ -169,6 +169,7 @@
     <Compile Include="EditorTools\DraggingLayer.cs" />
     <Compile Include="MapObjects\Highlighter.cs" />
     <Compile Include="EditorTools\InsertionPreviewFeature.cs" />
+    <Compile Include="MapObjects\Line.cs" />
     <Compile Include="MapObjects\MapObject.cs" />
     <Compile Include="Styles\LineStyle.cs" />
     <Compile Include="Styles\MapObjectStyle.cs" />
