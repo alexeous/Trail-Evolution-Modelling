@@ -7,33 +7,30 @@ using Polygon = TrailEvolutionModelling.MapObjects.Polygon;
 
 namespace TrailEvolutionModelling.EditorTools
 {
-    partial class PolygonEditing
+    class InsertionPreviewFeature : Feature
     {
-        private class InsertionPreviewFeature : Feature
+        private readonly IList<Point> vertices;
+        public Point Vertex { get; private set; }
+        public int Index { get; private set; }
+
+        public InsertionPreviewFeature(Polygon polygon, Point vertex, int index)
         {
-            private readonly IList<Point> vertices;
-            public Point Vertex { get; private set; }
-            public int Index { get; private set; }
-
-            public InsertionPreviewFeature(Polygon polygon, Point vertex, int index)
+            if (polygon == null)
             {
-                if (polygon == null)
-                {
-                    throw new ArgumentNullException(nameof(polygon));
-                }
-                vertices = polygon.Vertices;
-                Update(vertex, index);
+                throw new ArgumentNullException(nameof(polygon));
             }
+            vertices = polygon.Vertices;
+            Update(vertex, index);
+        }
 
-            public void Update(Point vertex, int index)
+        public void Update(Point vertex, int index)
+        {
+            if (index < 0 || index >= vertices.Count)
             {
-                if (index < 0 || index >= vertices.Count)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(index));
-                }
-                Geometry = Vertex = vertex ?? throw new ArgumentNullException(nameof(vertex));
-                Index = index;
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
+            Geometry = Vertex = vertex ?? throw new ArgumentNullException(nameof(vertex));
+            Index = index;
         }
     }
 }

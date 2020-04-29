@@ -7,41 +7,38 @@ using Polygon = TrailEvolutionModelling.MapObjects.Polygon;
 
 namespace TrailEvolutionModelling.EditorTools
 {
-    partial class PolygonEditing
+    class DraggingFeature : Feature
     {
-        private class DraggingFeature : Feature
+        private readonly IList<Point> vertices;
+        private Point vertex;
+
+        public Point Vertex
         {
-            private readonly IList<Point> vertices;
-            private Point vertex;
-
-            public Point Vertex
+            get => vertex;
+            set
             {
-                get => vertex;
-                set
+                int index = vertices.IndexOf(Vertex);
+                if (index != -1)
                 {
-                    int index = vertices.IndexOf(Vertex);
-                    if (index != -1)
-                    {
-                        vertices.RemoveAt(index);
-                        vertices.Insert(index, value);
-                    }
-                    vertex = value;
-                    Geometry = value;
+                    vertices.RemoveAt(index);
+                    vertices.Insert(index, value);
                 }
+                vertex = value;
+                Geometry = value;
+            }
+        }
+
+        public DraggingFeature(Polygon polygon, Point vertex)
+        {
+            if (polygon == null)
+            {
+                throw new ArgumentNullException(nameof(polygon));
             }
 
-            public DraggingFeature(Polygon polygon, Point vertex)
-            {
-                if (polygon == null)
-                {
-                    throw new ArgumentNullException(nameof(polygon));
-                }
+            this.vertex = vertex ?? throw new ArgumentNullException(nameof(vertex));
+            this.vertices = polygon.Vertices;
 
-                this.vertex = vertex ?? throw new ArgumentNullException(nameof(vertex));
-                this.vertices = polygon.Vertices;
-
-                Geometry = vertex;
-            }
+            Geometry = vertex;
         }
     }
 }

@@ -18,7 +18,7 @@ using MapsuiPolygon = Mapsui.Geometries.Polygon;
 
 namespace TrailEvolutionModelling.EditorTools
 {
-    partial class PolygonEditing
+    class PolygonEditing
     {
         private const double VertexInsertionDistance = 30;
 
