@@ -190,7 +190,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MapObjects\Polygon.cs" />
-    <Compile Include="EditorTools\PolygonEditing.cs" />
+    <Compile Include="EditorTools\MapObjectEditing.cs" />
     <Compile Include="MapObjects\PolygonLayer.cs" />
     <Compile Include="EditorTools\PolygonTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

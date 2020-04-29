@@ -27,7 +27,7 @@ namespace TrailEvolutionModelling
         private WritableLayer polygonLayer;
 
         private PolygonTool polygonTool;
-        private PolygonEditing polygonEditing;
+        private MapObjectEditing mapObjectEditing;
         private Tool[] allTools;
 
         public MainWindow()
@@ -60,8 +60,8 @@ namespace TrailEvolutionModelling
         private void InitTools()
         {
             polygonTool = new PolygonTool(mapControl, polygonLayer);
-            polygonEditing = new PolygonEditing(mapControl, polygonLayer);
-            allTools = new Tool[] { polygonTool, polygonEditing };
+            mapObjectEditing = new MapObjectEditing(mapControl, polygonLayer);
+            allTools = new Tool[] { polygonTool, mapObjectEditing };
         }
 
         private void ZoomToPoint(Point center)
@@ -100,8 +100,8 @@ namespace TrailEvolutionModelling
                 {
                     UnhighlightAllPolygons();
                     EndAllTools();
-                    polygonEditing.TargetPolygon = polygon;
-                    polygonEditing.Begin();
+                    mapObjectEditing.TargetObject = polygon;
+                    mapObjectEditing.Begin();
                 };
                 return item;
             }

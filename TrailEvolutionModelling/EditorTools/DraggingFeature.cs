@@ -28,15 +28,15 @@ namespace TrailEvolutionModelling.EditorTools
             }
         }
 
-        public DraggingFeature(Polygon polygon, Point vertex)
+        public DraggingFeature(MapObject mapObject, Point vertex)
         {
-            if (polygon == null)
+            if (mapObject == null)
             {
-                throw new ArgumentNullException(nameof(polygon));
+                throw new ArgumentNullException(nameof(mapObject));
             }
 
             this.vertex = vertex ?? throw new ArgumentNullException(nameof(vertex));
-            this.vertices = polygon.Vertices;
+            this.vertices = mapObject.Vertices;
 
             Geometry = vertex;
         }

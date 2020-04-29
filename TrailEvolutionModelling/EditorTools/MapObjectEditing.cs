@@ -13,29 +13,27 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TrailEvolutionModelling.Util;
 using TrailEvolutionModelling.MapObjects;
-using Polygon = TrailEvolutionModelling.MapObjects.Polygon;
-using MapsuiPolygon = Mapsui.Geometries.Polygon;
 
 namespace TrailEvolutionModelling.EditorTools
 {
-    class PolygonEditing : Tool
+    class MapObjectEditing : Tool
     {
         private const double VertexInsertionDistance = 30;
 
-        public Polygon TargetPolygon { get; set; }
+        public MapObject TargetObject { get; set; }
 
         private MapControl mapControl;
-        private WritableLayer polygonLayer;
+        private WritableLayer targetLayer;
         private WritableLayer draggingLayer;
         private DraggingFeature draggingFeature;
         private Point draggingOffset;
         private InsertionPreviewFeature insertionPreviewFeature;
-        private Polygon editedPolygon;
+        private MapObject editedObject;
 
-        public PolygonEditing(MapControl mapControl, WritableLayer polygonLayer)
+        public MapObjectEditing(MapControl mapControl, WritableLayer targetLayer)
         {
             this.mapControl = mapControl;
-            this.polygonLayer = polygonLayer;
+            this.targetLayer = targetLayer;
 
             draggingLayer = new DraggingLayer();
             this.mapControl.Map.Layers.Add(draggingLayer);
@@ -43,16 +41,16 @@ namespace TrailEvolutionModelling.EditorTools
 
         protected override void BeginImpl()
         {
-            editedPolygon = TargetPolygon;
+            editedObject = TargetObject;
 
-            if (editedPolygon == null)
+            if (editedObject == null)
             {
-                throw new InvalidOperationException($"{nameof(TargetPolygon)} was not set");
+                throw new InvalidOperationException($"{nameof(TargetObject)} was not set");
             }
 
-            foreach (var vertex in editedPolygon.Vertices)
+            foreach (var vertex in editedObject.Vertices)
             {
-                draggingLayer.Add(new DraggingFeature(editedPolygon, vertex));
+                draggingLayer.Add(new DraggingFeature(editedObject, vertex));
             }
             draggingLayer.Refresh();
 
@@ -66,7 +64,7 @@ namespace TrailEvolutionModelling.EditorTools
             draggingLayer.Clear();
             draggingLayer.Refresh();
             insertionPreviewFeature = null;
-            editedPolygon = null;
+            editedObject = null;
         }
 
         private void OnPreviewLeftMouseDown(object sender, MouseButtonEventArgs e)
@@ -123,7 +121,7 @@ namespace TrailEvolutionModelling.EditorTools
                 Point mousePoint = ScreenPointToGlobal(e.GetPosition(mapControl).ToMapsui());
                 draggingFeature.Vertex = mousePoint - draggingOffset;
                 draggingLayer.Refresh();
-                polygonLayer.Refresh();
+                targetLayer.Refresh();
             }
             else
             {
@@ -165,7 +163,7 @@ namespace TrailEvolutionModelling.EditorTools
             {
                 if (insertionPreviewFeature == null)
                 {
-                    insertionPreviewFeature = new InsertionPreviewFeature(editedPolygon, previewPoint, index);
+                    insertionPreviewFeature = new InsertionPreviewFeature(editedObject, previewPoint, index);
                     draggingLayer.Add(insertionPreviewFeature);
                 }
                 insertionPreviewFeature.Update(previewPoint, index);
@@ -174,7 +172,7 @@ namespace TrailEvolutionModelling.EditorTools
 
             void GetInsertionPreviewPoint(Point mouseScreenPoint, Point mouseWorldPoint, out Point previewPoint, out int index)
             {
-                IList<Point> vertices = editedPolygon.Vertices;
+                IList<Point> vertices = editedObject.Vertices;
                 previewPoint = null;
                 index = -1;
                 double minDistance = double.PositiveInfinity;
@@ -214,8 +212,8 @@ namespace TrailEvolutionModelling.EditorTools
         private DraggingFeature InsertVertex(int index, Point vertex)
         {
             DraggingFeature draggingFeature;
-            editedPolygon.Vertices.Insert(index, vertex);
-            draggingFeature = new DraggingFeature(editedPolygon, vertex);
+            editedObject.Vertices.Insert(index, vertex);
+            draggingFeature = new DraggingFeature(editedObject, vertex);
             draggingLayer.Add(draggingFeature);
             draggingLayer.Refresh();
             return draggingFeature;
@@ -223,7 +221,7 @@ namespace TrailEvolutionModelling.EditorTools
 
         private void RemoveVertex(Point vertex)
         {
-            editedPolygon.Vertices.Remove(vertex);
+            editedObject.Vertices.Remove(vertex);
             var draggingFeatures = draggingLayer.GetFeatures().OfType<DraggingFeature>();
             var correspondingDraggingFeature = draggingFeatures.FirstOrDefault(f => f.Vertex == vertex);
             if(correspondingDraggingFeature != null)

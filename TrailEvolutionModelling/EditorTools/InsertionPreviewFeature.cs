@@ -13,13 +13,13 @@ namespace TrailEvolutionModelling.EditorTools
         public Point Vertex { get; private set; }
         public int Index { get; private set; }
 
-        public InsertionPreviewFeature(Polygon polygon, Point vertex, int index)
+        public InsertionPreviewFeature(MapObject mapObject, Point vertex, int index)
         {
-            if (polygon == null)
+            if (mapObject == null)
             {
-                throw new ArgumentNullException(nameof(polygon));
+                throw new ArgumentNullException(nameof(mapObject));
             }
-            vertices = polygon.Vertices;
+            vertices = mapObject.Vertices;
             Update(vertex, index);
         }
 
