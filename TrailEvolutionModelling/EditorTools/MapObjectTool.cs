@@ -12,14 +12,14 @@ using TrailEvolutionModelling.Util;
 
 namespace TrailEvolutionModelling.EditorTools
 {
-    abstract class MapObjectTool<T> where T : MapObject
+    abstract class MapObjectTool<T> : Tool where T : MapObject
     {
+        public AreaType AreaType { get; set; }
+
         protected MapControl MapControl { get; }
         protected WritableLayer TargetLayer { get; }
-        protected AreaType CurrentAreaType { get; set; }
         protected T CurrentDrawnObject { get; set; }
 
-        public bool IsInDrawingMode { get; private set; }
 
         private System.Windows.Point mouseDownPos;
         private Mapsui.Geometries.Point previewPoint;
@@ -30,40 +30,53 @@ namespace TrailEvolutionModelling.EditorTools
         {
             this.MapControl = mapControl;
             this.TargetLayer = targetLayer;
-
-            this.MapControl.MouseLeftButtonDown += OnLeftMouseDown;
-            this.MapControl.MouseLeftButtonUp += OnLeftMouseUp;
-            this.MapControl.MouseMove += OnMouseMove;
         }
 
-        public void BeginDrawing(AreaType areaType)
+        protected override void BeginImpl()
         {
-            if (IsInDrawingMode)
-            {
-                return;
-            }
-
-            IsInDrawingMode = true;
-            CurrentAreaType = areaType;
             MapControl.Cursor = Cursors.Pen;
+
+            SubscribeMouseEvents();
         }
 
+        protected override void EndImpl()
+        {
+            UnsubscribeMouseEvents();
+
+            T result = CurrentDrawnObject;
+
+            MapControl.Cursor = Cursors.Arrow;
+
+            if (CurrentDrawnObject != null)
+            {
+                if (previewPoint != null)
+                {
+                    CurrentDrawnObject.Vertices.Remove(previewPoint);
+                }
+                if (CurrentDrawnObject.Vertices.Count <= 1)
+                {
+                    TargetLayer.TryRemove(CurrentDrawnObject);
+                    result = null;
+                }
+            }
+            if (previewPointFeature != null)
+            {
+                TargetLayer.TryRemove(previewPointFeature);
+            }
+            Update();
+
+            CurrentDrawnObject = null;
+            previewPoint = null;
+            previewPointFeature = null;
+        }
 
         private void OnLeftMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!IsInDrawingMode)
-            {
-                return;
-            }
             mouseDownPos = e.GetPosition(MapControl);
         }
 
         private void OnLeftMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (!IsInDrawingMode)
-            {
-                return;
-            }
             const double tolerance = 5;
             var pos = e.GetPosition(MapControl);
             if (Math.Abs(pos.X - mouseDownPos.X) > tolerance ||
@@ -79,15 +92,10 @@ namespace TrailEvolutionModelling.EditorTools
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
-            if (!IsInDrawingMode)
-            {
-                return;
-            }
-
             if (CurrentDrawnObject == null)
             {
                 CurrentDrawnObject = CreateNewMapObject();
-                CurrentDrawnObject.AreaType = CurrentAreaType;
+                CurrentDrawnObject.AreaType = AreaType;
                 TargetLayer.Add(CurrentDrawnObject);
             }
             if (previewPoint != null)
@@ -118,41 +126,18 @@ namespace TrailEvolutionModelling.EditorTools
             TargetLayer.Refresh();
         }
 
-        public T EndDrawing()
+        private void SubscribeMouseEvents()
         {
-            if (!IsInDrawingMode)
-            {
-                return null;
-            }
+            this.MapControl.MouseLeftButtonDown += OnLeftMouseDown;
+            this.MapControl.MouseLeftButtonUp += OnLeftMouseUp;
+            this.MapControl.MouseMove += OnMouseMove;
+        }
 
-            IsInDrawingMode = false;
-            T result = CurrentDrawnObject;
-
-            MapControl.Cursor = Cursors.Arrow;
-
-            if (CurrentDrawnObject != null)
-            {
-                if (previewPoint != null)
-                {
-                    CurrentDrawnObject.Vertices.Remove(previewPoint);
-                }
-                if (CurrentDrawnObject.Vertices.Count <= 1)
-                {
-                    TargetLayer.TryRemove(CurrentDrawnObject);
-                    result = null;
-                }
-            }
-            if (previewPointFeature != null)
-            {
-                TargetLayer.TryRemove(previewPointFeature);
-            }
-            Update();
-
-            CurrentDrawnObject = null;
-            previewPoint = null;
-            previewPointFeature = null;
-
-            return result;
+        private void UnsubscribeMouseEvents()
+        {
+            this.MapControl.MouseLeftButtonDown -= OnLeftMouseDown;
+            this.MapControl.MouseLeftButtonUp -= OnLeftMouseUp;
+            this.MapControl.MouseMove -= OnMouseMove;
         }
 
         protected abstract T CreateNewMapObject();

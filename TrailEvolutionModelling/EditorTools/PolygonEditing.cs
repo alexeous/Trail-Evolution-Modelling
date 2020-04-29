@@ -18,9 +18,11 @@ using MapsuiPolygon = Mapsui.Geometries.Polygon;
 
 namespace TrailEvolutionModelling.EditorTools
 {
-    class PolygonEditing
+    class PolygonEditing : Tool
     {
         private const double VertexInsertionDistance = 30;
+
+        public Polygon TargetPolygon { get; set; }
 
         private MapControl mapControl;
         private WritableLayer polygonLayer;
@@ -28,8 +30,7 @@ namespace TrailEvolutionModelling.EditorTools
         private DraggingFeature draggingFeature;
         private Point draggingOffset;
         private InsertionPreviewFeature insertionPreviewFeature;
-
-        public Polygon editedPolygon { get; private set; }
+        private Polygon editedPolygon;
 
         public PolygonEditing(MapControl mapControl, WritableLayer polygonLayer)
         {
@@ -38,52 +39,38 @@ namespace TrailEvolutionModelling.EditorTools
 
             draggingLayer = new DraggingLayer();
             this.mapControl.Map.Layers.Add(draggingLayer);
-
-            this.mapControl.PreviewMouseLeftButtonDown += OnPreviewLeftMouseDown;
-            this.mapControl.PreviewMouseRightButtonDown += OnPreviewRightMouseDown;
-            this.mapControl.PreviewMouseMove += OnPreviewMouseMove;
-            this.mapControl.PreviewMouseLeftButtonUp += OnPreviewLeftMouseUp;
         }
 
-        public void BeginEditing(Polygon polygon)
+        protected override void BeginImpl()
         {
-            if (polygon == null)
+            editedPolygon = TargetPolygon;
+
+            if (editedPolygon == null)
             {
-                throw new ArgumentNullException(nameof(polygon));
+                throw new InvalidOperationException($"{nameof(TargetPolygon)} was not set");
             }
 
-            if (editedPolygon != null)
+            foreach (var vertex in editedPolygon.Vertices)
             {
-                EndEditing();
-            }
-            editedPolygon = polygon;
-            foreach (var vertex in polygon.Vertices)
-            {
-                draggingLayer.Add(new DraggingFeature(polygon, vertex));
+                draggingLayer.Add(new DraggingFeature(editedPolygon, vertex));
             }
             draggingLayer.Refresh();
+
+            SubscribeMouseEvents();
         }
 
-        public bool EndEditing()
+        protected override void EndImpl()
         {
+            UnsubscribeMouseEvents();
+
             draggingLayer.Clear();
             draggingLayer.Refresh();
             insertionPreviewFeature = null;
-            if (editedPolygon != null)
-            {
-                editedPolygon = null;
-                return true;
-            }
-            return false;
+            editedPolygon = null;
         }
 
         private void OnPreviewLeftMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (editedPolygon == null)
-            {
-                return;
-            }
-
             Point mouseScreenPoint = e.GetPosition(mapControl).ToMapsui();
             var draggingFeature = GetFeaturesAtScreenPoint(mouseScreenPoint).OfType<DraggingFeature>().FirstOrDefault();
 
@@ -131,10 +118,6 @@ namespace TrailEvolutionModelling.EditorTools
 
         private void OnPreviewMouseMove(object sender, MouseEventArgs e)
         {   
-            if(editedPolygon == null)
-            {
-                return;
-            }
             if (draggingFeature != null)
             {
                 Point mousePoint = ScreenPointToGlobal(e.GetPosition(mapControl).ToMapsui());
@@ -248,6 +231,22 @@ namespace TrailEvolutionModelling.EditorTools
                 draggingLayer.TryRemove(correspondingDraggingFeature);
                 draggingLayer.Refresh();
             }
+        }
+
+        private void SubscribeMouseEvents()
+        {
+            this.mapControl.PreviewMouseLeftButtonDown += OnPreviewLeftMouseDown;
+            this.mapControl.PreviewMouseRightButtonDown += OnPreviewRightMouseDown;
+            this.mapControl.PreviewMouseMove += OnPreviewMouseMove;
+            this.mapControl.PreviewMouseLeftButtonUp += OnPreviewLeftMouseUp;
+        }
+
+        private void UnsubscribeMouseEvents()
+        {
+            this.mapControl.PreviewMouseLeftButtonDown -= OnPreviewLeftMouseDown;
+            this.mapControl.PreviewMouseRightButtonDown -= OnPreviewRightMouseDown;
+            this.mapControl.PreviewMouseMove -= OnPreviewMouseMove;
+            this.mapControl.PreviewMouseLeftButtonUp -= OnPreviewLeftMouseUp;
         }
 
         private Point ScreenPointToGlobal(Point screenPoint)

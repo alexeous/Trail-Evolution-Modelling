@@ -28,6 +28,7 @@ namespace TrailEvolutionModelling
 
         private PolygonTool polygonTool;
         private PolygonEditing polygonEditing;
+        private Tool[] allTools;
 
         public MainWindow()
         {
@@ -41,7 +42,7 @@ namespace TrailEvolutionModelling
             base.OnKeyDown(e);
             if (e.Key == Key.Escape)
             {
-                polygonTool.EndDrawing();
+                EndAllTools();
             }
         }
 
@@ -51,11 +52,16 @@ namespace TrailEvolutionModelling
             InitializeMapControl();
             //polygonLayer.AddRange(polygonStorage.Polygons);
 
+            InitTools();
+
+            ZoomToPoint(new Point(9231625, 7402608));
+        }
+
+        private void InitTools()
+        {
             polygonTool = new PolygonTool(mapControl, polygonLayer);
             polygonEditing = new PolygonEditing(mapControl, polygonLayer);
-
-            
-            ZoomToPoint(new Point(9231625, 7402608));
+            allTools = new Tool[] { polygonTool, polygonEditing };
         }
 
         private void ZoomToPoint(Point center)
@@ -93,7 +99,9 @@ namespace TrailEvolutionModelling
                 item.Click += (s, e) =>
                 {
                     UnhighlightAllPolygons();
-                    polygonEditing.BeginEditing(polygon);
+                    EndAllTools();
+                    polygonEditing.TargetPolygon = polygon;
+                    polygonEditing.Begin();
                 };
                 return item;
             }
@@ -119,52 +127,63 @@ namespace TrailEvolutionModelling
         {
             UnhighlightAllPolygons();
 
-            bool wasntDrawing = polygonTool.EndDrawing() == null;
-            bool wasntEditing = !polygonEditing.EndEditing();
-            if (wasntDrawing && wasntEditing)
+            bool anyToolWasAcitve = EndAllTools();
+            if (anyToolWasAcitve)
             {
-                var clickScreenPos = e.GetPosition(mapControl).ToMapsui();
-                var clickWorldPos = mapControl.Viewport.ScreenToWorld(clickScreenPos);
-                IEnumerable<Polygon> polygons = GetPolygonsAt(clickWorldPos);
-
-                int count = polygons.Count();
-                if (count == 0)
-                {
-                    return;
-                }
-                if (count == 1)
-                {
-                    OnPolygonRightClick(polygons.First());
-                }
-                else
-                {
-                    var contextMenu = new ContextMenu();
-                    contextMenu.Items.Add(new Label
-                    {
-                        Content = "Выберите объект:",
-                        IsEnabled = false
-                    });
-                    foreach (var polygon in polygons)
-                    {
-                        var item = new MenuItem
-                        {
-                            //Header = polygon.ObjectKindName
-                        };
-                        item.GotFocus += (s, ee) => { polygon.Highlighter.IsHighlighted = true; polygonLayer.Refresh(); };
-                        item.LostFocus += (s, ee) => { polygon.Highlighter.IsHighlighted = false; polygonLayer.Refresh(); };
-                        item.Click += (s, ee) => OnPolygonRightClick(polygon);
-                        contextMenu.Items.Add(item);
-                    }
-                    contextMenu.IsOpen = true;
-                }
+                return;
             }
 
-            IEnumerable<Polygon> GetPolygonsAt(Point point)
+            var clickScreenPos = e.GetPosition(mapControl).ToMapsui();
+            var clickWorldPos = mapControl.Viewport.ScreenToWorld(clickScreenPos);
+            IEnumerable<Polygon> polygons = GetPolygonsAt(clickWorldPos);
+
+            int count = polygons.Count();
+            if (count == 0)
             {
-                var boundingBox = new BoundingBox(point, point);
-                var polygons = polygonLayer.GetFeaturesInView(boundingBox, resolution: 1f).OfType<Polygon>();
-                return polygons.Where(p => p.Geometry.Distance(point) <= 0);
+                return;
             }
+            if (count == 1)
+            {
+                OnPolygonRightClick(polygons.First());
+            }
+            else
+            {
+                var contextMenu = new ContextMenu();
+                contextMenu.Items.Add(new Label
+                {
+                    Content = "Выберите объект:",
+                    IsEnabled = false
+                });
+                foreach (var polygon in polygons)
+                {
+                    var item = new MenuItem
+                    {
+                        //Header = polygon.ObjectKindName
+                    };
+                    item.GotFocus += (s, ee) => { polygon.Highlighter.IsHighlighted = true; polygonLayer.Refresh(); };
+                    item.LostFocus += (s, ee) => { polygon.Highlighter.IsHighlighted = false; polygonLayer.Refresh(); };
+                    item.Click += (s, ee) => OnPolygonRightClick(polygon);
+                    contextMenu.Items.Add(item);
+                }
+                contextMenu.IsOpen = true;
+            }
+        }
+
+        private IEnumerable<Polygon> GetPolygonsAt(Point point)
+        {
+            var boundingBox = new BoundingBox(point, point);
+            var polygons = polygonLayer.GetFeaturesInView(boundingBox, resolution: 1f).OfType<Polygon>();
+            return polygons.Where(p => p.Geometry.Distance(point) <= 0);
+        }
+
+        private bool EndAllTools()
+        {
+            bool any = false;
+            foreach (var tool in allTools)
+            {
+                any |= tool.End();
+            }
+            return any;
         }
 
         private void OnMapLeftClick(object sender, MouseButtonEventArgs e)
@@ -192,18 +211,11 @@ namespace TrailEvolutionModelling
 
         private void OnPolygonDrawClick(object sender, RoutedEventArgs e)
         {
-            if (!polygonTool.IsInDrawingMode)
-            {
-                string areaTypeNmae = (string)((Button)sender).Tag;
-                AreaType areaType = AreaTypes.GetByName(areaTypeNmae);
+            EndAllTools();
 
-                polygonEditing.EndEditing();
-                polygonTool.BeginDrawing(areaType);
-            }
-            else
-            {
-                polygonTool.EndDrawing();
-            }
+            string areaTypeName = (string)((Button)sender).Tag;
+            polygonTool.AreaType = AreaTypes.GetByName(areaTypeName);
+            polygonTool.Begin();
         }
 
         private void OnLineDrawClick(object sender, RoutedEventArgs e)
