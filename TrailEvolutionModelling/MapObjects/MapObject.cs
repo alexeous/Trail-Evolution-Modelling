@@ -17,13 +17,40 @@ namespace TrailEvolutionModelling.MapObjects
     {
         public abstract IList<Point> Vertices { get; }
         
-
         public Highlighter Highlighter { get; }
+
+        private IStyle mainStyle;
+        private AreaType areaType;
+        public AreaType AreaType
+        {
+            get => areaType;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                if (mainStyle != null)
+                {
+                    Styles.Remove(mainStyle);
+                }      
+                
+                areaType = value;
+                mainStyle = areaType.Style;
+
+                if (mainStyle != null)
+                {
+                    Styles.Add(mainStyle);
+                }
+            }
+        }
 
 
         public MapObject()
         {
             Highlighter = new Highlighter(this, CreateHighlighedStyle());
+            Styles = new List<IStyle>();
         }
 
         public XmlSchema GetSchema() => null;

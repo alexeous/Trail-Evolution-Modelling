@@ -20,16 +20,6 @@ namespace TrailEvolutionModelling.MapObjects
         public Polygon()
         {
             Geometry = new MapsuiPolygon(new LinearRing());
-            Styles = new List<IStyle>();
-            Styles.Add(new VectorStyle
-            {
-                Fill = new Brush(new Color(240, 20, 20, 70)),
-                Outline = new Pen
-                {
-                    Color = new Color(240, 20, 20),
-                    Width = 2
-                }
-            });
         }
 
         protected override void InitGeometryFromText(string geometryText)
