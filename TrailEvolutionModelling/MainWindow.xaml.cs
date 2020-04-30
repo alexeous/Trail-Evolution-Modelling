@@ -32,11 +32,38 @@ namespace TrailEvolutionModelling
         private MapObjectEditing mapObjectEditing;
         private Tool[] allTools;
 
+        private Button[] MapObjectButtons => new[]
+        {
+            buttonPavedPath,
+            buttonCarRoad,
+            buttonVegetation,
+            buttonWalkthroughableFence,
+            buttonBuilding,
+            buttonFence,
+            buttonWater,
+            buttonOtherUnwalkthroughable
+        };
+
         public MainWindow()
         {
             InitializeComponent();
+            InitMapObjectButtons();
 
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
+        }
+
+        private void InitMapObjectButtons()
+        {
+            foreach (var button in MapObjectButtons)
+            {
+                string text = GetAreaTypeFromTag(button).DisplayedName;
+                button.Content = new TextBlock
+                {
+                    Text = text,
+                    TextWrapping = TextWrapping.Wrap,
+                    TextAlignment = TextAlignment.Left
+                };
+            }
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -219,8 +246,7 @@ namespace TrailEvolutionModelling
         {
             EndAllTools();
 
-            string areaTypeName = (string)((Button)sender).Tag;
-            polygonTool.AreaType = AreaTypes.GetByName(areaTypeName);
+            polygonTool.AreaType = GetAreaTypeFromTag(sender);
             polygonTool.Begin();
         }
 
@@ -228,9 +254,13 @@ namespace TrailEvolutionModelling
         {
             EndAllTools();
 
-            string areaTypeName = (string)((Button)sender).Tag;
-            lineTool.AreaType = AreaTypes.GetByName(areaTypeName);
+            lineTool.AreaType = GetAreaTypeFromTag(sender);
             lineTool.Begin();
+        }
+
+        private static AreaType GetAreaTypeFromTag(object element) {
+            string areaTypeName = (string)((FrameworkElement)element).Tag;
+            return AreaTypes.GetByName(areaTypeName);
         }
     }
 }
