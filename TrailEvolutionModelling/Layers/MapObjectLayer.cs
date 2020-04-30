@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TrailEvolutionModelling.MapObjects
+namespace TrailEvolutionModelling.Layers
 {
-    class PolygonLayer : WritableLayer
+    class MapObjectLayer : WritableLayer
     {
-        public PolygonLayer()
+        public MapObjectLayer()
         {
-            Name = "Polygons";
+            Name = "Map Objects";
         }
     }
 }

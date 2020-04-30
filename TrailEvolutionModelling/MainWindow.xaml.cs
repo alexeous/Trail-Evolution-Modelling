@@ -13,6 +13,7 @@ using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
 using TrailEvolutionModelling.EditorTools;
 using TrailEvolutionModelling.GPUProxy;
+using TrailEvolutionModelling.Layers;
 using TrailEvolutionModelling.MapObjects;
 using TrailEvolutionModelling.Util;
 using Point = Mapsui.Geometries.Point;
@@ -77,7 +78,7 @@ namespace TrailEvolutionModelling
 
         private void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
-            mapObjectLayer = new PolygonLayer();
+            mapObjectLayer = new MapObjectLayer();
             InitializeMapControl();
             //polygonLayer.AddRange(polygonStorage.Polygons);
 
