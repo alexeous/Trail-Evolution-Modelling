@@ -189,7 +189,7 @@ namespace TrailEvolutionModelling
                 {
                     var item = new MenuItem
                     {
-                        //Header = polygon.ObjectKindName
+                        Header = mapObject.AreaType.DisplayedName
                     };
                     item.GotFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = true; mapObjectLayer.Refresh(); };
                     item.LostFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = false; mapObjectLayer.Refresh(); };
