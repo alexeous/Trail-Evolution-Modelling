@@ -28,18 +28,13 @@ namespace TrailEvolutionModelling.MapObjects
             get => areaType;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
                 if (mainStyle != null)
                 {
                     Styles.Remove(mainStyle);
                 }      
                 
                 areaType = value;
-                mainStyle = areaType.Style;
+                mainStyle = areaType?.Style;
 
                 if (mainStyle != null)
                 {
