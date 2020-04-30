@@ -18,8 +18,10 @@ namespace TrailEvolutionModelling.MapObjects
         public abstract IList<Point> Vertices { get; }
         public abstract bool AreVerticesLooped { get; }
         public abstract string DisplayedName { get; }
-        
+        public abstract int MinimumVertices { get; }
+
         public Highlighter Highlighter { get; }
+        public bool IsVerticesNumberValid => Vertices != null && Vertices.Count >= MinimumVertices;
 
         private IStyle mainStyle;
         private AreaType areaType;

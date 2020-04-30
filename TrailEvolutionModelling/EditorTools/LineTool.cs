@@ -16,6 +16,11 @@ namespace TrailEvolutionModelling.EditorTools
         {
         }
 
+        protected override bool IsFinalResultAcceptable(Line finalResult)
+        {
+            return finalResult.IsVerticesNumberValid;
+        }
+
         protected override Line CreateNewMapObject()
         {
             return new Line();

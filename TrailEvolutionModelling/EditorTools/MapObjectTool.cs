@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Mapsui.Geometries;
 using Mapsui.Layers;
 using Mapsui.Providers;
 using Mapsui.UI.Wpf;
@@ -22,7 +23,7 @@ namespace TrailEvolutionModelling.EditorTools
 
 
         private System.Windows.Point mouseDownPos;
-        private Mapsui.Geometries.Point previewPoint;
+        private Point previewPoint;
 
 
         public MapObjectTool(MapControl mapControl, WritableLayer targetLayer)
@@ -52,7 +53,7 @@ namespace TrailEvolutionModelling.EditorTools
                 {
                     CurrentDrawnObject.Vertices.Remove(previewPoint);
                 }
-                if (CurrentDrawnObject.Vertices.Count <= 1)
+                if (!IsFinalResultAcceptable(CurrentDrawnObject))
                 {
                     TargetLayer.TryRemove(CurrentDrawnObject);
                     result = null;
@@ -92,6 +93,7 @@ namespace TrailEvolutionModelling.EditorTools
                 CurrentDrawnObject.AreaType = AreaType;
                 TargetLayer.Add(CurrentDrawnObject);
             }
+            
             if (previewPoint != null)
             {
                 CurrentDrawnObject.Vertices.Remove(previewPoint);
@@ -102,7 +104,7 @@ namespace TrailEvolutionModelling.EditorTools
             Update();
         }
 
-        private Mapsui.Geometries.Point GetGlobalPointFromEvent(MouseEventArgs e)
+        private Point GetGlobalPointFromEvent(MouseEventArgs e)
         {
             var screenPosition = e.GetPosition(MapControl).ToMapsui();
             var globalPosition = MapControl.Viewport.ScreenToWorld(screenPosition);
@@ -128,6 +130,7 @@ namespace TrailEvolutionModelling.EditorTools
             this.MapControl.MouseMove -= OnMouseMove;
         }
 
+        protected abstract bool IsFinalResultAcceptable(T finalResult);
         protected abstract T CreateNewMapObject();
     }
 }

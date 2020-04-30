@@ -13,6 +13,7 @@ namespace TrailEvolutionModelling.MapObjects
         public override IList<Point> Vertices => LineString.Vertices;
         public override bool AreVerticesLooped => false;
         public override string DisplayedName => AreaType?.DisplayedName ?? "<Line>";
+        public override int MinimumVertices => 2;
 
         private LineString LineString => (LineString)Geometry;
 

@@ -22,6 +22,11 @@ namespace TrailEvolutionModelling.EditorTools
         {
         }
 
+        protected override bool IsFinalResultAcceptable(Polygon finalResult)
+        {
+            return finalResult.IsVerticesNumberValid;
+        }
+
         protected override Polygon CreateNewMapObject()
         {
             return new Polygon();
