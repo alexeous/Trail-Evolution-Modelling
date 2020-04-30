@@ -23,7 +23,6 @@ namespace TrailEvolutionModelling.EditorTools
 
         private System.Windows.Point mouseDownPos;
         private Mapsui.Geometries.Point previewPoint;
-        private Feature previewPointFeature;
 
 
         public MapObjectTool(MapControl mapControl, WritableLayer targetLayer)
@@ -59,15 +58,10 @@ namespace TrailEvolutionModelling.EditorTools
                     result = null;
                 }
             }
-            if (previewPointFeature != null)
-            {
-                TargetLayer.TryRemove(previewPointFeature);
-            }
             Update();
 
             CurrentDrawnObject = null;
             previewPoint = null;
-            previewPointFeature = null;
         }
 
         private void OnLeftMouseDown(object sender, MouseButtonEventArgs e)
@@ -104,12 +98,6 @@ namespace TrailEvolutionModelling.EditorTools
             }
             previewPoint = GetGlobalPointFromEvent(e);
             CurrentDrawnObject.Vertices.Add(previewPoint);
-
-            if (previewPointFeature == null)
-            {
-                TargetLayer.Add(previewPointFeature = new Feature { Geometry = previewPoint });
-            }
-            previewPointFeature.Geometry = previewPoint;
 
             Update();
         }
