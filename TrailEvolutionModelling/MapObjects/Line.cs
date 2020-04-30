@@ -12,8 +12,14 @@ namespace TrailEvolutionModelling.MapObjects
     {
         public override IList<Point> Vertices => LineString.Vertices;
         public override bool AreVerticesLooped => false;
+        public override string DisplayedName => AreaType?.DisplayedName ?? "<Line>";
 
         private LineString LineString => (LineString)Geometry;
+
+        public override double Distance(Point p)
+        {
+            return LineString.Distance(p);
+        }
 
         protected override IGeometry CreateGeometry()
         {

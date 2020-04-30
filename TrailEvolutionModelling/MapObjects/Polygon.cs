@@ -15,8 +15,14 @@ namespace TrailEvolutionModelling.MapObjects
     {
         public override IList<Point> Vertices => MapsuiPolygon.ExteriorRing.Vertices;
         public override bool AreVerticesLooped => true;
+        public override string DisplayedName => AreaType?.DisplayedName ?? "<Polygon>";
 
         private MapsuiPolygon MapsuiPolygon => (MapsuiPolygon)Geometry;
+
+        public override double Distance(Point p)
+        {
+            return MapsuiPolygon.Distance(p);
+        }
 
         protected override IGeometry CreateGeometry()
         {

@@ -17,6 +17,7 @@ namespace TrailEvolutionModelling.MapObjects
     {
         public abstract IList<Point> Vertices { get; }
         public abstract bool AreVerticesLooped { get; }
+        public abstract string DisplayedName { get; }
         
         public Highlighter Highlighter { get; }
 
@@ -63,6 +64,7 @@ namespace TrailEvolutionModelling.MapObjects
             throw new NotImplementedException();
         }
 
+        public abstract double Distance(Point p);
         protected abstract IGeometry CreateGeometry();
         protected abstract void InitGeometryFromText(string geometryText);
         protected abstract VectorStyle CreateHighlighedStyle();

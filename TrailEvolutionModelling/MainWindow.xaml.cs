@@ -176,7 +176,7 @@ namespace TrailEvolutionModelling
             }
             if (count == 1)
             {
-                OnMapObjectRightClich(mapObjects.First());
+                OnMapObjectRightClick(mapObjects.First());
             }
             else
             {
@@ -190,11 +190,11 @@ namespace TrailEvolutionModelling
                 {
                     var item = new MenuItem
                     {
-                        Header = mapObject.AreaType.DisplayedName
+                        Header = mapObject.DisplayedName
                     };
                     item.GotFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = true; mapObjectLayer.Refresh(); };
                     item.LostFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = false; mapObjectLayer.Refresh(); };
-                    item.Click += (s, ee) => OnMapObjectRightClich(mapObject);
+                    item.Click += (s, ee) => OnMapObjectRightClick(mapObject);
                     contextMenu.Items.Add(item);
                 }
                 contextMenu.IsOpen = true;
@@ -207,7 +207,7 @@ namespace TrailEvolutionModelling
 
             var boundingBox = new BoundingBox(point, point);
             var mapObjects = mapObjectLayer.GetFeaturesInView(boundingBox, resolution: 1f).OfType<MapObject>();
-            return mapObjects.Where(p => p.Geometry.Distance(point) <= tolerance);
+            return mapObjects.Where(p => p.Distance(point) <= tolerance);
         }
 
         private bool EndAllTools()
@@ -225,7 +225,7 @@ namespace TrailEvolutionModelling
             UnhighlightAllMapObjects();
         }
 
-        private void OnMapObjectRightClich(MapObject mapObject)
+        private void OnMapObjectRightClick(MapObject mapObject)
         {
             mapObject.Highlighter.IsHighlighted = true;
             mapObjectLayer.Refresh();
