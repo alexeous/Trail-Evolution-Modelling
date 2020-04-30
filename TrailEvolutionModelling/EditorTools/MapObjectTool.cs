@@ -16,10 +16,11 @@ namespace TrailEvolutionModelling.EditorTools
     abstract class MapObjectTool<T> : Tool where T : MapObject
     {
         public AreaType AreaType { get; set; }
+        public T CurrentDrawnObject { get; protected set; }
+        public T Result { get; protected set; }
 
         protected MapControl MapControl { get; }
         protected WritableLayer TargetLayer { get; }
-        protected T CurrentDrawnObject { get; set; }
 
 
         private System.Windows.Point mouseDownPos;
@@ -61,6 +62,7 @@ namespace TrailEvolutionModelling.EditorTools
             }
             Update();
 
+            Result = result;
             CurrentDrawnObject = null;
             previewPoint = null;
         }

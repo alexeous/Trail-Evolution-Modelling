@@ -15,6 +15,7 @@ using TrailEvolutionModelling.EditorTools;
 using TrailEvolutionModelling.GPUProxy;
 using TrailEvolutionModelling.Layers;
 using TrailEvolutionModelling.MapObjects;
+using TrailEvolutionModelling.Styles;
 using TrailEvolutionModelling.Util;
 using Point = Mapsui.Geometries.Point;
 using Polygon = TrailEvolutionModelling.MapObjects.Polygon;
@@ -27,9 +28,11 @@ namespace TrailEvolutionModelling
     public partial class MainWindow : Window
     {
         private WritableLayer mapObjectLayer;
+        private WritableLayer boundingAreaLayer;
 
         private PolygonTool polygonTool;
         private LineTool lineTool;
+        private BoundingAreaTool boundingAreaTool;
         private MapObjectEditing mapObjectEditing;
         private Tool[] allTools;
 
@@ -51,6 +54,7 @@ namespace TrailEvolutionModelling
             InitMapObjectButtons();
 
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
+            mapControl.Renderer.StyleRenderers.Add(typeof(BoundingAreaStyle), new BoundingAreaRenderer());
         }
 
         private void InitMapObjectButtons()
@@ -79,6 +83,7 @@ namespace TrailEvolutionModelling
         private void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
             mapObjectLayer = new MapObjectLayer();
+            boundingAreaLayer = new BoundingAreaLayer();
             InitializeMapControl();
             //polygonLayer.AddRange(polygonStorage.Polygons);
 
@@ -91,9 +96,13 @@ namespace TrailEvolutionModelling
         {
             polygonTool = new PolygonTool(mapControl, mapObjectLayer);
             lineTool = new LineTool(mapControl, mapObjectLayer);
+            boundingAreaTool = new BoundingAreaTool(mapControl, boundingAreaLayer);
             mapObjectEditing = new MapObjectEditing(mapControl, mapObjectLayer);
             
-            allTools = new Tool[] { polygonTool, lineTool, mapObjectEditing };
+            allTools = new Tool[] { 
+                polygonTool, lineTool, mapObjectEditing,
+                boundingAreaTool
+            };
         }
 
         private void ZoomToPoint(Point center)
@@ -107,7 +116,7 @@ namespace TrailEvolutionModelling
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
 
             mapControl.Map.Layers.Add(mapObjectLayer);
-            //mapControl.Map.Layers.Add(polygonLayer);
+            mapControl.Map.Layers.Add(boundingAreaLayer);
 
             mapControl.MouseLeftButtonDown += OnMapLeftClick;
             mapControl.MouseRightButtonDown += OnMapRightClick;
@@ -142,13 +151,21 @@ namespace TrailEvolutionModelling
             {
                 var item = new MenuItem
                 {
-                    Header = "Удалить полигон",
+                    Header = "Удалить",
                     Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Delete.png")) }
                 };
                 item.Click += (s, e) =>
                 {
-                    mapObjectLayer.TryRemove(mapObject);
-                    mapObjectLayer.Refresh();
+                    if (mapObject == boundingAreaTool.BoundingArea)
+                    {
+                        boundingAreaTool.Remove();
+                        RefreshButtons();
+                    }
+                    else
+                    {
+                        mapObjectLayer.TryRemove(mapObject);
+                        mapObjectLayer.Refresh();
+                    }
                 };
                 return item;
             }
@@ -206,8 +223,10 @@ namespace TrailEvolutionModelling
             const double tolerance = 15;
 
             var boundingBox = new BoundingBox(point, point);
-            var mapObjects = mapObjectLayer.GetFeaturesInView(boundingBox, resolution: 1f).OfType<MapObject>();
-            return mapObjects.Where(p => p.Distance(point) <= tolerance);
+            return mapObjectLayer.GetFeaturesInView(boundingBox, resolution: 1f)
+                .Concat(boundingAreaLayer.GetFeaturesInView(boundingBox, resolution: 1f))
+                .OfType<MapObject>()
+                .Where(p => p.Distance(point) <= tolerance);
         }
 
         private bool EndAllTools()
@@ -217,6 +236,9 @@ namespace TrailEvolutionModelling
             {
                 any |= tool.End();
             }
+
+            RefreshButtons();
+            
             return any;
         }
 
@@ -236,7 +258,8 @@ namespace TrailEvolutionModelling
 
         private void UnhighlightAllMapObjects()
         {
-            foreach (var mapObject in mapObjectLayer.GetFeatures().OfType<MapObject>())
+            var mapObjs = mapObjectLayer.GetFeatures().Concat(boundingAreaLayer.GetFeatures()).OfType<MapObject>();
+            foreach (var mapObject in mapObjs)
             {
                 mapObject.Highlighter.IsHighlighted = false;
             }
@@ -259,7 +282,25 @@ namespace TrailEvolutionModelling
             lineTool.Begin();
         }
 
-        private static AreaType GetAreaTypeFromTag(object element) {
+        private void OnBoundingAreaToolClicked(object sender, RoutedEventArgs e)
+        {
+            EndAllTools();
+
+            boundingAreaTool.Begin();
+        }
+
+        private void RefreshButtons()
+        {
+            RefreshBoundingAreaToolButton();
+        }
+
+        private void RefreshBoundingAreaToolButton()
+        {
+            buttonBoundingArea.IsEnabled = boundingAreaTool.BoundingArea == null;
+        }
+
+        private static AreaType GetAreaTypeFromTag(object element)
+        {
             string areaTypeName = (string)((FrameworkElement)element).Tag;
             return AreaTypes.GetByName(areaTypeName);
         }

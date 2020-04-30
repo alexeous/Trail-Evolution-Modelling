@@ -160,18 +160,22 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EditorTools\BoundingAreaTool.cs" />
     <Compile Include="EditorTools\LineTool.cs" />
     <Compile Include="EditorTools\Tool.cs" />
     <Compile Include="EditorTools\MapObjectTool.cs" />
+    <Compile Include="Layers\BoundingAreaLayer.cs" />
     <Compile Include="MapObjects\AreaAttributes.cs" />
     <Compile Include="MapObjects\AreaType.cs" />
     <Compile Include="MapObjects\AreaTypes.cs" />
     <Compile Include="EditorTools\DraggingFeature.cs" />
     <Compile Include="EditorTools\DraggingLayer.cs" />
+    <Compile Include="MapObjects\BoundingAreaPolygon.cs" />
     <Compile Include="MapObjects\Highlighter.cs" />
     <Compile Include="EditorTools\InsertionPreviewFeature.cs" />
     <Compile Include="MapObjects\Line.cs" />
     <Compile Include="MapObjects\MapObject.cs" />
+    <Compile Include="Styles\BoundingAreaStyle.cs" />
     <Compile Include="Styles\LineStyle.cs" />
     <Compile Include="Styles\MapObjectStyle.cs" />
     <Compile Include="Styles\PolygonStyle.cs" />
@@ -193,7 +197,7 @@
   <ItemGroup>
     <Compile Include="MapObjects\Polygon.cs" />
     <Compile Include="EditorTools\MapObjectEditing.cs" />
-    <Compile Include="MapObjects\PolygonLayer.cs" />
+    <Compile Include="Layers\MapObjectLayer.cs" />
     <Compile Include="EditorTools\PolygonTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
