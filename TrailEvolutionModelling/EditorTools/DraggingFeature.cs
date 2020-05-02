@@ -20,8 +20,7 @@ namespace TrailEvolutionModelling.EditorTools
                 int index = vertices.IndexOf(Vertex);
                 if (index != -1)
                 {
-                    vertices.RemoveAt(index);
-                    vertices.Insert(index, value);
+                    vertices[index] = value;
                 }
                 vertex = value;
                 Geometry = value;
