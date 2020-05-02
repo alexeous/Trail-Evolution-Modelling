@@ -11,8 +11,24 @@ namespace TrailEvolutionModelling.EditorTools
     {
         private WritableLayer boundingAreaLayer;
         private BoundingAreaPolygonTool polygonTool;
-        
-        public Polygon BoundingArea { get; private set; }
+        private Polygon boundingArea;
+
+        public Polygon BoundingArea
+        {
+            get => boundingArea;
+            set
+            {
+                if (value != boundingArea)
+                {
+                    boundingAreaLayer.TryRemove(boundingArea);
+                    boundingArea = value;
+                    if (boundingArea != null)
+                        boundingAreaLayer.Add(boundingArea);
+                    
+                    boundingAreaLayer.Refresh();
+                }
+            }
+        }
 
         public BoundingAreaTool(MapControl mapControl, WritableLayer boundingAreaLayer)
         {
@@ -26,8 +42,6 @@ namespace TrailEvolutionModelling.EditorTools
             if (BoundingArea == null)
                 return false;
 
-            boundingAreaLayer.TryRemove(BoundingArea);
-            boundingAreaLayer.Refresh();
             BoundingArea = null;
             return true;
         }
