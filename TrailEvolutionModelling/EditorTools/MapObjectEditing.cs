@@ -107,7 +107,7 @@ namespace TrailEvolutionModelling.EditorTools
                 var contextMenu = new ContextMenu();
                 var deleteItem = new MenuItem {
                     Header = "Удалить вершину",
-                    Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Delete.png")) }
+                    Icon = BitmapResources.LoadImage("Delete.png")
                 };
                 deleteItem.Click += (_s, _e) => RemoveVertex(draggingFeature.Vertex);
                 contextMenu.Items.Add(deleteItem);

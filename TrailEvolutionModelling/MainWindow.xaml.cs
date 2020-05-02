@@ -135,7 +135,7 @@ namespace TrailEvolutionModelling
                 var item = new MenuItem
                 {
                     Header = "Редактировать",
-                    Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/EditPolygon.png")) }
+                    Icon = BitmapResources.LoadImage("EditPolygon.png")
                 };
                 item.Click += (s, e) =>
                 {
@@ -152,7 +152,7 @@ namespace TrailEvolutionModelling
                 var item = new MenuItem
                 {
                     Header = "Удалить",
-                    Icon = new Image { Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Delete.png")) }
+                    Icon = BitmapResources.LoadImage("Delete.png")
                 };
                 item.Click += (s, e) =>
                 {
