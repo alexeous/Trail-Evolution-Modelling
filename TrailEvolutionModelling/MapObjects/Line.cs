@@ -8,7 +8,7 @@ using Mapsui.Styles;
 
 namespace TrailEvolutionModelling.MapObjects
 {
-    class Line : MapObject
+    public class Line : MapObject
     {
         public override IList<Point> Vertices => LineString.Vertices;
         public override bool AreVerticesLooped => false;
