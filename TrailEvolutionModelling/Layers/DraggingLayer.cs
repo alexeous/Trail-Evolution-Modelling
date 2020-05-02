@@ -11,7 +11,7 @@ namespace TrailEvolutionModelling.Layers
 {
     class DraggingLayer : WritableLayer
     {
-        private const float Scale = 0.8f;
+        public static readonly float Scale = 0.6f;
         private const string ImagePath = "Dragging.png";
 
         public DraggingLayer()
