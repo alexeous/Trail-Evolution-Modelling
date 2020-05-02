@@ -169,7 +169,7 @@
     <Compile Include="MapObjects\AreaType.cs" />
     <Compile Include="MapObjects\AreaTypes.cs" />
     <Compile Include="EditorTools\DraggingFeature.cs" />
-    <Compile Include="EditorTools\DraggingLayer.cs" />
+    <Compile Include="Layers\DraggingLayer.cs" />
     <Compile Include="MapObjects\BoundingAreaPolygon.cs" />
     <Compile Include="MapObjects\Highlighter.cs" />
     <Compile Include="EditorTools\InsertionPreviewFeature.cs" />

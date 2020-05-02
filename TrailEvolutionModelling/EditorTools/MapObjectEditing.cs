@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using TrailEvolutionModelling.Util;
 using TrailEvolutionModelling.MapObjects;
+using TrailEvolutionModelling.Layers;
 
 namespace TrailEvolutionModelling.EditorTools
 {
