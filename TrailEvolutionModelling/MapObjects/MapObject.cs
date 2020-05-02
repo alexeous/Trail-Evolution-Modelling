@@ -58,17 +58,27 @@ namespace TrailEvolutionModelling.MapObjects
 
         public void ReadXml(XmlReader reader)
         {
-            throw new NotImplementedException();
+            string areaTypeName = reader.GetAttribute("AreaType");
+            if (areaTypeName != null)
+                AreaType = AreaTypes.GetByName(areaTypeName);
+
+            reader.MoveToContent();
+            string geomText = reader.ReadElementContentAsString();
+            InitGeometryFromText(geomText);
         }
 
         public void WriteXml(XmlWriter writer)
         {
-            throw new NotImplementedException();
+            if (AreaType?.Name != null)
+                writer.WriteAttributeString("AreaType", AreaType.Name);
+            
+            writer.WriteString(ConvertGeometryToText());
         }
 
         public abstract double Distance(Point p);
         protected abstract IGeometry CreateGeometry();
         protected abstract void InitGeometryFromText(string geometryText);
+        protected abstract string ConvertGeometryToText();
         protected abstract VectorStyle CreateHighlighedStyle();
     }
 }

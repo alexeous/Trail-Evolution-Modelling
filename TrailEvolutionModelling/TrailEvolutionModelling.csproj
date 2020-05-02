@@ -164,6 +164,8 @@
     <Compile Include="EditorTools\LineTool.cs" />
     <Compile Include="EditorTools\Tool.cs" />
     <Compile Include="EditorTools\MapObjectTool.cs" />
+    <Compile Include="Files\SaveFile.cs" />
+    <Compile Include="Files\XmlSaverLoader.cs" />
     <Compile Include="Layers\BoundingAreaLayer.cs" />
     <Compile Include="MapObjects\AreaAttributes.cs" />
     <Compile Include="MapObjects\AreaType.cs" />

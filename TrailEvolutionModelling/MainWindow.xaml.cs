@@ -12,6 +12,7 @@ using Mapsui.Projection;
 using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
 using TrailEvolutionModelling.EditorTools;
+using TrailEvolutionModelling.Files;
 using TrailEvolutionModelling.GPUProxy;
 using TrailEvolutionModelling.Layers;
 using TrailEvolutionModelling.MapObjects;
@@ -35,6 +36,8 @@ namespace TrailEvolutionModelling
         private BoundingAreaTool boundingAreaTool;
         private MapObjectEditing mapObjectEditing;
         private Tool[] allTools;
+
+        private XmlSaverLoader<SaveFile> saver;
 
         private Button[] MapObjectButtons => new[]
         {
@@ -86,8 +89,8 @@ namespace TrailEvolutionModelling
             boundingAreaLayer = new BoundingAreaLayer();
             InitializeMapControl();
             //polygonLayer.AddRange(polygonStorage.Polygons);
-
             InitTools();
+            InitSaver();
 
             ZoomToPoint(new Point(9231625, 7402608));
         }
@@ -103,6 +106,11 @@ namespace TrailEvolutionModelling
                 polygonTool, lineTool, mapObjectEditing,
                 boundingAreaTool
             };
+        }
+
+        private void InitSaver()
+        {
+            saver = new XmlSaverLoader<SaveFile>("tem");
         }
 
         private void ZoomToPoint(Point center)
@@ -299,10 +307,56 @@ namespace TrailEvolutionModelling
             buttonBoundingArea.IsEnabled = boundingAreaTool.BoundingArea == null;
         }
 
+        private void RefreshLayers()
+        {
+            foreach (var layer in mapControl.Map.Layers)
+            {
+                layer.Refresh();
+            }
+        }
+
         private static AreaType GetAreaTypeFromTag(object element)
         {
             string areaTypeName = (string)((FrameworkElement)element).Tag;
             return AreaTypes.GetByName(areaTypeName);
+        }
+
+        private void OnOpenFileClick(object sender, RoutedEventArgs e)
+        {
+            SaveFile save = saver.Load();
+            if (save != null)
+                LoadFromSaveFile(save);
+        }
+
+        private void OnSaveFileClick(object sender, RoutedEventArgs e)
+        {
+            saver.Save(PrepareSaveFile());
+        }
+
+        private void OnSaveFileAsClick(object sender, RoutedEventArgs e)
+        {
+            saver.SaveAs(PrepareSaveFile());
+        }
+
+        private void LoadFromSaveFile(SaveFile saveFile)
+        {
+            boundingAreaTool.BoundingArea = saveFile.BoundingArea;
+            mapObjectLayer.Clear();
+            mapObjectLayer.AddRange(saveFile.MapObjects);
+            mapControl.ZoomToBox(saveFile.Viewport.TopLeft, saveFile.Viewport.BottomRight);
+
+            RefreshLayers();
+            RefreshButtons();
+        }
+
+        private SaveFile PrepareSaveFile()
+        {
+            return new SaveFile
+            {
+                BoundingArea = boundingAreaTool.BoundingArea,
+                MapObjects = mapObjectLayer.GetFeatures().OfType<MapObject>().ToArray(),
+                Viewport = mapControl.Viewport.Extent
+            };
         }
     }
 }

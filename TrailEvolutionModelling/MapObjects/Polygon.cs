@@ -55,6 +55,11 @@ namespace TrailEvolutionModelling.MapObjects
             Geometry = mapsuiPolygon;
         }
 
+        protected override string ConvertGeometryToText()
+        {
+            return Geometry.AsText();
+        }
+
         protected override VectorStyle CreateHighlighedStyle()
         {
             return new VectorStyle

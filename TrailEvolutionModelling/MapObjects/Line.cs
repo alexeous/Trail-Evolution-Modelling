@@ -52,6 +52,11 @@ namespace TrailEvolutionModelling.MapObjects
             Geometry = lineString;
         }
 
+        protected override string ConvertGeometryToText()
+        {
+            return Geometry.AsText();
+        }
+
         protected override VectorStyle CreateHighlighedStyle()
         {
             return new VectorStyle
