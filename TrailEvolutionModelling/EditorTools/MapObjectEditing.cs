@@ -218,9 +218,9 @@ namespace TrailEvolutionModelling.EditorTools
         private IEnumerable<IFeature> GetFeaturesAtScreenPoint(Point point)
         {
             var worldPoint = ScreenPointToGlobal(point);
-            var extent = worldPoint - ScreenPointToGlobal(point - new Point(10, 10));
-            var boundingBox = new BoundingBox(worldPoint - extent, worldPoint + extent);
-            var features = draggingLayer.GetFeaturesInView(boundingBox, resolution: 1f);
+            const double extentReduction = 0.2;
+            double resolution = mapControl.Viewport.Resolution * extentReduction;
+            var features = draggingLayer.GetFeaturesInView(new BoundingBox(worldPoint, worldPoint), resolution);
             return features;
         }
 

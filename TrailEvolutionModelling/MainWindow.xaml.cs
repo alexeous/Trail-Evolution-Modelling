@@ -223,8 +223,8 @@ namespace TrailEvolutionModelling
             const double tolerance = 15;
 
             var boundingBox = new BoundingBox(point, point);
-            return mapObjectLayer.GetFeaturesInView(boundingBox, resolution: 1f)
-                .Concat(boundingAreaLayer.GetFeaturesInView(boundingBox, resolution: 1f))
+            return mapObjectLayer.GetFeaturesInView(boundingBox, mapControl.Viewport.Resolution)
+                .Concat(boundingAreaLayer.GetFeaturesInView(boundingBox, mapControl.Viewport.Resolution))
                 .OfType<MapObject>()
                 .Where(p => p.Distance(point) <= tolerance);
         }
