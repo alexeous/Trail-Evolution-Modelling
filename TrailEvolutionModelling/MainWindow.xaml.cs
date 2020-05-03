@@ -28,8 +28,8 @@ namespace TrailEvolutionModelling
     /// </summary>
     public partial class MainWindow : Window
     {
-        private WritableLayer mapObjectLayer;
-        private WritableLayer boundingAreaLayer;
+        private MapObjectLayer mapObjectLayer;
+        private BoundingAreaLayer boundingAreaLayer;
 
         private PolygonTool polygonTool;
         private LineTool lineTool;

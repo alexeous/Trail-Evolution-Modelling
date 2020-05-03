@@ -8,7 +8,7 @@ using MapsuiPolygon = Mapsui.Geometries.Polygon;
 
 namespace TrailEvolutionModelling.MapObjects
 {
-    class BoundingAreaPolygon : Polygon
+    public class BoundingAreaPolygon : Polygon
     {
         public override string DisplayedName => "Рабочая область";
 

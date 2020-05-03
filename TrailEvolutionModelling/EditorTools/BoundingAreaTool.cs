@@ -1,6 +1,7 @@
 ﻿using Mapsui.Geometries;
 using Mapsui.Layers;
 using Mapsui.UI.Wpf;
+using TrailEvolutionModelling.Layers;
 using TrailEvolutionModelling.MapObjects;
 using TrailEvolutionModelling.Util;
 using Polygon = TrailEvolutionModelling.MapObjects.Polygon;
@@ -9,11 +10,11 @@ namespace TrailEvolutionModelling.EditorTools
 {
     class BoundingAreaTool : Tool
     {
-        private WritableLayer boundingAreaLayer;
+        private BoundingAreaLayer boundingAreaLayer;
         private BoundingAreaPolygonTool polygonTool;
-        private Polygon boundingArea;
+        private BoundingAreaPolygon boundingArea;
 
-        public Polygon BoundingArea
+        public BoundingAreaPolygon BoundingArea
         {
             get => boundingArea;
             set
@@ -30,7 +31,7 @@ namespace TrailEvolutionModelling.EditorTools
             }
         }
 
-        public BoundingAreaTool(MapControl mapControl, WritableLayer boundingAreaLayer)
+        public BoundingAreaTool(MapControl mapControl, BoundingAreaLayer boundingAreaLayer)
         {
             this.boundingAreaLayer = boundingAreaLayer;
 

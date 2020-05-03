@@ -166,6 +166,8 @@
     <Compile Include="EditorTools\MapObjectTool.cs" />
     <Compile Include="Files\SaveFile.cs" />
     <Compile Include="Files\XmlSaverLoader.cs" />
+    <Compile Include="Graph\GraphBuilder.cs" />
+    <Compile Include="Graph\GraphBuilderInput.cs" />
     <Compile Include="Layers\BoundingAreaLayer.cs" />
     <Compile Include="MapObjects\AreaAttributes.cs" />
     <Compile Include="MapObjects\AreaType.cs" />
