@@ -348,9 +348,9 @@ namespace TrailEvolutionModelling
 
         private void LoadFromSaveFile(SaveFile saveFile)
         {
-            boundingAreaTool.BoundingArea = saveFile.BoundingArea;
+            boundingAreaTool.BoundingArea = saveFile.World.BoundingArea;
             mapObjectLayer.Clear();
-            mapObjectLayer.AddRange(saveFile.MapObjects);
+            mapObjectLayer.AddRange(saveFile.World.MapObjects);
             mapControl.ZoomToBox(saveFile.Viewport.TopLeft, saveFile.Viewport.BottomRight);
 
             RefreshLayers();
@@ -361,8 +361,7 @@ namespace TrailEvolutionModelling
         {
             return new SaveFile
             {
-                BoundingArea = GetBoundingArea(),
-                MapObjects = GetAllMapObjects(),
+                World = GetWorld(),
                 Viewport = mapControl.Viewport.Extent
             };
         }
@@ -371,20 +370,18 @@ namespace TrailEvolutionModelling
         {
             GraphBuilder.Build(new GraphBuilderInput
             {
-                BoundingArea = GetBoundingArea(),
-                MapObjects = GetAllMapObjects(),
+                World = GetWorld(),
                 DesiredStep = 0.5f
             });
         }
 
-        private BoundingAreaPolygon GetBoundingArea()
+        private World GetWorld()
         {
-            return boundingAreaTool.BoundingArea;
-        }
-
-        private MapObject[] GetAllMapObjects()
-        {
-            return mapObjectLayer.GetFeatures().OfType<MapObject>().ToArray();
+            return new World
+            {
+                BoundingArea = boundingAreaTool.BoundingArea,
+                MapObjects = mapObjectLayer.GetFeatures().OfType<MapObject>().ToArray()
+            };
         }
     }
 }

@@ -13,12 +13,7 @@ namespace TrailEvolutionModelling.Files
     [Serializable]
     public class SaveFile
     {
-        public BoundingAreaPolygon BoundingArea { get; set; }
-
-        [XmlArrayItem(typeof(Line))]
-        [XmlArrayItem(typeof(Polygon))]
-        public MapObject[] MapObjects { get; set; }
-
+        public World World { get; set; }
         public BoundingBox Viewport { get; set; }
     }
 }

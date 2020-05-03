@@ -14,7 +14,7 @@ namespace TrailEvolutionModelling.GraphBuilding
 
         public static Graph Build(GraphBuilderInput input)
         {
-            BoundingBox bounds = input.BoundingArea.Geometry.BoundingBox;
+            BoundingBox bounds = input.World.BoundingArea.Geometry.BoundingBox;
             Point min = bounds.Min;
 
             float step = ClampStep(input.DesiredStep, bounds);
@@ -37,7 +37,7 @@ namespace TrailEvolutionModelling.GraphBuilding
             return step;
         }
 
-        // TODO
+        // TODO:
         //static void BuildNodes(Graph graph)
         //{
         //    for (int i = 0; i < graph.Width; i++)

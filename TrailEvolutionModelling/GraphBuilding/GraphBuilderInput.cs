@@ -9,8 +9,7 @@ namespace TrailEvolutionModelling.GraphBuilding
 {
     class GraphBuilderInput
     {
-        public BoundingAreaPolygon BoundingArea { get; set; }
-        public MapObject[] MapObjects { get; set; }
+        public World World { get; set; }
         public float DesiredStep { get; set; }
     }
 }
