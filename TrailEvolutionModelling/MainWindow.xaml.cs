@@ -92,6 +92,7 @@ namespace TrailEvolutionModelling
             InitTools();
             InitSaver();
 
+            RefreshButtons();
             ZoomToPoint(new Point(9231625, 7402608));
         }
 
@@ -300,11 +301,17 @@ namespace TrailEvolutionModelling
         private void RefreshButtons()
         {
             RefreshBoundingAreaToolButton();
+            RefreshStartButton();
         }
 
         private void RefreshBoundingAreaToolButton()
         {
             buttonBoundingArea.IsEnabled = boundingAreaTool.BoundingArea == null;
+        }
+
+        private void RefreshStartButton()
+        {
+            buttonStart.IsEnabled = boundingAreaTool.BoundingArea != null;
         }
 
         private void RefreshLayers()

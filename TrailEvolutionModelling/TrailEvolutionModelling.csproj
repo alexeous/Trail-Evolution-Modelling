@@ -248,6 +248,9 @@
     <Resource Include="Resources\PolygonTool.png" />
     <Resource Include="Resources\Rename.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Play.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

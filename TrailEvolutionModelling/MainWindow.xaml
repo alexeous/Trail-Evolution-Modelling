@@ -6,7 +6,7 @@
         xmlns:mapsui="clr-namespace:Mapsui.UI.Wpf;assembly=Mapsui.UI.Wpf"
         xmlns:local="clr-namespace:TrailEvolutionModelling"
         mc:Ignorable="d"
-        Title="MainWindow" Height="657" Width="1019"
+        Title="MainWindow" Height="577" Width="1019"
         WindowStartupLocation="CenterScreen" Loaded="OnWindowLoaded">
     <DockPanel>
         <Menu DockPanel.Dock="Top" Height="18" >
@@ -22,17 +22,29 @@
                 <ColumnDefinition Width="142*"/>
             </Grid.ColumnDefinitions>
             <mapsui:MapControl x:Name="mapControl" Margin="0"/>
-            <StackPanel Margin="3,0" Grid.Column="1">
-                <Button x:Name="buttonPavedPath" Tag="PavedPath" Content="Пешеходная&#xA;дорожка" HorizontalContentAlignment="Left" Padding="9,3,1,3" Margin="0,8,0,0" Click="OnPolygonDrawClick"/>
-                <Button x:Name="buttonCarRoad" Tag="CarRoad" Content="Проезжая&#xA;часть" HorizontalContentAlignment="Left" Padding="9,3,1,3" Margin="0,8,0,0" Click="OnPolygonDrawClick"/>
-                <Button x:Name="buttonVegetation" Tag="Vegetation" Content="Растительность" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnPolygonDrawClick"/>
-                <Button x:Name="buttonWalkthroughableFence" Tag="WalkthroughableFence" Content="Проходимый забор" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnLineDrawClick"/>
-                <Button x:Name="buttonBuilding" Tag="Building" Content="Здание" HorizontalContentAlignment="Left" Padding="9,3,1,3" Margin="0,8,0,0" Click="OnPolygonDrawClick"/>
-                <Button x:Name="buttonFence" Tag="Fence" Content="Непроходимый забор" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnLineDrawClick"/>
-                <Button x:Name="buttonWater" Tag="Water" Content="Водоём" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnPolygonDrawClick"/>
-                <Button x:Name="buttonOtherUnwalkthroughable" Tag="OtherUnwalkthroughable" Content="Другое непроходимое&#xA;препятствие" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnPolygonDrawClick"/>
-                <Button x:Name="buttonBoundingArea" Content="Рабочая область" HorizontalContentAlignment="Left" Padding="9,8,1,8" Click="OnBoundingAreaToolClicked" Margin="0,24,0,0"/>
-            </StackPanel>
+            <Grid Grid.Column="1" Margin="3,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="76"/>
+                </Grid.RowDefinitions>
+                <StackPanel>
+                    <Button x:Name="buttonPavedPath" Tag="PavedPath" Content="Пешеходная&#xA;дорожка" HorizontalContentAlignment="Left" Padding="9,3,1,3" Margin="0,8,0,0" Click="OnPolygonDrawClick"/>
+                    <Button x:Name="buttonCarRoad" Tag="CarRoad" Content="Проезжая&#xA;часть" HorizontalContentAlignment="Left" Padding="9,3,1,3" Margin="0,8,0,0" Click="OnPolygonDrawClick"/>
+                    <Button x:Name="buttonVegetation" Tag="Vegetation" Content="Растительность" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnPolygonDrawClick"/>
+                    <Button x:Name="buttonWalkthroughableFence" Tag="WalkthroughableFence" Content="Проходимый забор" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnLineDrawClick"/>
+                    <Button x:Name="buttonBuilding" Tag="Building" Content="Здание" HorizontalContentAlignment="Left" Padding="9,3,1,3" Margin="0,8,0,0" Click="OnPolygonDrawClick"/>
+                    <Button x:Name="buttonFence" Tag="Fence" Content="Непроходимый забор" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnLineDrawClick"/>
+                    <Button x:Name="buttonWater" Tag="Water" Content="Водоём" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnPolygonDrawClick"/>
+                    <Button x:Name="buttonOtherUnwalkthroughable" Tag="OtherUnwalkthroughable" Content="Другое непроходимое&#xA;препятствие" HorizontalContentAlignment="Left" Padding="9,3,1,3" Click="OnPolygonDrawClick"/>
+                    <Button x:Name="buttonBoundingArea" Content="Рабочая область" HorizontalContentAlignment="Left" Padding="9,8,1,8" Click="OnBoundingAreaToolClicked" Margin="0,24,0,0"/>
+                </StackPanel>
+                <Button x:Name="buttonStart" Margin="0" VerticalAlignment="Top" Grid.Row="1" HorizontalContentAlignment="Left" Padding="6,3,1,3">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Resources/Play.png" Width="24" Margin="0,3,5,3" />
+                        <TextBlock VerticalAlignment="Center" Margin="5,0,0,0">Запустить</TextBlock>
+                    </StackPanel>
+                </Button>
+            </Grid>
         </Grid>
     </DockPanel>
 </Window>
