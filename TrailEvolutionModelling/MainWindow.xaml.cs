@@ -14,6 +14,7 @@ using Mapsui.Utilities;
 using TrailEvolutionModelling.EditorTools;
 using TrailEvolutionModelling.Files;
 using TrailEvolutionModelling.GPUProxy;
+using TrailEvolutionModelling.GraphBuilding;
 using TrailEvolutionModelling.Layers;
 using TrailEvolutionModelling.MapObjects;
 using TrailEvolutionModelling.Styles;
@@ -360,10 +361,30 @@ namespace TrailEvolutionModelling
         {
             return new SaveFile
             {
-                BoundingArea = boundingAreaTool.BoundingArea,
-                MapObjects = mapObjectLayer.GetFeatures().OfType<MapObject>().ToArray(),
+                BoundingArea = GetBoundingArea(),
+                MapObjects = GetAllMapObjects(),
                 Viewport = mapControl.Viewport.Extent
             };
+        }
+
+        private void OnStartClick(object sender, RoutedEventArgs e)
+        {
+            GraphBuilder.Build(new GraphBuilderInput
+            {
+                BoundingArea = GetBoundingArea(),
+                MapObjects = GetAllMapObjects(),
+                DesiredStep = 0.5f
+            });
+        }
+
+        private BoundingAreaPolygon GetBoundingArea()
+        {
+            return boundingAreaTool.BoundingArea;
+        }
+
+        private MapObject[] GetAllMapObjects()
+        {
+            return mapObjectLayer.GetFeatures().OfType<MapObject>().ToArray();
         }
     }
 }

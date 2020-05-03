@@ -166,8 +166,8 @@
     <Compile Include="EditorTools\MapObjectTool.cs" />
     <Compile Include="Files\SaveFile.cs" />
     <Compile Include="Files\XmlSaverLoader.cs" />
-    <Compile Include="Graph\GraphBuilder.cs" />
-    <Compile Include="Graph\GraphBuilderInput.cs" />
+    <Compile Include="GraphBuilding\GraphBuilder.cs" />
+    <Compile Include="GraphBuilding\GraphBuilderInput.cs" />
     <Compile Include="Layers\BoundingAreaLayer.cs" />
     <Compile Include="MapObjects\AreaAttributes.cs" />
     <Compile Include="MapObjects\AreaType.cs" />
@@ -179,12 +179,14 @@
     <Compile Include="EditorTools\InsertionPreviewFeature.cs" />
     <Compile Include="MapObjects\Line.cs" />
     <Compile Include="MapObjects\MapObject.cs" />
+    <Compile Include="MapObjects\World.cs" />
     <Compile Include="Styles\BoundingAreaStyle.cs" />
     <Compile Include="Styles\LineStyle.cs" />
     <Compile Include="Styles\MapObjectStyle.cs" />
     <Compile Include="Styles\PolygonStyle.cs" />
     <Compile Include="Util\BitmapResources.cs" />
     <Compile Include="Util\ILayerExtensions.cs" />
+    <Compile Include="Util\PointExtensions.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -253,6 +255,7 @@
   <ItemGroup>
     <Resource Include="Resources\Play.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
