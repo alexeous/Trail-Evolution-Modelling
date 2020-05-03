@@ -21,10 +21,13 @@ namespace TrailEvolutionModelling.MapObjects
         [XmlAttribute]
         public bool IsTramplable { get; set; }
 
+        public float WeightOrInf => IsWalkable ? Weight : float.PositiveInfinity;
+
         public static AreaAttributes Unwalkable => new AreaAttributes
         {
             IsWalkable = false,
-            IsTramplable = false
+            IsTramplable = false,
+            Weight = float.PositiveInfinity
         };
     }
 }

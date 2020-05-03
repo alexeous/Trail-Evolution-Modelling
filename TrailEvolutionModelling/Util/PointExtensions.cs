@@ -18,5 +18,10 @@ namespace TrailEvolutionModelling.Util
             var newLat = lonLat.Y + (dy / EarthRadius) * (180 / Math.PI);
             return SphericalMercator.FromLonLat(newLon, newLat);
         }
+
+        public static Point ToMapsui(this (float x, float y) coords)
+        {
+            return new Point(coords.x, coords.y);
+        }
     }
 }
