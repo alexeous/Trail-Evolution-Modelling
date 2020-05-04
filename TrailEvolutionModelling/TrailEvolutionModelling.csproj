@@ -185,6 +185,7 @@
     <Compile Include="Styles\MapObjectStyle.cs" />
     <Compile Include="Styles\PolygonStyle.cs" />
     <Compile Include="Util\BitmapResources.cs" />
+    <Compile Include="Util\GeometryIntersections.cs" />
     <Compile Include="Util\ILayerExtensions.cs" />
     <Compile Include="Util\PointExtensions.cs" />
     <Page Include="MainWindow.xaml">

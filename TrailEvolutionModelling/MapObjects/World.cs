@@ -32,9 +32,34 @@ namespace TrailEvolutionModelling.MapObjects
             return true;
         }
 
-        public AreaAttributes GetAreaAttributes(Point nodePos, Point neighbourPos)
+        public AreaAttributes GetAreaAttributesInLine(Point nodePos, Point neighbourPos)
         {
-            
+            if (BoundingArea.IntersectsLine(nodePos, neighbourPos))
+                return AreaAttributes.Unwalkable;
+
+            float maxWeight = 0;
+            AreaAttributes resultAttribtues = default;
+            foreach (var mapObj in MapObjects)
+            {
+                if (mapObj.IntersectsLine(nodePos, neighbourPos))
+                {
+                    AreaAttributes attributes = mapObj.AreaType.Attributes;
+                    if (!attributes.IsWalkable)
+                        return AreaAttributes.Unwalkable;
+
+                    if (attributes.Weight > maxWeight)
+                    {
+                        maxWeight = attributes.Weight;
+                        resultAttribtues = attributes;
+                    }
+                }
+            }
+
+            if (maxWeight == 0)
+            {
+                resultAttribtues = AreaTypes.Default.Attributes;
+            }
+            return resultAttribtues;
         }
     }
 }

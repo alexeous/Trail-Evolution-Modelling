@@ -9,12 +9,15 @@ using System.Windows.Media.Imaging;
 using Mapsui.Geometries;
 using Mapsui.Layers;
 using Mapsui.Projection;
+using Mapsui.Providers;
+using Mapsui.Styles;
 using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
 using TrailEvolutionModelling.EditorTools;
 using TrailEvolutionModelling.Files;
 using TrailEvolutionModelling.GPUProxy;
 using TrailEvolutionModelling.GraphBuilding;
+using TrailEvolutionModelling.GraphTypes;
 using TrailEvolutionModelling.Layers;
 using TrailEvolutionModelling.MapObjects;
 using TrailEvolutionModelling.Styles;
@@ -368,11 +371,64 @@ namespace TrailEvolutionModelling
 
         private void OnStartClick(object sender, RoutedEventArgs e)
         {
-            GraphBuilder.Build(new GraphBuilderInput
+            var graph = GraphBuilder.Build(new GraphBuilderInput
             {
                 World = GetWorld(),
-                DesiredStep = 0.5f
+                DesiredStep = 50f
             });
+
+            var layer = new WritableLayer();
+            layer.Style = new SymbolStyle
+            {
+                Fill = new Brush(Color.Blue),
+                SymbolType = SymbolType.Ellipse,
+                SymbolScale = 0.1f
+            };
+            for (int i = 0; i < graph.Width; i++)
+            {
+                for (int j = 0; j < graph.Height; j++)
+                {
+                    Node node = graph.GetNodeAtOrNull(i, j);
+                    if (node == null)
+                        continue;
+
+                    Point pos = graph.GetNodePosition(node).ToMapsui();
+                    layer.Add(new Feature
+                    {
+                        Geometry = pos
+                    });
+                }
+            }
+            mapControl.Map.Layers.Add(layer);
+
+            var edgeLayer = new WritableLayer();
+
+            Color minCol = Color.FromArgb(255, 0, 255, 0);
+            Color maxCol = Color.Red;
+            const float minW = 1f;
+            const float maxW = 3.4f;
+
+            foreach (var edge in graph.Edges)
+            {
+                Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
+                Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();
+                float t = (edge.Weight - minW) / (maxW - minW);
+                Color color = Color.FromArgb(255, Lerp(minCol.R, maxCol.R, t), Lerp(minCol.G, maxCol.G, t), Lerp(minCol.B, maxCol.B, t));
+                edgeLayer.Add(new Feature
+                {
+                    Geometry = new LineString(new[] { pos1, pos2 }),
+                    Styles = new[]
+                    {
+                        new VectorStyle { Line = new Pen(color, 1) }
+                    }
+                });
+            }
+            mapControl.Map.Layers.Add(edgeLayer);
+
+            int Lerp(int a, int b, float t)
+            {
+                return (int)(a * (1 - t) + b * t);
+            }
         }
 
         private World GetWorld()

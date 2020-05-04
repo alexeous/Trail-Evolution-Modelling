@@ -76,6 +76,8 @@ namespace TrailEvolutionModelling.MapObjects
         }
 
         public abstract double Distance(Point p);
+        public abstract bool IntersectsLine(Point start, Point end);
+
         protected abstract IGeometry CreateGeometry();
         protected abstract void InitGeometryFromText(string geometryText);
         protected abstract string ConvertGeometryToText();

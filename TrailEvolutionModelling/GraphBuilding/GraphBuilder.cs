@@ -25,6 +25,7 @@ namespace TrailEvolutionModelling.GraphBuilding
 
             var graph = new Graph(w, h, (float)min.X, (float)min.Y, step);
             BuildNodes(graph, input.World);
+            BuildEdges(graph, input.World);
 
             return graph;
         }
@@ -90,8 +91,7 @@ namespace TrailEvolutionModelling.GraphBuilding
             if (TryGetAreaAttributes(graph, world, node, direction, out var area) &&
                 area.IsWalkable)
             {
-                float weight = area.Weight * direction.WeightMultiplier();
-                graph.AddEdge(node, direction, weight, area.IsTramplable);
+                graph.AddEdge(node, direction, area.Weight, area.IsTramplable);
             }
         }
 
@@ -106,7 +106,7 @@ namespace TrailEvolutionModelling.GraphBuilding
 
             Point nodePos = graph.GetNodePosition(node).ToMapsui();
             Point neighbourPos = graph.GetNodePosition(neighbour).ToMapsui();
-            area = world.GetAreaAttributes(nodePos, neighbourPos);
+            area = world.GetAreaAttributesInLine(nodePos, neighbourPos);
             return true;
         }
     }

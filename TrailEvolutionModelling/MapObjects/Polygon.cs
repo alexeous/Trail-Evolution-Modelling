@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using MapsuiPolygon = Mapsui.Geometries.Polygon;
+using TrailEvolutionModelling.Util;
 
 namespace TrailEvolutionModelling.MapObjects
 {
@@ -71,6 +72,13 @@ namespace TrailEvolutionModelling.MapObjects
                     Width = 7
                 }
             };
+        }
+
+        public override bool IntersectsLine(Point start, Point end)
+        {
+            return MapsuiPolygon.Contains(start)
+                || MapsuiPolygon.Contains(end)
+                || GeometryIntersections.DoesLineIntersectPolyline(start, end, Vertices);
         }
     }
 }
