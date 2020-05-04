@@ -14,20 +14,23 @@ namespace TrailEvolutionModelling.MapObjects
     {
         [XmlAttribute]
         public bool IsWalkable { get; set; }
-        
-        [XmlAttribute]
-        public float Weight { get; set; }
-        
+
         [XmlAttribute]
         public bool IsTramplable { get; set; }
 
-        public float WeightOrInf => IsWalkable ? Weight : float.PositiveInfinity;
+        [XmlAttribute]
+        public float Weight
+        {
+            get => IsWalkable ? weight : float.PositiveInfinity;
+            set => weight = value;
+        }
+
+        private float weight;
 
         public static AreaAttributes Unwalkable => new AreaAttributes
         {
             IsWalkable = false,
-            IsTramplable = false,
-            Weight = float.PositiveInfinity
+            IsTramplable = false
         };
     }
 }
