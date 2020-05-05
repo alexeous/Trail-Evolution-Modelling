@@ -32,6 +32,8 @@ namespace TrailEvolutionModelling
     /// </summary>
     public partial class MainWindow : Window
     {
+        private enum AttractorType { Universal, Source, Drain }
+
         private MapObjectLayer mapObjectLayer;
         private BoundingAreaLayer boundingAreaLayer;
 
@@ -429,6 +431,16 @@ namespace TrailEvolutionModelling
             {
                 return (int)(a * (1 - t) + b * t);
             }
+        }
+
+        private void OnAttractorClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnLargeAttractorClick(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private World GetWorld()
