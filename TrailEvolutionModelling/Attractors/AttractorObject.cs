@@ -11,12 +11,13 @@ using System.Xml.Serialization;
 using Mapsui.Geometries;
 using Mapsui.Providers;
 using Mapsui.Styles;
+using TrailEvolutionModelling.MapObjects;
 
 namespace TrailEvolutionModelling.Attractors
 {
     public enum AttractorType { Universal, Source, Drain }
     
-    public class AttractorObject : Feature, IXmlSerializable
+    public class AttractorObject : Feature, IMapObject, IXmlSerializable
     {
         public static readonly float DefaultWorkingRadius = 1000;
 
@@ -47,8 +48,18 @@ namespace TrailEvolutionModelling.Attractors
             }
         }
 
+        public string DisplayedName => GetBaseDisplayedName() + (IsLarge ? "+" : "");
+
+        public Highlighter Highlighter { get; }
+
         private bool isLarge;
         private AttractorType type;
+
+
+        public AttractorObject()
+        {
+            Highlighter = new Highlighter(this, CreateHighlightedStyle());
+        }
 
 
         public XmlSchema GetSchema() => null;
@@ -84,8 +95,8 @@ namespace TrailEvolutionModelling.Attractors
             {
                 switch (type)
                 {
-                    case AttractorType.Universal: return Color.FromArgb(255, 230, 230, 30);
-                    case AttractorType.Source: return Color.FromArgb(255, 230, 30, 30);
+                    case AttractorType.Universal: return Color.FromArgb(255, 230, 30, 230);
+                    case AttractorType.Source: return Color.FromArgb(255, 230, 230, 30);
                     case AttractorType.Drain: return Color.FromArgb(255, 30, 30, 230);
                     default: throw new NotSupportedException("Unknown AttractorType");
                 }
@@ -99,6 +110,34 @@ namespace TrailEvolutionModelling.Attractors
             }
 
             double GetPenWidth() => IsLarge ? 8 : 1.5;
+        }
+
+        public double Distance(Point p)
+        {
+            return Position.Distance(p);
+        }
+
+        private string GetBaseDisplayedName()
+        {
+            switch (Type)
+            {
+                case AttractorType.Universal: return "Универсальная точка притяжения";
+                case AttractorType.Source: return "Источник";
+                case AttractorType.Drain: return "Сток";
+                default: throw new NotSupportedException("Unknown AttractorType");
+            }
+        }
+        private static VectorStyle CreateHighlightedStyle()
+        {
+            return new VectorStyle
+            {
+                Fill = new Brush(Color.Transparent),
+                Outline = new Pen
+                {
+                    Color = new Color(240, 20, 20),
+                    Width = 7
+                }
+            };
         }
     }
 }

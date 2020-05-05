@@ -42,6 +42,7 @@ namespace TrailEvolutionModelling
         private BoundingAreaTool boundingAreaTool;
         private MapObjectEditing mapObjectEditing;
         private AttractorTool attractorTool;
+        private AttractorEditing attractorEditing;
         private Tool[] allTools;
 
         private XmlSaverLoader<SaveFile> saver;
@@ -108,13 +109,14 @@ namespace TrailEvolutionModelling
         {
             polygonTool = new PolygonTool(mapControl, mapObjectLayer);
             lineTool = new LineTool(mapControl, mapObjectLayer);
-            boundingAreaTool = new BoundingAreaTool(mapControl, boundingAreaLayer);
             mapObjectEditing = new MapObjectEditing(mapControl, mapObjectLayer);
+            boundingAreaTool = new BoundingAreaTool(mapControl, boundingAreaLayer);
             attractorTool = new AttractorTool(mapControl, attractorLayer);
+            attractorEditing = new AttractorEditing(mapControl, attractorLayer);
             
             allTools = new Tool[] { 
                 polygonTool, lineTool, mapObjectEditing,
-                boundingAreaTool, attractorTool
+                boundingAreaTool, attractorTool, attractorEditing
             };
         }
 
@@ -167,7 +169,8 @@ namespace TrailEvolutionModelling
                     }
                     else if (iMapObject is AttractorObject attractor)
                     {
-                        // TODO
+                        attractorEditing.TargetObject = attractor;
+                        attractorEditing.Begin();
                     }
                 };
                 return item;
