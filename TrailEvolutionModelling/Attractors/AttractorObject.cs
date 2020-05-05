@@ -60,7 +60,7 @@ namespace TrailEvolutionModelling.Attractors
             {
                 switch (type)
                 {
-                    case AttractorType.Universal: return Color.FromArgb(255, 230, 30, 230);
+                    case AttractorType.Universal: return Color.FromArgb(255, 230, 230, 30);
                     case AttractorType.Source: return Color.FromArgb(255, 230, 30, 30);
                     case AttractorType.Drain: return Color.FromArgb(255, 30, 30, 230);
                     default: throw new NotSupportedException("Unknown AttractorType");
