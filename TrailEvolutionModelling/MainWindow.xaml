@@ -57,12 +57,12 @@
                     <Border BorderBrush="#FF7E8CBD" Padding="2,0,0,0" BorderThickness="3,0,0,0" Margin="0,12,0,0">
                         <StackPanel>
                             <TextBlock TextWrapping="Wrap" Padding="9,0,0,3" VerticalAlignment="Top" FontWeight="Bold"><Run Text="Точки притяжения пешеходов"/></TextBlock>
-                            <Button x:Name="buttonAttractorUniversal" Content="Универсальный" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
-                            <Button x:Name="buttonAttractorSource" Content="Источник" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
-                            <Button x:Name="buttonAttractorDrain" Content="Сток" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
-                            <Button x:Name="buttonAttractorUniversalLarge" Content="Универсальный+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorClick" Margin="0,5,0,0" VerticalAlignment="Bottom"/>
-                            <Button x:Name="buttonAttractorSourceLarge" Content="Источник+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
-                            <Button x:Name="buttonAttractorDrainLarge" Content="Сток+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorUniversal" Tag="Universal" Content="Универсальный" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorSource" Tag="Source" Content="Источник" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorDrain" Tag="Drain" Content="Сток" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorUniversalLarge" Tag="Universal" Content="Универсальный+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorButtonClick" Margin="0,5,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorSourceLarge" Tag="Source" Content="Источник+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorDrainLarge" Tag="Drain" Content="Сток+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>

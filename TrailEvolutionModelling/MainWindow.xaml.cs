@@ -13,6 +13,7 @@ using Mapsui.Providers;
 using Mapsui.Styles;
 using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
+using TrailEvolutionModelling.Attractors;
 using TrailEvolutionModelling.EditorTools;
 using TrailEvolutionModelling.Files;
 using TrailEvolutionModelling.GPUProxy;
@@ -32,15 +33,15 @@ namespace TrailEvolutionModelling
     /// </summary>
     public partial class MainWindow : Window
     {
-        private enum AttractorType { Universal, Source, Drain }
-
         private MapObjectLayer mapObjectLayer;
         private BoundingAreaLayer boundingAreaLayer;
+        private WritableLayer attractorLayer;
 
         private PolygonTool polygonTool;
         private LineTool lineTool;
         private BoundingAreaTool boundingAreaTool;
         private MapObjectEditing mapObjectEditing;
+        private AttractorTool attractorTool;
         private Tool[] allTools;
 
         private XmlSaverLoader<SaveFile> saver;
@@ -93,6 +94,7 @@ namespace TrailEvolutionModelling
         {
             mapObjectLayer = new MapObjectLayer();
             boundingAreaLayer = new BoundingAreaLayer();
+            attractorLayer = new WritableLayer();
             InitializeMapControl();
             //polygonLayer.AddRange(polygonStorage.Polygons);
             InitTools();
@@ -108,10 +110,11 @@ namespace TrailEvolutionModelling
             lineTool = new LineTool(mapControl, mapObjectLayer);
             boundingAreaTool = new BoundingAreaTool(mapControl, boundingAreaLayer);
             mapObjectEditing = new MapObjectEditing(mapControl, mapObjectLayer);
+            attractorTool = new AttractorTool(mapControl, attractorLayer);
             
             allTools = new Tool[] { 
                 polygonTool, lineTool, mapObjectEditing,
-                boundingAreaTool
+                boundingAreaTool, attractorTool
             };
         }
 
@@ -131,6 +134,7 @@ namespace TrailEvolutionModelling
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
 
             mapControl.Map.Layers.Add(mapObjectLayer);
+            mapControl.Map.Layers.Add(attractorLayer);
             mapControl.Map.Layers.Add(boundingAreaLayer);
 
             mapControl.MouseLeftButtonDown += OnMapLeftClick;
@@ -433,14 +437,20 @@ namespace TrailEvolutionModelling
             }
         }
 
-        private void OnAttractorClick(object sender, RoutedEventArgs e)
+        private void OnAttractorButtonClick(object sender, RoutedEventArgs e)
         {
-
+            string tag = (string)((FrameworkElement)sender).Tag;
+            attractorTool.AttractorType = (AttractorType)Enum.Parse(typeof(AttractorType), tag);
+            attractorTool.IsLarge = false;
+            attractorTool.Begin();
         }
 
-        private void OnLargeAttractorClick(object sender, RoutedEventArgs e)
+        private void OnLargeAttractorButtonClick(object sender, RoutedEventArgs e)
         {
-
+            string tag = (string)((FrameworkElement)sender).Tag;
+            attractorTool.AttractorType = (AttractorType)Enum.Parse(typeof(AttractorType), tag);
+            attractorTool.IsLarge = true;
+            attractorTool.Begin();
         }
 
         private World GetWorld()

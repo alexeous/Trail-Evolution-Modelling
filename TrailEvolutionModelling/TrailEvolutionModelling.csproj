@@ -160,6 +160,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Attractors\AttractorObject.cs" />
+    <Compile Include="EditorTools\AttractorTool.cs" />
     <Compile Include="EditorTools\BoundingAreaTool.cs" />
     <Compile Include="EditorTools\LineTool.cs" />
     <Compile Include="EditorTools\Tool.cs" />
