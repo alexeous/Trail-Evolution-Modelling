@@ -360,6 +360,8 @@ namespace TrailEvolutionModelling
             boundingAreaTool.BoundingArea = saveFile.World.BoundingArea;
             mapObjectLayer.Clear();
             mapObjectLayer.AddRange(saveFile.World.MapObjects);
+            attractorLayer.Clear();
+            attractorLayer.AddRange(saveFile.World.AttractorObjects);
             mapControl.ZoomToBox(saveFile.Viewport.TopLeft, saveFile.Viewport.BottomRight);
 
             RefreshLayers();
@@ -458,7 +460,8 @@ namespace TrailEvolutionModelling
             return new World
             {
                 BoundingArea = boundingAreaTool.BoundingArea,
-                MapObjects = mapObjectLayer.GetFeatures().OfType<MapObject>().ToArray()
+                MapObjects = mapObjectLayer.GetFeatures().OfType<MapObject>().ToArray(),
+                AttractorObjects = attractorLayer.GetFeatures().OfType<AttractorObject>().ToArray()
             };
         }
     }

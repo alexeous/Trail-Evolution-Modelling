@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Mapsui.Geometries;
+using TrailEvolutionModelling.Attractors;
 
 namespace TrailEvolutionModelling.MapObjects
 {
@@ -16,6 +17,7 @@ namespace TrailEvolutionModelling.MapObjects
         [XmlArrayItem(typeof(Line))]
         [XmlArrayItem(typeof(Polygon))]
         public MapObject[] MapObjects { get; set; }
+        public AttractorObject[] AttractorObjects { get; set; }
 
         public bool IsPointWalkable(Point point)
         {

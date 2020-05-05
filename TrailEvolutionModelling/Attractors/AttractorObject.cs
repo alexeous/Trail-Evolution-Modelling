@@ -4,6 +4,10 @@ using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents.Serialization;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 using Mapsui.Geometries;
 using Mapsui.Providers;
 using Mapsui.Styles;
@@ -11,9 +15,8 @@ using Mapsui.Styles;
 namespace TrailEvolutionModelling.Attractors
 {
     public enum AttractorType { Universal, Source, Drain }
-
-    [Serializable]
-    public class AttractorObject : Feature
+    
+    public class AttractorObject : Feature, IXmlSerializable
     {
         public static readonly float DefaultWorkingRadius = 1000;
 
@@ -46,6 +49,27 @@ namespace TrailEvolutionModelling.Attractors
 
         private bool isLarge;
         private AttractorType type;
+
+
+        public XmlSchema GetSchema() => null;
+
+        public void ReadXml(XmlReader reader)
+        {
+            Position = (Point)Mapsui.Geometries.Geometry.GeomFromText(reader.GetAttribute("Position"));
+            WorkingRadius = float.Parse(reader.GetAttribute("WorkingRadius"));
+            IsLarge = bool.Parse(reader.GetAttribute("IsLarge"));
+            Type = (AttractorType)Enum.Parse(typeof(AttractorType), reader.GetAttribute("Type"));
+
+            reader.ReadStartElement();
+        }
+
+        public void WriteXml(XmlWriter writer)
+        {
+            writer.WriteAttributeString("Position", Position.AsText());
+            writer.WriteAttributeString("WorkingRadius", WorkingRadius.ToString());
+            writer.WriteAttributeString("IsLarge", IsLarge.ToString());
+            writer.WriteAttributeString("Type", Type.ToString());
+        }
 
         private void UpdateStyle()
         {
