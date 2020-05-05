@@ -141,7 +141,7 @@ namespace TrailEvolutionModelling
             mapControl.MouseRightButtonDown += OnMapRightClick;
         }
 
-        private ContextMenu CreateMapObjectContextMenu(MapObject mapObject)
+        private ContextMenu CreateMapObjectContextMenu(IMapObject iMapObject)
         {
             var contextMenu = new ContextMenu();
             contextMenu.Items.Add(CreateModifyItem());
@@ -160,8 +160,15 @@ namespace TrailEvolutionModelling
                 {
                     UnhighlightAllMapObjects();
                     EndAllTools();
-                    mapObjectEditing.TargetObject = mapObject;
-                    mapObjectEditing.Begin();
+                    if (iMapObject is MapObject mapObject)
+                    {
+                        mapObjectEditing.TargetObject = mapObject;
+                        mapObjectEditing.Begin();
+                    }
+                    else if (iMapObject is AttractorObject attractor)
+                    {
+                        // TODO
+                    }
                 };
                 return item;
             }
@@ -175,16 +182,24 @@ namespace TrailEvolutionModelling
                 };
                 item.Click += (s, e) =>
                 {
-                    if (mapObject == boundingAreaTool.BoundingArea)
+                    if (iMapObject is MapObject mapObject)
                     {
-                        boundingAreaTool.Remove();
+                        if (iMapObject == boundingAreaTool.BoundingArea)
+                        {
+                            boundingAreaTool.Remove();
+                            RefreshButtons();
+                        }
+                        else
+                        {
+                            mapObjectLayer.TryRemove(mapObject);
+                        }
+                    }
+                    else if (iMapObject is AttractorObject attractor)
+                    {
+                        attractorLayer.TryRemove(attractor);
                         RefreshButtons();
                     }
-                    else
-                    {
-                        mapObjectLayer.TryRemove(mapObject);
-                        mapObjectLayer.Refresh();
-                    }
+                    RefreshLayers();
                 };
                 return item;
             }
@@ -203,7 +218,7 @@ namespace TrailEvolutionModelling
 
             var clickScreenPos = e.GetPosition(mapControl).ToMapsui();
             var clickWorldPos = mapControl.Viewport.ScreenToWorld(clickScreenPos);
-            IEnumerable<MapObject> mapObjects = GetMapObjectsAt(clickWorldPos);
+            IEnumerable<IMapObject> mapObjects = GetFeaturesAt(clickWorldPos);
 
             int count = mapObjects.Count();
             if (count == 0)
@@ -228,8 +243,8 @@ namespace TrailEvolutionModelling
                     {
                         Header = mapObject.DisplayedName
                     };
-                    item.GotFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = true; mapObjectLayer.Refresh(); };
-                    item.LostFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = false; mapObjectLayer.Refresh(); };
+                    item.GotFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = true; RefreshLayers(); };
+                    item.LostFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = false; RefreshLayers(); };
                     item.Click += (s, ee) => OnMapObjectRightClick(mapObject);
                     contextMenu.Items.Add(item);
                 }
@@ -237,14 +252,15 @@ namespace TrailEvolutionModelling
             }
         }
 
-        private IEnumerable<MapObject> GetMapObjectsAt(Point point)
+        private IEnumerable<IMapObject> GetFeaturesAt(Point point)
         {
             const double tolerance = 15;
 
             var boundingBox = new BoundingBox(point, point);
             return mapObjectLayer.GetFeaturesInView(boundingBox, mapControl.Viewport.Resolution)
                 .Concat(boundingAreaLayer.GetFeaturesInView(boundingBox, mapControl.Viewport.Resolution))
-                .OfType<MapObject>()
+                .Concat(attractorLayer.GetFeaturesInView(boundingBox, mapControl.Viewport.Resolution))
+                .OfType<IMapObject>()
                 .Where(p => p.Distance(point) <= tolerance);
         }
 
@@ -266,10 +282,10 @@ namespace TrailEvolutionModelling
             UnhighlightAllMapObjects();
         }
 
-        private void OnMapObjectRightClick(MapObject mapObject)
+        private void OnMapObjectRightClick(IMapObject mapObject)
         {
             mapObject.Highlighter.IsHighlighted = true;
-            mapObjectLayer.Refresh();
+            RefreshLayers();
 
             var contextMenu = CreateMapObjectContextMenu(mapObject);
             contextMenu.IsOpen = true;
@@ -277,12 +293,15 @@ namespace TrailEvolutionModelling
 
         private void UnhighlightAllMapObjects()
         {
-            var mapObjs = mapObjectLayer.GetFeatures().Concat(boundingAreaLayer.GetFeatures()).OfType<MapObject>();
+            var mapObjs = mapControl.Map.Layers
+                .OfType<WritableLayer>()
+                .SelectMany(layer => layer.GetFeatures())
+                .OfType<IMapObject>();
             foreach (var mapObject in mapObjs)
             {
                 mapObject.Highlighter.IsHighlighted = false;
             }
-            mapObjectLayer.Refresh();
+            RefreshLayers();
         }
 
         private void OnPolygonDrawClick(object sender, RoutedEventArgs e)

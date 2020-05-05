@@ -179,6 +179,7 @@
     <Compile Include="MapObjects\BoundingAreaPolygon.cs" />
     <Compile Include="MapObjects\Highlighter.cs" />
     <Compile Include="EditorTools\InsertionPreviewFeature.cs" />
+    <Compile Include="MapObjects\IMapObject.cs" />
     <Compile Include="MapObjects\Line.cs" />
     <Compile Include="MapObjects\MapObject.cs" />
     <Compile Include="MapObjects\World.cs" />
