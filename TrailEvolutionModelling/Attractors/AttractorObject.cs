@@ -79,7 +79,6 @@ namespace TrailEvolutionModelling.Attractors
             }
         }
 
-
         public XmlSchema GetSchema() => null;
 
         public void ReadXml(XmlReader reader)

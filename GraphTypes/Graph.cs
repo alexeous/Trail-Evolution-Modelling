@@ -9,8 +9,7 @@ namespace TrailEvolutionModelling.GraphTypes
     [Serializable]
     public class Graph
     {
-        public static readonly int MaximumWidth = 500;
-        public static readonly int MaximumHeight = 500;
+        public static readonly int MaximumSteps = 500;
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -31,15 +30,15 @@ namespace TrailEvolutionModelling.GraphTypes
             {
                 throw new ArgumentOutOfRangeException();
             }
-            if (width > MaximumWidth)
+            if (width > MaximumSteps)
             {
                 throw new ArgumentOutOfRangeException(nameof(width), width,
-                    $"Width is too large. Must not be greater than {MaximumWidth}");
+                    $"Width is too large. Must not be greater than {MaximumSteps}");
             }
-            if (height > MaximumHeight)
+            if (height > MaximumSteps)
             {
                 throw new ArgumentOutOfRangeException(nameof(height), height,
-                    $"Height is too large. Must not be greater than {MaximumHeight}");
+                    $"Height is too large. Must not be greater than {MaximumSteps}");
             }
 
             Width = width;
@@ -85,6 +84,9 @@ namespace TrailEvolutionModelling.GraphTypes
                 for (int j = 0; j < Height; j++)
                 {
                     Node node = GetNodeAtOrNull(i, j);
+                    if (node == null)
+                        continue;
+
                     float distance = Distance(snappedI, snappedJ, i, j);
                     if (distance < minDistance)
                     {

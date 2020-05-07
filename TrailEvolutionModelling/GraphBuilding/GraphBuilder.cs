@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Mapsui.Geometries;
+using TrailEvolutionModelling.Attractors;
+using TrailEvolutionModelling.GPUProxy;
 using TrailEvolutionModelling.GraphTypes;
 using TrailEvolutionModelling.MapObjects;
 using TrailEvolutionModelling.Util;
@@ -12,16 +14,12 @@ namespace TrailEvolutionModelling.GraphBuilding
 {
     static class GraphBuilder
     {
-        private static readonly int MaxSteps = 500;
-
         public static Graph Build(GraphBuilderInput input)
         {
             BoundingBox bounds = input.World.BoundingArea.Geometry.BoundingBox;
             Point min = bounds.Min;
 
-            float step = ClampStep(input.DesiredStep, bounds);
-            int w = (int)Math.Ceiling(bounds.Width / step);
-            int h = (int)Math.Ceiling(bounds.Height / step);
+            float step = ClampStep(input.DesiredStep, bounds, out int w, out int h);
 
             var graph = new Graph(w, h, (float)min.X, (float)min.Y, step);
             BuildNodes(graph, input.World);
@@ -30,19 +28,43 @@ namespace TrailEvolutionModelling.GraphBuilding
             return graph;
         }
 
-        static float ClampStep(float step, BoundingBox bounds)
+        public static Attractor[] CreateAttractors(Graph graph, IEnumerable<AttractorObject> attractorObjects)
+        {
+            var attractors = new List<Attractor>();
+            foreach (var attrObj in attractorObjects)
+            {
+                Node closest = graph.GetClosestNode((float)attrObj.Position.X, (float)attrObj.Position.Y);
+                if (closest == null)
+                    throw new ArgumentException("Graph has no nodes");
+
+                var attractor = new Attractor
+                {
+                    Node = closest,
+                    WorkingRadius = attrObj.WorkingRadius,
+                    Performance = AttractorPerformanceToNumber(attrObj.Performance),
+                    IsSource = attrObj.Type == AttractorType.Universal || attrObj.Type == AttractorType.Source,
+                    IsDrain = attrObj.Type == AttractorType.Universal || attrObj.Type == AttractorType.Drain
+                };
+                attractors.Add(attractor);
+            }
+            return attractors.ToArray();
+        }
+
+        static float ClampStep(float step, BoundingBox bounds, out int w, out int h)
         {
             double max = Math.Max(bounds.Width, bounds.Height);
-            if (max > step * MaxSteps)
+            if (max > step * Graph.MaximumSteps)
             {
-                step = (float)(max / MaxSteps);
+                step = (float)max / Graph.MaximumSteps;
             }
+            w = Math.Min(Graph.MaximumSteps, (int)Math.Ceiling(bounds.Width / step));
+            h = Math.Min(Graph.MaximumSteps, (int)Math.Ceiling(bounds.Height / step));
             return step;
         }
 
         static void BuildNodes(Graph graph, World world)
         {
-            for (int i = 0; i < graph.Width; i++)
+            Parallel.For(0, graph.Width, i =>
             {
                 for (int j = 0; j < graph.Height; j++)
                 {
@@ -52,7 +74,7 @@ namespace TrailEvolutionModelling.GraphBuilding
                         graph.AddNode(i, j);
                     }
                 }
-            }
+            });
         }
 
         static void BuildEdges(Graph graph, World world)
@@ -108,6 +130,20 @@ namespace TrailEvolutionModelling.GraphBuilding
             Point neighbourPos = graph.GetNodePosition(neighbour).ToMapsui();
             area = world.GetAreaAttributesInLine(nodePos, neighbourPos);
             return true;
+        }
+
+        static float AttractorPerformanceToNumber(AttractorPerformance performance)
+        {
+            float normal = TrailsGPUProxy.StepSeconds * 0.033333f;
+            switch (performance)
+            {
+                case AttractorPerformance.Normal:
+                    return normal;
+                case AttractorPerformance.High:
+                    return normal * 2;
+                default:
+                    throw new NotSupportedException($"Unknown {nameof(AttractorPerformance)} value");
+            }
         }
     }
 }
