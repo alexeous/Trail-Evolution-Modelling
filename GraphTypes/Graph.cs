@@ -67,6 +67,36 @@ namespace TrailEvolutionModelling.GraphTypes
             return GetNodeAtOrNull(node.I + shift.di, node.J + shift.dj);
         }
 
+        public Node GetClosestNode(float x, float y)
+        {
+            int snappedI = (int)Math.Round((x - OriginX) / Step);
+            int snappedJ = (int)Math.Round((y - OriginY) / Step);
+            snappedI = Math.Max(0, Math.Min(snappedI, Width - 1));
+            snappedJ = Math.Max(0, Math.Min(snappedJ, Height - 1));
+            if (nodes[snappedI, snappedJ] != null)
+            {
+                return nodes[snappedI, snappedJ];
+            }
+
+            float minDistance = float.PositiveInfinity;
+            Node closest = null;
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    Node node = GetNodeAtOrNull(i, j);
+                    float distance = Distance(snappedI, snappedJ, i, j);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        closest = node;
+                    }
+                }
+            }
+
+            return closest;
+        }
+
         public (float x, float y) GetNodePosition(Node node)
         {
             return GetNodePosition(node.I, node.J);
@@ -107,8 +137,13 @@ namespace TrailEvolutionModelling.GraphTypes
 
         public float Distance(Node a, Node b)
         {
-            int di = a.I - b.I;
-            int dj = a.J - b.J;
+            return Distance(a.I, a.J, b.I, b.J);
+        }
+
+        public float Distance(int i1, int j1, int i2, int j2)
+        {
+            int di = i1 - i2;
+            int dj = j1 - j2;
 
             return Step * (float)Math.Sqrt(di * di + dj * dj);
         }
