@@ -281,7 +281,7 @@ namespace TrailEvolutionModelling
 
         private IEnumerable<IMapObject> GetFeaturesAt(Point point)
         {
-            const double tolerance = 15;
+            double tolerance = mapControl.Viewport.Resolution * 5;
 
             var boundingBox = new BoundingBox(point, point);
             return mapObjectLayer.GetFeaturesInView(boundingBox, mapControl.Viewport.Resolution)
