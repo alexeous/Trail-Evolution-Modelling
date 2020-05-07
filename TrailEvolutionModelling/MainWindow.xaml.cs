@@ -64,6 +64,7 @@ namespace TrailEvolutionModelling
             InitializeComponent();
             InitMapObjectButtons();
             InitAttractorButtonsTags();
+            InitAttractorEditingControlsTags();
 
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
             mapControl.Renderer.StyleRenderers.Add(typeof(BoundingAreaStyle), new BoundingAreaRenderer());
@@ -91,6 +92,16 @@ namespace TrailEvolutionModelling
             buttonAttractorUniversalLarge.Tag = AttractorType.Universal;
             buttonAttractorSourceLarge.Tag = AttractorType.Source;
             buttonAttractorDrainLarge.Tag = AttractorType.Drain;
+        }
+
+        private void InitAttractorEditingControlsTags()
+        {
+            itemAttractorTypeUniversal.Tag = AttractorType.Universal;
+            itemAttractorTypeSource.Tag = AttractorType.Source;
+            itemAttractorTypeDrain.Tag = AttractorType.Drain;
+
+            itemAttractorPerfNormal.Tag = AttractorPerformance.Normal;
+            itemAttractorPerfHigh.Tag = AttractorPerformance.High;
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -123,7 +134,9 @@ namespace TrailEvolutionModelling
             mapObjectEditing = new MapObjectEditing(mapControl, mapObjectLayer);
             boundingAreaTool = new BoundingAreaTool(mapControl, boundingAreaLayer);
             attractorTool = new AttractorTool(mapControl, attractorLayer);
-            attractorEditing = new AttractorEditing(mapControl, attractorLayer);
+            attractorEditing = new AttractorEditing(mapControl, attractorLayer,
+                gridAttractorEditing, comboBoxAttractorType, comboBoxAttractorPerformance,
+                upDownAttractorRadius);
             
             allTools = new Tool[] { 
                 polygonTool, lineTool, mapObjectEditing,
@@ -474,17 +487,15 @@ namespace TrailEvolutionModelling
 
         private void OnAttractorButtonClick(object sender, RoutedEventArgs e)
         {
-            string tag = (string)((FrameworkElement)sender).Tag;
-            attractorTool.AttractorType = (AttractorType)Enum.Parse(typeof(AttractorType), tag);
-            attractorTool.IsLarge = false;
+            attractorTool.AttractorType = (AttractorType)((FrameworkElement)sender).Tag;
+            attractorTool.AttractorPerformance = AttractorPerformance.Normal;
             attractorTool.Begin();
         }
 
         private void OnLargeAttractorButtonClick(object sender, RoutedEventArgs e)
         {
-            string tag = (string)((FrameworkElement)sender).Tag;
-            attractorTool.AttractorType = (AttractorType)Enum.Parse(typeof(AttractorType), tag);
-            attractorTool.IsLarge = true;
+            attractorTool.AttractorType = (AttractorType)((FrameworkElement)sender).Tag;
+            attractorTool.AttractorPerformance = AttractorPerformance.High;
             attractorTool.Begin();
         }
 

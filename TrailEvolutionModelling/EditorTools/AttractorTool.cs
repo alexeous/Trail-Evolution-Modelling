@@ -15,7 +15,7 @@ namespace TrailEvolutionModelling.EditorTools
     class AttractorTool : Tool
     {
         public AttractorType AttractorType { get; set; }
-        public bool IsLarge { get; set; }
+        public AttractorPerformance AttractorPerformance { get; set; }
 
         public AttractorObject Result { get; private set; }
 
@@ -80,7 +80,7 @@ namespace TrailEvolutionModelling.EditorTools
                 Position = point,
                 WorkingRadius = AttractorObject.DefaultWorkingRadius,
                 Type = AttractorType,
-                IsLarge = IsLarge
+                Performance = AttractorPerformance
             };
             targetLayer.Add(Result);
         }

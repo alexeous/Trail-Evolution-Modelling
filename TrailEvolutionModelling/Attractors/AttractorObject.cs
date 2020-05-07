@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing.Text;
 using System.Linq;
 using System.Text;
@@ -12,10 +13,12 @@ using Mapsui.Geometries;
 using Mapsui.Providers;
 using Mapsui.Styles;
 using TrailEvolutionModelling.MapObjects;
+using TrailEvolutionModelling.Util;
 
 namespace TrailEvolutionModelling.Attractors
 {
     public enum AttractorType { Universal, Source, Drain }
+    public enum AttractorPerformance { Normal, High }
     
     public class AttractorObject : Feature, IMapObject, IXmlSerializable
     {
@@ -28,12 +31,12 @@ namespace TrailEvolutionModelling.Attractors
             set => Geometry = value;
         }
 
-        public bool IsLarge
+        public AttractorPerformance Performance
         {
-            get => isLarge;
+            get => performance;
             set
             {
-                isLarge = value;
+                performance = value;
                 UpdateStyle();
             }
         }
@@ -48,17 +51,32 @@ namespace TrailEvolutionModelling.Attractors
             }
         }
 
-        public string DisplayedName => GetBaseDisplayedName() + (IsLarge ? "+" : "");
+        public string DisplayedName => GetBaseDisplayedName() + GetPerformancePostfix();
 
         public Highlighter Highlighter { get; }
 
-        private bool isLarge;
+        private AttractorPerformance performance;
         private AttractorType type;
+        private VectorStyle style;
 
 
         public AttractorObject()
         {
             Highlighter = new Highlighter(this, CreateHighlightedStyle());
+            style = new VectorStyle();
+            Styles.Add(style);
+            UpdateStyle();
+        }
+
+        public Color GetColor()
+        {
+            switch (type)
+            {
+                case AttractorType.Universal: return Color.FromArgb(255, 230, 30, 230);
+                case AttractorType.Source: return Color.FromArgb(255, 230, 230, 30);
+                case AttractorType.Drain: return Color.FromArgb(255, 30, 30, 230);
+                default: throw new NotSupportedException("Unknown AttractorType");
+            }
         }
 
 
@@ -68,7 +86,7 @@ namespace TrailEvolutionModelling.Attractors
         {
             Position = (Point)Mapsui.Geometries.Geometry.GeomFromText(reader.GetAttribute("Position"));
             WorkingRadius = float.Parse(reader.GetAttribute("WorkingRadius"));
-            IsLarge = bool.Parse(reader.GetAttribute("IsLarge"));
+            Performance = (AttractorPerformance)Enum.Parse(typeof(AttractorPerformance), reader.GetAttribute("Performance"));
             Type = (AttractorType)Enum.Parse(typeof(AttractorType), reader.GetAttribute("Type"));
 
             reader.ReadStartElement();
@@ -78,44 +96,24 @@ namespace TrailEvolutionModelling.Attractors
         {
             writer.WriteAttributeString("Position", Position.AsText());
             writer.WriteAttributeString("WorkingRadius", WorkingRadius.ToString());
-            writer.WriteAttributeString("IsLarge", IsLarge.ToString());
+            writer.WriteAttributeString("Performance", Performance.ToString());
             writer.WriteAttributeString("Type", Type.ToString());
         }
 
-        private void UpdateStyle()
-        {
-            Styles.Clear();
-            Styles.Add(new VectorStyle
-            {
-                Fill = new Brush(GetColor()),
-                Outline = new Pen(Dimmed(GetColor(), 0.5f), GetPenWidth())
-            });
-
-            Color GetColor()
-            {
-                switch (type)
-                {
-                    case AttractorType.Universal: return Color.FromArgb(255, 230, 30, 230);
-                    case AttractorType.Source: return Color.FromArgb(255, 230, 230, 30);
-                    case AttractorType.Drain: return Color.FromArgb(255, 30, 30, 230);
-                    default: throw new NotSupportedException("Unknown AttractorType");
-                }
-            }
-
-            Color Dimmed(Color color, float factor)
-            {
-                return Color.FromArgb(255, (int)(color.R * factor),
-                                           (int)(color.G * factor),
-                                           (int)(color.B * factor));
-            }
-
-            double GetPenWidth() => IsLarge ? 8 : 1.5;
-        }
 
         public double Distance(Point p)
         {
             return Position.Distance(p);
         }
+        
+        private void UpdateStyle()
+        {
+            style.Fill.Color = GetColor();
+            style.Outline.Color = GetColor().Scale(0.5f);
+            style.Outline.Width = GetOutlineWidth();
+        }
+
+        private double GetOutlineWidth() => Performance == AttractorPerformance.High ? 8 : 1.5;
 
         private string GetBaseDisplayedName()
         {
@@ -124,9 +122,20 @@ namespace TrailEvolutionModelling.Attractors
                 case AttractorType.Universal: return "Универсальная точка притяжения";
                 case AttractorType.Source: return "Источник";
                 case AttractorType.Drain: return "Сток";
-                default: throw new NotSupportedException("Unknown AttractorType");
+                default: throw new NotSupportedException($"Unknown {nameof(AttractorType)}");
             }
         }
+
+        private string GetPerformancePostfix()
+        {
+            switch (Performance)
+            {
+                case AttractorPerformance.Normal: return "";
+                case AttractorPerformance.High: return "+";
+                default: throw new NotSupportedException($"Unknown {nameof(AttractorPerformance)}");
+            }
+        }
+
         private static VectorStyle CreateHighlightedStyle()
         {
             return new VectorStyle

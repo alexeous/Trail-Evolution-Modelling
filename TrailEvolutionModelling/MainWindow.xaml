@@ -23,7 +23,7 @@
                 <ColumnDefinition Width="151*"/>
             </Grid.ColumnDefinitions>
             <mapsui:MapControl x:Name="mapControl" Margin="0"/>
-            <Grid x:Name="gridAttractorEditing" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,10,25" Width="220">
+            <Grid x:Name="gridAttractorEditing" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,10,25" Width="240" Visibility="Collapsed">
                 <Grid.Background>
                     <SolidColorBrush Color="White" Opacity="0.5"/>
                 </Grid.Background>
@@ -37,9 +37,9 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="Тип" Margin="3,0,0,0" VerticalAlignment="Center"/>
                             <ComboBox x:Name="comboBoxAttractorType" Grid.Column="1" Margin="5,0,0,0">
-                                <ComboBoxItem Tag="Universal" Content="Универсальная"/>
-                                <ComboBoxItem Tag="Source" Content="Источник"/>
-                                <ComboBoxItem Tag="Drain" Content="Сток"/>
+                                <ComboBoxItem x:Name="itemAttractorTypeUniversal" Content="Универсальная"/>
+                                <ComboBoxItem x:Name="itemAttractorTypeSource" Content="Источник"/>
+                                <ComboBoxItem x:Name="itemAttractorTypeDrain" Content="Сток"/>
                             </ComboBox>
                         </Grid>
                         <Grid Margin="0,0,0,2">
@@ -49,8 +49,8 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="Поток пешеходов" VerticalAlignment="Center" Margin="3,0,0,0"/>
                             <ComboBox x:Name="comboBoxAttractorPerformance" Grid.Column="1" Margin="5,0,0,0">
-                                <ComboBoxItem Tag="False" Content="Обычный"/>
-                                <ComboBoxItem Tag="True" Content="Большой"/>
+                                <ComboBoxItem x:Name="itemAttractorPerfNormal" Content="Обычный"/>
+                                <ComboBoxItem x:Name="itemAttractorPerfHigh" Content="Большой"/>
                             </ComboBox>
                         </Grid>
                         <Grid Margin="0,0,0,1">
@@ -59,7 +59,7 @@
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="Рабочий радиус" VerticalAlignment="Center" Margin="3,0,0,0"/>
-                            <tk:IntegerUpDown x:Name="upDownAttractorRadius" Grid.Column="1" Margin="5,0,0,0" Height="22" Minimum="1" Value="1000" ButtonSpinnerLocation="Right"/>
+                            <tk:IntegerUpDown x:Name="upDownAttractorRadius" Increment="20" Grid.Column="1" Margin="5,0,0,0" Height="22" Minimum="1" Value="1000" ButtonSpinnerLocation="Right"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -99,12 +99,12 @@
                     <Border BorderBrush="#FF7E8CBD" Padding="2,0,0,0" BorderThickness="3,0,0,0" Margin="0,12,0,0">
                         <StackPanel>
                             <TextBlock TextWrapping="Wrap" Padding="9,0,0,3" VerticalAlignment="Top" FontWeight="Bold"><Run Text="Точки притяжения пешеходов"/></TextBlock>
-                            <Button x:Name="buttonAttractorUniversal" Tag="Universal" Content="Универсальная" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
-                            <Button x:Name="buttonAttractorSource" Tag="Source" Content="Источник" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
-                            <Button x:Name="buttonAttractorDrain" Tag="Drain" Content="Сток" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
-                            <Button x:Name="buttonAttractorUniversalLarge" Tag="Universal" Content="Универсальная+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorButtonClick" Margin="0,5,0,0" VerticalAlignment="Bottom"/>
-                            <Button x:Name="buttonAttractorSourceLarge" Tag="Source" Content="Источник+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
-                            <Button x:Name="buttonAttractorDrainLarge" Tag="Drain" Content="Сток+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorUniversal" Content="Универсальная" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorSource" Content="Источник" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorDrain" Content="Сток" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorUniversalLarge" Content="Универсальная+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorButtonClick" Margin="0,5,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorSourceLarge" Content="Источник+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
+                            <Button x:Name="buttonAttractorDrainLarge" Content="Сток+" HorizontalContentAlignment="Left" Padding="9,4,1,4" Click="OnLargeAttractorButtonClick" Margin="0,1,0,0" VerticalAlignment="Bottom"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
