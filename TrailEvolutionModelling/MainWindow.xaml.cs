@@ -63,6 +63,7 @@ namespace TrailEvolutionModelling
         {
             InitializeComponent();
             InitMapObjectButtons();
+            InitAttractorButtonsTags();
 
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
             mapControl.Renderer.StyleRenderers.Add(typeof(BoundingAreaStyle), new BoundingAreaRenderer());
@@ -80,6 +81,16 @@ namespace TrailEvolutionModelling
                     TextAlignment = TextAlignment.Left
                 };
             }
+        }
+
+        private void InitAttractorButtonsTags()
+        {
+            buttonAttractorUniversal.Tag = AttractorType.Universal;
+            buttonAttractorSource.Tag = AttractorType.Source;
+            buttonAttractorDrain.Tag = AttractorType.Drain;
+            buttonAttractorUniversalLarge.Tag = AttractorType.Universal;
+            buttonAttractorSourceLarge.Tag = AttractorType.Source;
+            buttonAttractorDrainLarge.Tag = AttractorType.Drain;
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
