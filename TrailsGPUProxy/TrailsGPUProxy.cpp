@@ -1,11 +1,13 @@
 #include "TrailsGPUProxy.h"
 #include "IsolatedAttractorsException.h"
 #include "kernel.h"
+#include "EdgesData.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 		TrailsComputationsOutput^ TrailsGPUProxy::ComputeTrails(TrailsComputationsInput^ input) {
 			auto attractors = CreateAttractorsMap(input);
+
 			return nullptr;
 		}
 
