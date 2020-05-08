@@ -432,6 +432,12 @@ namespace TrailEvolutionModelling
                 DesiredStep = 2.4f
             });
             Attractor[] attractors = GraphBuilder.CreateAttractors(graph, world.AttractorObjects);
+            var computationsInput = new TrailsComputationsInput
+            {
+                Graph = graph,
+                Attractors = attractors
+            };
+            TrailsComputationsOutput output = TrailsGPUProxy.ComputeTrails(computationsInput);
 
             //var edgeLayer = new WritableLayer();
 
@@ -457,10 +463,10 @@ namespace TrailEvolutionModelling
             //}
             //mapControl.Map.Layers.Add(edgeLayer);
 
-            //int Lerp(int a, int b, float t)
-            //{
-            //    return (int)(a * (1 - t) + b * t);
-            //}
+            int Lerp(int a, int b, float t)
+            {
+                return (int)(a * (1 - t) + b * t);
+            }
         }
 
         private void OnAttractorButtonClick(object sender, RoutedEventArgs e)

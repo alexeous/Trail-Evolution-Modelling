@@ -198,6 +198,7 @@
     <Compile Include="MapObjects\IMapObject.cs" />
     <Compile Include="MapObjects\Line.cs" />
     <Compile Include="MapObjects\MapObject.cs" />
+    <Compile Include="MapObjects\SpatialIndexing\RTreeMemoryIndex.cs" />
     <Compile Include="MapObjects\World.cs" />
     <Compile Include="Styles\BoundingAreaStyle.cs" />
     <Compile Include="Styles\LineStyle.cs" />
