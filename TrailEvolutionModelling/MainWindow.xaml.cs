@@ -2,6 +2,8 @@
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -44,6 +46,8 @@ namespace TrailEvolutionModelling
         private AttractorTool attractorTool;
         private AttractorEditing attractorEditing;
         private Tool[] allTools;
+
+        private Thread computationThread;
 
         private XmlSaverLoader<SaveFile> saver;
 
@@ -426,18 +430,36 @@ namespace TrailEvolutionModelling
         private void OnStartClick(object sender, RoutedEventArgs e)
         {
             World world = GetWorld();
-            Graph graph = GraphBuilder.Build(new GraphBuilderInput
+            var computation = new TrailsComputation(world);
+            computation.ProgressChanged += (_s, _e) => Dispatcher.Invoke(
+                () => textBoxComputationStage.Text = computation.CurrentStage
+            );
+
+            computationThread = new Thread(() =>
             {
-                World = world,
-                DesiredStep = 2.4f
+                try
+                {
+                    Dispatcher.Invoke(() => gridComputationIsOn.Visibility = Visibility.Visible);
+                    computation.Run();
+                }
+                catch (IsolatedAttractorsException ex)
+                {
+                    MessageBox.Show("Обнаружены недостижимые точки", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (ThreadAbortException)
+                {
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    Dispatcher.Invoke(() => gridComputationIsOn.Visibility = Visibility.Collapsed);
+                }
             });
-            Attractor[] attractors = GraphBuilder.CreateAttractors(graph, world.AttractorObjects);
-            var computationsInput = new TrailsComputationsInput
-            {
-                Graph = graph,
-                Attractors = attractors
-            };
-            TrailsComputationsOutput output = TrailsGPUProxy.ComputeTrails(computationsInput);
+            computationThread.IsBackground = true;
+            computationThread.Start();
 
             //var edgeLayer = new WritableLayer();
 
@@ -463,10 +485,10 @@ namespace TrailEvolutionModelling
             //}
             //mapControl.Map.Layers.Add(edgeLayer);
 
-            int Lerp(int a, int b, float t)
-            {
-                return (int)(a * (1 - t) + b * t);
-            }
+            //int Lerp(int a, int b, float t)
+            //{
+            //    return (int)(a * (1 - t) + b * t);
+            //}
         }
 
         private void OnAttractorButtonClick(object sender, RoutedEventArgs e)
@@ -491,6 +513,11 @@ namespace TrailEvolutionModelling
                 MapObjects = mapObjectLayer.GetFeatures().OfType<MapObject>().ToArray(),
                 AttractorObjects = attractorLayer.GetFeatures().OfType<AttractorObject>().ToArray()
             };
+        }
+
+        private void OnCancelComputationClick(object sender, RoutedEventArgs e)
+        {
+            computationThread?.Abort();
         }
     }
 }

@@ -1,19 +1,43 @@
 #include "TrailsGPUProxy.h"
+#include "IsolatedAttractorsException.h"
 #include "kernel.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 		TrailsComputationsOutput^ TrailsGPUProxy::ComputeTrails(TrailsComputationsInput^ input) {
-			auto output = gcnew TrailsComputationsOutput();
+			auto attractors = CreateAttractorsMap(input);
+			return nullptr;
+		}
 
-			const int arraySize = 5;
-			const int a[arraySize] = { 1, 2, 3, 4, 5 };
-			const int b[arraySize] = { 10, 20, 30, 40, 50 };
-			int c[arraySize] = { 0 };
-			addWithCuda(c, a, b, arraySize);
+		Dictionary<Attractor^, List<Attractor^>^>^ TrailsGPUProxy::CreateAttractorsMap(TrailsComputationsInput^ input) {
+			auto map = gcnew Dictionary<Attractor^, List<Attractor^>^>();
+			auto isolated = gcnew List<Attractor^>();
+			for each(auto attrI in input->Attractors) {
+				auto reachable = gcnew List<Attractor^>();
+				map[attrI] = reachable;
+				for each(auto attrJ in input->Attractors) {
+					if(attrI == attrJ)
+						continue;
 
-			output->Graph = gcnew Graph(c[0], c[1], c[2], c[3], c[4]);
-			return output;
+					if(CanReach(input->Graph, attrI, attrJ)) {
+						reachable->Add(attrJ);
+					}
+				}
+				if(reachable->Count == 0) {
+					isolated->Add(attrI);
+				}
+			}
+			if(isolated->Count != 0) {
+				throw gcnew IsolatedAttractorsException(isolated);
+			}
+			return map;
+		}
+
+		bool TrailsGPUProxy::CanReach(Graph^ graph, Attractor^ a, Attractor^ b) {
+			float distance = graph->Distance(a->Node, b->Node);
+			return distance <= a->WorkingRadius
+				&& distance <= b->WorkingRadius
+				&& a->Node->ComponentParent == b->Node->ComponentParent;
 		}
 	}
 }

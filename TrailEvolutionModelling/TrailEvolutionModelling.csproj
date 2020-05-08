@@ -204,6 +204,7 @@
     <Compile Include="Styles\LineStyle.cs" />
     <Compile Include="Styles\MapObjectStyle.cs" />
     <Compile Include="Styles\PolygonStyle.cs" />
+    <Compile Include="TrailsComputation.cs" />
     <Compile Include="Util\BitmapResources.cs" />
     <Compile Include="Util\ColorExtensions.cs" />
     <Compile Include="Util\GeometryIntersections.cs" />
