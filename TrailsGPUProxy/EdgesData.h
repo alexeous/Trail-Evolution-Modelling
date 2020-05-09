@@ -73,10 +73,10 @@ namespace TrailEvolutionModelling {
 		template<typename T>
 		inline void EdgesData<T>::CudaCopy(const EdgesData<T>& src, const EdgesData<T>& dest, 
 			int size, cudaMemcpyKind kind) {
-			CHECK_CUDA(cudaMemcpy(vertical, host.vertical, size, kind));
-			CHECK_CUDA(cudaMemcpy(horizontal, host.horizontal, size, kind));
-			CHECK_CUDA(cudaMemcpy(leftDiagonal, host.leftDiagonal, size, kind));
-			CHECK_CUDA(cudaMemcpy(rightDiagonal, host.rightDiagonal, size, kind));
+			CHECK_CUDA(cudaMemcpy(src.vertical, dest.vertical, size, kind));
+			CHECK_CUDA(cudaMemcpy(src.horizontal, dest.horizontal, size, kind));
+			CHECK_CUDA(cudaMemcpy(src.leftDiagonal, dest.leftDiagonal, size, kind));
+			CHECK_CUDA(cudaMemcpy(src.rightDiagonal, dest.rightDiagonal, size, kind));
 		}
 
 		template<typename T>
