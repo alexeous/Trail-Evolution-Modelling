@@ -9,9 +9,15 @@ namespace TrailEvolutionModelling.GraphTypes
         public Node Node1 { get; internal set; }
         public Node Node2 { get; internal set; }
         public float Weight { get; set; }
-        public bool IsTramplable { get; set; }
+        public bool IsTramplable
+        {
+            get => isTramplable && !float.IsInfinity(Weight);
+            set => isTramplable = value;
+        }
+
         public float Trampledness { get; set; }
 
+        private bool isTramplable;
 
         private Edge() { }
 
