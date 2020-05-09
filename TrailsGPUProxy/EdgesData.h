@@ -5,10 +5,10 @@
 
 template<typename T>
 struct EdgesData {
-	T* vertical;
-	T* horizontal;
-	T* leftDiagonal;
-	T* rightDiagonal;
+	T* vertical = nullptr;
+	T* horizontal = nullptr;
+	T* leftDiagonal = nullptr;
+	T* rightDiagonal = nullptr;
 
 	inline T& NW(int i, int j, int w);
 	inline T& N(int i, int j, int w);
@@ -18,18 +18,21 @@ struct EdgesData {
 	inline T& SW(int i, int j, int w);
 	inline T& S(int i, int j, int w);
 	inline T& SE(int i, int j, int w);
+
+	virtual void Free() = 0;
 };
 
 template<typename T>
 struct EdgesDataHost : public EdgesData<T> {
 	EdgesDataHost(int w, int h);
-	~EdgesDataHost();
+	void Free();
 };
 
 template<typename T>
 struct EdgesDataDevice : public EdgesData<T> {
 	EdgesDataDevice(int w, int h);
-	~EdgesDataDevice();
+	void Free();
+
 	static EdgesDataDevice<T> MakeFromHost(const EdgesDataHost<T>& host, int w, int h);
 };
 
@@ -54,7 +57,7 @@ EdgesDataHost<T>::EdgesDataHost(int w, int h) {
 }
 
 template<typename T>
-EdgesDataHost<T>::~EdgesDataHost() {
+void EdgesDataHost<T>::Free() {
 	cudaFreeHost(vertical);
 	cudaFreeHost(horizontal);
 	cudaFreeHost(leftDiagonal);
@@ -71,7 +74,7 @@ EdgesDataDevice<T>::EdgesDataDevice(int w, int h) {
 }
 
 template<typename T>
-EdgesDataDevice<T>::~EdgesDataDevice() {
+void EdgesDataDevice<T>::Free() {
 	cudaFree(vertical);
 	cudaFree(horizontal);
 	cudaFree(leftDiagonal);
