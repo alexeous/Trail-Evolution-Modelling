@@ -9,6 +9,7 @@ namespace TrailEvolutionModelling {
 		public:
 			template<typename TResource, typename... TConstructorArgs>
 			TResource& New(TConstructorArgs... constructorArgs);
+			template<typename T> void Track(T& resources);
 			template<typename T> void Free(T& resource);
 			void FreeAll();
 
@@ -21,6 +22,11 @@ namespace TrailEvolutionModelling {
 			auto resource = new TResource(constructorArgs...);
 			resources.insert(resource);
 			return *resource;
+		}
+
+		template<typename T>
+		inline void ResourceManager::Track(T& resources) {
+			resources.insert(&resouces);
 		}
 
 		template<typename T>
