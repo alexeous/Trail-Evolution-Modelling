@@ -6,6 +6,9 @@
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
+		template<typename T> struct EdgesData;
+		template<typename T> struct EdgesDataHost;
+		template<typename T> struct EdgesDataDevice;
 
 		template<typename T>
 		struct EdgesData : public IResource {
@@ -27,28 +30,33 @@ namespace TrailEvolutionModelling {
 			
 		protected:
 			virtual void Free() = 0;
+			static void CudaCopy(const EdgesData<T>& src, const EdgesData<T>& dest, int size, cudaMemcpyKind kind);
 		};
 
 		template<typename T>
 		struct EdgesDataHost : public EdgesData<T> {
 			friend class ResourceManager;
 			
-			
+			void CopyTo(const EdgesDataHost<T>& other, int w, int h);
+			void CopyTo(const EdgesDataDevice<T>& other, int w, int h);
 		protected:
 			EdgesDataHost(int w, int h);
-			void Free();
+			EdgesDataHost(const EdgesDataDevice<T>& device, int w, int h);
+			void Free() override;
 		};
 
 		template<typename T>
 		struct EdgesDataDevice : public EdgesData<T> {
 			friend class ResourceManager;
 			
-			static EdgesDataDevice<T> MakeFromHost(const EdgesDataHost<T>& host, int w, int h);
-
+			void CopyTo(const EdgesDataHost<T>& other, int w, int h);
+			void CopyTo(const EdgesDataDevice<T>& other, int w, int h);
 		protected:
 			EdgesDataDevice(int w, int h);
-			void Free();
+			EdgesDataDevice(const EdgesDataHost<T>& host, int w, int h);
+			void Free() override;
 		};
+
 
 
 
@@ -62,6 +70,28 @@ namespace TrailEvolutionModelling {
 		template<typename T> inline T& EdgesData<T>::SE(int i, int j, int w) { return leftDiagonal[i + 1 + (j + 1) * w]; }
 
 		template<typename T>
+		inline void EdgesData<T>::CudaCopy(const EdgesData<T>& src, const EdgesData<T>& dest, 
+			int size, cudaMemcpyKind kind) {
+			CHECK_CUDA(cudaMemcpy(vertical, host.vertical, size, kind));
+			CHECK_CUDA(cudaMemcpy(horizontal, host.horizontal, size, kind));
+			CHECK_CUDA(cudaMemcpy(leftDiagonal, host.leftDiagonal, size, kind));
+			CHECK_CUDA(cudaMemcpy(rightDiagonal, host.rightDiagonal, size, kind));
+		}
+
+
+
+
+		template<typename T>
+		inline void EdgesDataHost<T>::CopyTo(const EdgesDataHost<T>& other, int w, int h) {
+			CudaCopy(*this, other, w * h, cudaMemcpyHostToHost);
+		}
+
+		template<typename T>
+		inline void EdgesDataHost<T>::CopyTo(const EdgesDataDevice<T>& other, int w, int h) {
+			CudaCopy(*this, other, w * h, cudaMemcpyHostToDevice);
+		}
+
+		template<typename T>
 		EdgesDataHost<T>::EdgesDataHost(int w, int h) {
 			size_t size = w * h;
 			CHECK_CUDA(cudaMallocHost((void**)&vertical, size));
@@ -71,12 +101,22 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
+		EdgesDataHost<T>::EdgesDataHost(const EdgesDataDevice<T>& device, int w, int h)
+			: EdgesDataHost(w, h) 
+		{
+			device.CopyTo(*this, w, h);
+		}
+
+		template<typename T>
 		void EdgesDataHost<T>::Free() {
 			cudaFreeHost(vertical);
 			cudaFreeHost(horizontal);
 			cudaFreeHost(leftDiagonal);
 			cudaFreeHost(rightDiagonal);
 		}
+
+
+
 
 		template<typename T>
 		EdgesDataDevice<T>::EdgesDataDevice(int w, int h) {
@@ -88,21 +128,28 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
+		inline void EdgesDataDevice<T>::CopyTo(const EdgesDataHost<T>& other, int w, int h) {
+			CudaCopy(*this, other, w * h, cudaMemcpyDeviceToHost);
+		}
+
+		template<typename T>
+		inline void EdgesDataDevice<T>::CopyTo(const EdgesDataDevice<T>& other, int w, int h) {
+			CudaCopy(*this, other, w * h, cudaMemcpyDeviceToDevice);
+		}
+
+		template<typename T>
+		EdgesDataDevice<T>::EdgesDataDevice(const EdgesDataHost<T>& host, int w, int h) :
+			EdgesDataDevice(w, h)
+		{
+			host.CopyTo(*this, w, h);
+		}
+
+		template<typename T>
 		void EdgesDataDevice<T>::Free() {
 			cudaFree(vertical);
 			cudaFree(horizontal);
 			cudaFree(leftDiagonal);
 			cudaFree(rightDiagonal);
-		}
-
-		template<typename T>
-		EdgesDataDevice<T> EdgesDataDevice<T>::MakeFromHost(const EdgesDataHost<T>& host, int w, int h) {
-			EdgesDataDevice<T> device(w, h);
-			size_t size = w * h;
-			CHECK_CUDA(cudaMemcpy(vertical, host.vertical, size, cudaMemcpyHostToDevice));
-			CHECK_CUDA(cudaMemcpy(horizontal, host.horizontal, size, cudaMemcpyHostToDevice));
-			CHECK_CUDA(cudaMemcpy(leftDiagonal, host.leftDiagonal, size, cudaMemcpyHostToDevice));
-			CHECK_CUDA(cudaMemcpy(rightDiagonal, host.rightDiagonal, size, cudaMemcpyHostToDevice));
 		}
 
 	}
