@@ -45,6 +45,18 @@ namespace TrailEvolutionModelling.GraphTypes
             return ((hasEdgesBits >> (int)direction) & 1) != 0;
         }
 
+        public Edge GetIncidentEdge(Direction direction)
+        {
+            int n = incidentEdges.Count;
+            for (int i = 0; i < n; i++)
+            {
+                IncidentEdge incEdge = incidentEdges[i];
+                if (incEdge.Direction == direction)
+                    return incEdge.Edge;
+            }
+            return null;
+        }
+
         internal void AddIncidentEdge(Direction direction, Edge edge)
         {
             Node oppositeNode = edge.GetOppositeNode(this);
