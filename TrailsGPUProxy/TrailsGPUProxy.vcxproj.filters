@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="TrailsGPUProxy.cpp" />
+    <ClCompile Include="IsolatedAttractorsException.cpp">
+      <Filter>Exceptions</Filter>
+    </ClCompile>
+    <ClCompile Include="CudaException.cpp">
+      <Filter>Exceptions</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>ResourceManagement</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EdgesData.h" />
+    <ClInclude Include="CudaUtils.h" />
+    <ClInclude Include="TrailsGPUProxy.h" />
+    <ClInclude Include="IsolatedAttractorsException.h">
+      <Filter>Exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="CudaException.h">
+      <Filter>Exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="IResource.h">
+      <Filter>ResourceManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>ResourceManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="kernel.h">
+      <Filter>CudaKernels</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Exceptions">
+      <UniqueIdentifier>{bf50e2a2-fc07-4c1b-9451-c54112e405d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ResourceManagement">
+      <UniqueIdentifier>{feb837a7-c6fc-4da7-b39a-cc1348455218}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CudaKernels">
+      <UniqueIdentifier>{e6e27c5e-6b74-45ac-a778-3bc862b867b5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="kernel.cu">
+      <Filter>CudaKernels</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>

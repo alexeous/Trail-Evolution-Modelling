@@ -9,6 +9,8 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 		TrailsComputationsOutput^ TrailsGPUProxy::ComputeTrails(TrailsComputationsInput^ input) {
+			TrailsComputationsOutput^ result = nullptr;
+
 			ResourceManager resources;
 			try {
 				NotifyProgress(L"”становление св€зей между точками прит€жени€");
@@ -23,7 +25,7 @@ namespace TrailEvolutionModelling {
 				resources.FreeAll();
 			}
 
-			return nullptr;
+			return result;
 		}
 
 		void TrailsGPUProxy::NotifyProgress(const wchar_t* stage) {
