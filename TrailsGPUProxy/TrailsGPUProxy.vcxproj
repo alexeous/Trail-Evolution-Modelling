@@ -88,17 +88,26 @@
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Attractor.cpp" />
+    <ClCompile Include="AttractorsMap.cpp" />
     <ClCompile Include="CudaException.cpp" />
     <ClCompile Include="IsolatedAttractorsException.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="TrailsGPUProxy.cpp" />
+    <ClCompile Include="TramplabilityMask.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Attractor.h" />
+    <ClInclude Include="AttractorsMap.h" />
     <ClInclude Include="CudaException.h" />
     <ClInclude Include="EdgesData.h" />
     <ClInclude Include="CudaUtils.h" />
+    <ClInclude Include="IResource.h" />
     <ClInclude Include="IsolatedAttractorsException.h" />
     <ClInclude Include="kernel.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="TrailsGPUProxy.h" />
+    <ClInclude Include="TramplabilityMask.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GraphTypes\GraphTypes.csproj">

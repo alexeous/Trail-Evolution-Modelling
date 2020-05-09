@@ -29,13 +29,13 @@ namespace TrailEvolutionModelling
             Graph graph = BuildGraph();
             Attractor[] attractors = GraphBuilder.CreateAttractors(graph, world.AttractorObjects);
 
-            ReportProgress("Симуляция движения пешеходов");
             var computationsInput = new TrailsComputationsInput
             {
                 Graph = graph,
                 Attractors = attractors
             };
             var proxy = new TrailsGPUProxy();
+            proxy.ProgressChanged += ReportProgress;
             TrailsComputationsOutput output = proxy.ComputeTrails(computationsInput);
         }
 
