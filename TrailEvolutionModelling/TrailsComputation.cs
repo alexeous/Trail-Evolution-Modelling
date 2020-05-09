@@ -35,7 +35,8 @@ namespace TrailEvolutionModelling
                 Graph = graph,
                 Attractors = attractors
             };
-            TrailsComputationsOutput output = TrailsGPUProxy.ComputeTrails(computationsInput);
+            var proxy = new TrailsGPUProxy();
+            TrailsComputationsOutput output = proxy.ComputeTrails(computationsInput);
         }
 
         private void ReportProgress(string message)

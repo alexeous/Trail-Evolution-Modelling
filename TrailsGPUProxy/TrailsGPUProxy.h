@@ -11,11 +11,11 @@ namespace TrailEvolutionModelling {
 		public:
 			static initonly int StepSeconds = 5 * 60;
 
-			static TrailsComputationsOutput^ ComputeTrails(TrailsComputationsInput^ input);
+			TrailsComputationsOutput^ ComputeTrails(TrailsComputationsInput^ input);
 
 		private:
-			static Dictionary<Attractor^, List<Attractor^>^>^ CreateAttractorsMap(TrailsComputationsInput^ input);
-			static bool CanReach(Graph^ graph, Attractor^ a, Attractor^ b);
+			Dictionary<Attractor^, List<Attractor^>^>^ CreateAttractorsMap(TrailsComputationsInput^ input);
+			bool CanReach(Graph^ graph, Attractor^ a, Attractor^ b);
 		};
 	}
 }
