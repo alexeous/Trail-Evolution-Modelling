@@ -1,16 +1,12 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
 using Mapsui.Geometries;
 using Mapsui.Layers;
-using Mapsui.Projection;
 using Mapsui.Providers;
 using Mapsui.Styles;
 using Mapsui.UI.Wpf;
@@ -19,14 +15,12 @@ using TrailEvolutionModelling.Attractors;
 using TrailEvolutionModelling.EditorTools;
 using TrailEvolutionModelling.Files;
 using TrailEvolutionModelling.GPUProxy;
-using TrailEvolutionModelling.GraphBuilding;
 using TrailEvolutionModelling.GraphTypes;
 using TrailEvolutionModelling.Layers;
 using TrailEvolutionModelling.MapObjects;
 using TrailEvolutionModelling.Styles;
 using TrailEvolutionModelling.Util;
 using Point = Mapsui.Geometries.Point;
-using Polygon = TrailEvolutionModelling.MapObjects.Polygon;
 
 namespace TrailEvolutionModelling
 {
@@ -141,8 +135,8 @@ namespace TrailEvolutionModelling
             attractorEditing = new AttractorEditing(mapControl, attractorLayer,
                 gridAttractorEditing, comboBoxAttractorType, comboBoxAttractorPerformance,
                 upDownAttractorRadius);
-            
-            allTools = new Tool[] { 
+
+            allTools = new Tool[] {
                 polygonTool, lineTool, mapObjectEditing,
                 boundingAreaTool, attractorTool, attractorEditing
             };
@@ -304,7 +298,7 @@ namespace TrailEvolutionModelling
             }
 
             RefreshButtons();
-            
+
             return any;
         }
 
@@ -440,9 +434,45 @@ namespace TrailEvolutionModelling
                 try
                 {
                     Dispatcher.Invoke(() => gridComputationIsOn.Visibility = Visibility.Visible);
-                    computation.Run();
+                    TrailsComputationsOutput output = computation.Run();
+                    Graph graph = output.Graph;
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        var edgeLayer = new WritableLayer();
+
+                        Color minCol = Color.FromArgb(255, 0, 255, 0);
+                        Color maxCol = Color.Red;
+                        const float minW = 1f;
+                        const float maxW = 3.4f;
+
+                        foreach (var edge in graph.Edges)
+                        {
+                            if (edge.Trampledness < 0.1f)
+                                continue;
+
+                            Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
+                            Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();
+                            float t = (edge.Weight - minW) / (maxW - minW);
+                            Color color = Color.FromArgb(255, Lerp(minCol.R, maxCol.R, t), Lerp(minCol.G, maxCol.G, t), Lerp(minCol.B, maxCol.B, t));
+                            edgeLayer.Add(new Feature
+                            {
+                                Geometry = new LineString(new[] { pos1, pos2 }),
+                                Styles = new[]
+                                {
+                                    new VectorStyle { Line = new Pen(color, 1) }
+                                }
+                            });
+                        }
+                        mapControl.Map.Layers.Add(edgeLayer);
+
+                        int Lerp(int a, int b, float t)
+                        {
+                            return (int)(a * (1 - t) + b * t);
+                        }
+                    });
                 }
-                catch (IsolatedAttractorsException ex)
+                catch (IsolatedAttractorsException)
                 {
                     MessageBox.Show("Обнаружены недостижимые точки", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
@@ -461,34 +491,7 @@ namespace TrailEvolutionModelling
             computationThread.IsBackground = true;
             computationThread.Start();
 
-            //var edgeLayer = new WritableLayer();
 
-            //Color minCol = Color.FromArgb(255, 0, 255, 0);
-            //Color maxCol = Color.Red;
-            //const float minW = 1f;
-            //const float maxW = 3.4f;
-
-            //foreach (var edge in graph.Edges)
-            //{
-            //    Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
-            //    Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();
-            //    float t = (edge.Weight - minW) / (maxW - minW);
-            //    Color color = Color.FromArgb(255, Lerp(minCol.R, maxCol.R, t), Lerp(minCol.G, maxCol.G, t), Lerp(minCol.B, maxCol.B, t));
-            //    edgeLayer.Add(new Feature
-            //    {
-            //        Geometry = new LineString(new[] { pos1, pos2 }),
-            //        Styles = new[]
-            //        {
-            //            new VectorStyle { Line = new Pen(color, 1) }
-            //        }
-            //    });
-            //}
-            //mapControl.Map.Layers.Add(edgeLayer);
-
-            //int Lerp(int a, int b, float t)
-            //{
-            //    return (int)(a * (1 - t) + b * t);
-            //}
         }
 
         private void OnAttractorButtonClick(object sender, RoutedEventArgs e)

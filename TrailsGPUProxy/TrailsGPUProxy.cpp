@@ -8,6 +8,11 @@
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
+		void f(uint8_t& tramplable, Edge^ edge) {
+			if (edge != nullptr)
+				edge->Trampledness = tramplable;
+		}
+
 		TrailsComputationsOutput^ TrailsGPUProxy::ComputeTrails(TrailsComputationsInput^ input) {
 			TrailsComputationsOutput^ result = nullptr;
 
@@ -23,7 +28,7 @@ namespace TrailEvolutionModelling {
 				
 				result = gcnew TrailsComputationsOutput();
 				result->Graph = input->Graph;
-
+				tramplabilityMask.ZipWithGraphEdges(result->Graph, 0, 0, f);
 			}
 			finally {
 				resources.FreeAll();

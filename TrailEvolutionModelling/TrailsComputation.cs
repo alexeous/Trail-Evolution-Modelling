@@ -23,7 +23,7 @@ namespace TrailEvolutionModelling
             this.world = world;
         }
 
-        public void Run()
+        public TrailsComputationsOutput Run()
         {
             ReportProgress("Построение графа");
             Graph graph = BuildGraph();
@@ -37,6 +37,7 @@ namespace TrailEvolutionModelling
             var proxy = new TrailsGPUProxy();
             proxy.ProgressChanged += ReportProgress;
             TrailsComputationsOutput output = proxy.ComputeTrails(computationsInput);
+            return output;
         }
 
         private void ReportProgress(string message)
