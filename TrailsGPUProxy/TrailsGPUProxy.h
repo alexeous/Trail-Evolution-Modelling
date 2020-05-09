@@ -1,4 +1,5 @@
 #pragma once
+#include "EdgesData.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -16,10 +17,16 @@ namespace TrailEvolutionModelling {
 
 		private:
 			void NotifyProgress(const wchar_t* stage);
+			template <typename T> void ApplyTrampledness(Graph^ graph, const EdgesDataHost<T> &edgesData);
 		//private:
 		//	Dictionary<Attractor^, List<Attractor^>^>^ CreateAttractorsMap(TrailsComputationsInput^ input);
 		//	bool CanReach(Graph^ graph, Attractor^ a, Attractor^ b);
 		};
+
+		template<typename T>
+		inline void TrailsGPUProxy::ApplyTrampledness(Graph^ graph, const EdgesDataHost<T>& edgesData) {
+			throw gcnew System::NotImplementedException();
+		}
 	}
 }
 

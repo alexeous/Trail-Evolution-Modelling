@@ -20,6 +20,10 @@ namespace TrailEvolutionModelling {
 				TramplabilityMask tramplabilityMask = resources.New<TramplabilityMask>(input->Graph);
 				
 				NotifyProgress(L"Симуляция движения пешеходов");
+				
+				result = gcnew TrailsComputationsOutput();
+				result->Graph = input->Graph;
+
 			}
 			finally {
 				resources.FreeAll();

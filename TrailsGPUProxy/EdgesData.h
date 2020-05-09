@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include "cuda_runtime.h"
 #include "CudaUtils.h"
 #include "IResource.h"
@@ -6,6 +7,8 @@
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
+		using namespace TrailEvolutionModelling::GraphTypes;
+
 		template<typename T> struct EdgesData;
 		template<typename T> struct EdgesDataHost;
 		template<typename T> struct EdgesDataDevice;
@@ -28,10 +31,13 @@ namespace TrailEvolutionModelling {
 			inline T& S(int i, int j, int w);
 			inline T& SE(int i, int j, int w);
 			
+			void ZipWithGraphEdges(Graph^ graph, int iOffset, int jOffset, void (*func)(T&, Edge^));
+
 		protected:
 			virtual void Free() = 0;
 			static void CudaCopy(const EdgesData<T>& src, const EdgesData<T>& dest, int size, cudaMemcpyKind kind);
 			static int ArraySize(int w, int h);
+			static Edge^ GetEdge(Node^ node, Direction direction);
 		};
 
 		template<typename T>
@@ -69,6 +75,37 @@ namespace TrailEvolutionModelling {
 		template<typename T> inline T& EdgesData<T>::SW(int i, int j, int w) { return rightDiagonal[i + (j + 1) * (w + 1)]; }
 		template<typename T> inline T& EdgesData<T>::S(int i, int j, int w) { return vertical[i + 1 + (j + 1) * (w + 1)]; }
 		template<typename T> inline T& EdgesData<T>::SE(int i, int j, int w) { return leftDiagonal[i + 1 + (j + 1) * (w + 1)]; }
+
+		template<typename T>
+		inline void EdgesData<T>::ZipWithGraphEdges(Graph^ graph, int iOffset, int jOffset, 
+			void (*func)(T&, Edge^))
+		{
+			int w = graph->Width;
+			int h = graph->Height;
+			for(int i = 0; i < w; i++) {
+				for(int j = 0; j < h; j++) {
+					bool notLastColumn = i < w - 1;
+					bool notLastRow = j < h - 1;
+					bool notFirstColumn = i != 0;
+
+					Node^ node = graph->GetNodeAtOrNull(i, j);
+
+					func(E(i, j, w), GetEdge(node, Direction::E));
+					if(notLastRow) {
+						func(S(i, j, w), GetEdge(node, Direction::S));
+						if(notLastColumn)
+							func(SE(i, j, w), GetEdge(node, Direction::SE));
+						if(notFirstColumn)
+							func(SW(i, j, w), GetEdge(node, Direction::SW));
+					}
+				}
+			}
+		}
+
+		template<typename T>
+		inline Edge^ EdgesData<T>::GetEdge(Node^ node, Direction direction) {
+			return (node == nullptr ? nullptr : node->GetIncidentEdge(direction));
+		}
 
 		template<typename T>
 		inline void EdgesData<T>::CudaCopy(const EdgesData<T>& src, const EdgesData<T>& dest, 
