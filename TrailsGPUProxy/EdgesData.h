@@ -31,7 +31,7 @@ namespace TrailEvolutionModelling {
 			inline T& S(int i, int j, int w);
 			inline T& SE(int i, int j, int w);
 			
-			void ZipWithGraphEdges(Graph^ graph, int iOffset, int jOffset, void (*func)(T&, Edge^));
+			void ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^));
 
 		protected:
 			virtual void Free() = 0;
@@ -77,8 +77,7 @@ namespace TrailEvolutionModelling {
 		template<typename T> inline T& EdgesData<T>::SE(int i, int j, int w) { return leftDiagonal[i + 1 + (j + 1) * (w + 1)]; }
 
 		template<typename T>
-		inline void EdgesData<T>::ZipWithGraphEdges(Graph^ graph, int iOffset, int jOffset, 
-			void (*func)(T&, Edge^))
+		inline void EdgesData<T>::ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^))
 		{
 			int w = graph->Width;
 			int h = graph->Height;
