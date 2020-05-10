@@ -18,11 +18,19 @@ namespace TrailEvolutionModelling {
 
 			if(initiallyTrampleAll) {
 				host.ZipWithGraphEdges(graph, [](float& weight, Edge^ edge) {
+					if(edge == nullptr) {
+						weight = INFINITY;
+						return;
+					}
 					weight = edge->IsTramplable ? TrailsGPUProxy::MinimumTramplableWeight : edge->Weight;
 				});
 			}
 			else {
 				host.ZipWithGraphEdges(graph, [](float& weight, Edge^ edge) {
+					if(edge == nullptr) {
+						weight = INFINITY;
+						return;
+					}
 					weight = edge->Weight;
 				});
 			}

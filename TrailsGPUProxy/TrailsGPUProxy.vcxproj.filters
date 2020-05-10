@@ -15,6 +15,9 @@
     <ClCompile Include="AttractorsMap.cpp" />
     <ClCompile Include="TramplabilityMask.cpp" />
     <ClCompile Include="ComputeNode.cpp" />
+    <ClCompile Include="ComputeNodesCreator.cpp" />
+    <ClCompile Include="ComputeNodesPair.cpp" />
+    <ClCompile Include="EdgesWeights.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EdgesData.h" />
@@ -39,6 +42,9 @@
     <ClInclude Include="AttractorsMap.h" />
     <ClInclude Include="TramplabilityMask.h" />
     <ClInclude Include="ComputeNode.h" />
+    <ClInclude Include="ComputeNodesCreator.h" />
+    <ClInclude Include="ComputeNodesPair.h" />
+    <ClInclude Include="EdgesWeights.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Exceptions">

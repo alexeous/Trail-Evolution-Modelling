@@ -448,12 +448,9 @@ namespace TrailEvolutionModelling
 
                         foreach (var edge in graph.Edges)
                         {
-                            if (edge.Trampledness < 0.1f)
-                                continue;
-
                             Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
                             Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();
-                            float t = (edge.Weight - minW) / (maxW - minW);
+                            float t = (edge.Weight - edge.Trampledness - minW) / (maxW - minW);
                             Color color = Color.FromArgb(255, Lerp(minCol.R, maxCol.R, t), Lerp(minCol.G, maxCol.G, t), Lerp(minCol.B, maxCol.B, t));
                             edgeLayer.Add(new Feature
                             {
@@ -468,6 +465,7 @@ namespace TrailEvolutionModelling
 
                         int Lerp(int a, int b, float t)
                         {
+                            t = Math.Max(0, Math.Min(t, 1));
                             return (int)(a * (1 - t) + b * t);
                         }
                     });

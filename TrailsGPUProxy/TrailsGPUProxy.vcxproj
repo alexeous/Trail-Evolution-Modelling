@@ -91,7 +91,10 @@
     <ClCompile Include="Attractor.cpp" />
     <ClCompile Include="AttractorsMap.cpp" />
     <ClCompile Include="ComputeNode.cpp" />
+    <ClCompile Include="ComputeNodesCreator.cpp" />
+    <ClCompile Include="ComputeNodesPair.cpp" />
     <ClCompile Include="CudaException.cpp" />
+    <ClCompile Include="EdgesWeights.cpp" />
     <ClCompile Include="IsolatedAttractorsException.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="TrailsGPUProxy.cpp" />
@@ -101,9 +104,12 @@
     <ClInclude Include="Attractor.h" />
     <ClInclude Include="AttractorsMap.h" />
     <ClInclude Include="ComputeNode.h" />
+    <ClInclude Include="ComputeNodesCreator.h" />
+    <ClInclude Include="ComputeNodesPair.h" />
     <ClInclude Include="CudaException.h" />
     <ClInclude Include="EdgesData.h" />
     <ClInclude Include="CudaUtils.h" />
+    <ClInclude Include="EdgesWeights.h" />
     <ClInclude Include="IResource.h" />
     <ClInclude Include="IsolatedAttractorsException.h" />
     <ClInclude Include="kernel.h" />

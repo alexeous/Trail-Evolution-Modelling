@@ -10,6 +10,7 @@ namespace TrailEvolutionModelling {
 		public ref class TrailsGPUProxy {
 		public:
 			static initonly int StepSeconds = 5 * 60;
+			static initonly float MinimumTramplableWeight = 1.1f;
 
 			event Action<String^>^ ProgressChanged;
 
@@ -17,15 +18,20 @@ namespace TrailEvolutionModelling {
 
 		private:
 			void NotifyProgress(const wchar_t* stage);
-			template <typename T> void ApplyTrampledness(Graph^ graph, const EdgesDataHost<T> &edgesData);
+			void ApplyTrampledness(Graph^ graph, EdgesDataHost<float> &edgesData);
 		//private:
 		//	Dictionary<Attractor^, List<Attractor^>^>^ CreateAttractorsMap(TrailsComputationsInput^ input);
 		//	bool CanReach(Graph^ graph, Attractor^ a, Attractor^ b);
 		};
 
-		template<typename T>
-		inline void TrailsGPUProxy::ApplyTrampledness(Graph^ graph, const EdgesDataHost<T>& edgesData) {
-			throw gcnew System::NotImplementedException();
+		inline void ApplyTramplednessFunc(float& trampledness, Edge^ edge) {
+			if(edge != nullptr) {
+				edge->Trampledness = trampledness;
+			}
+		}
+
+		inline void TrailsGPUProxy::ApplyTrampledness(Graph^ graph, EdgesDataHost<float>& edgesData) {
+			edgesData.ZipWithGraphEdges(graph, ApplyTramplednessFunc);
 		}
 	}
 }

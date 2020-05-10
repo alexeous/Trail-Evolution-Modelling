@@ -35,8 +35,9 @@ namespace TrailEvolutionModelling {
 
 		protected:
 			virtual void Free() = 0;
-			static void CudaCopy(const EdgesData<T>& src, const EdgesData<T>& dest, int size, cudaMemcpyKind kind);
+			static void CudaCopy(const EdgesData<T>& src, const EdgesData<T>& dest, int count, cudaMemcpyKind kind);
 			static int ArraySize(int w, int h);
+			static int ArraySizeBytes(int w, int h);
 			static Edge^ GetEdge(Node^ node, Direction direction);
 		};
 
@@ -108,16 +109,22 @@ namespace TrailEvolutionModelling {
 
 		template<typename T>
 		inline void EdgesData<T>::CudaCopy(const EdgesData<T>& src, const EdgesData<T>& dest, 
-			int size, cudaMemcpyKind kind) {
-			CHECK_CUDA(cudaMemcpy(src.vertical, dest.vertical, size, kind));
-			CHECK_CUDA(cudaMemcpy(src.horizontal, dest.horizontal, size, kind));
-			CHECK_CUDA(cudaMemcpy(src.leftDiagonal, dest.leftDiagonal, size, kind));
-			CHECK_CUDA(cudaMemcpy(src.rightDiagonal, dest.rightDiagonal, size, kind));
+			int count, cudaMemcpyKind kind) {
+			size_t size = count * sizeof(T);
+			CHECK_CUDA(cudaMemcpy(dest.vertical, src.vertical, size, kind));
+			CHECK_CUDA(cudaMemcpy(dest.horizontal, src.horizontal, size, kind));
+			CHECK_CUDA(cudaMemcpy(dest.leftDiagonal, src.leftDiagonal, size, kind));
+			CHECK_CUDA(cudaMemcpy(dest.rightDiagonal, src.rightDiagonal, size, kind));
 		}
 
 		template<typename T>
 		inline int EdgesData<T>::ArraySize(int w, int h) {
 			return (w + 1) * (h + 1);
+		}
+
+		template<typename T>
+		inline int EdgesData<T>::ArraySizeBytes(int w, int h) {
+			return ArraySize(w, h) * sizeof(T);
 		}
 
 
@@ -135,11 +142,11 @@ namespace TrailEvolutionModelling {
 
 		template<typename T>
 		EdgesDataHost<T>::EdgesDataHost(int w, int h) {
-			size_t size = ArraySize(w, h);
-			CHECK_CUDA(cudaMallocHost((void**)&vertical, size));
-			CHECK_CUDA(cudaMallocHost((void**)&horizontal, size));
-			CHECK_CUDA(cudaMallocHost((void**)&leftDiagonal, size));
-			CHECK_CUDA(cudaMallocHost((void**)&rightDiagonal, size));
+			size_t size = ArraySizeBytes(w, h);
+			CHECK_CUDA(cudaMallocHost(&vertical, size));
+			CHECK_CUDA(cudaMallocHost(&horizontal, size));
+			CHECK_CUDA(cudaMallocHost(&leftDiagonal, size));
+			CHECK_CUDA(cudaMallocHost(&rightDiagonal, size));
 		}
 
 		template<typename T>
@@ -162,11 +169,11 @@ namespace TrailEvolutionModelling {
 
 		template<typename T>
 		EdgesDataDevice<T>::EdgesDataDevice(int w, int h) {
-			size_t size = ArraySize(w, h);
-			CHECK_CUDA(cudaMalloc((void**)&vertical, size));
-			CHECK_CUDA(cudaMalloc((void**)&horizontal, size));
-			CHECK_CUDA(cudaMalloc((void**)&leftDiagonal, size));
-			CHECK_CUDA(cudaMalloc((void**)&rightDiagonal, size));
+			size_t size = ArraySizeBytes(w, h);
+			CHECK_CUDA(cudaMalloc(&vertical, size));
+			CHECK_CUDA(cudaMalloc(&horizontal, size));
+			CHECK_CUDA(cudaMalloc(&leftDiagonal, size));
+			CHECK_CUDA(cudaMalloc(&rightDiagonal, size));
 		}
 
 		template<typename T>
