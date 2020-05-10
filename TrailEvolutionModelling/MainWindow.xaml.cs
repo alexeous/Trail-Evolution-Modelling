@@ -474,7 +474,7 @@ namespace TrailEvolutionModelling
                 }
                 catch (IsolatedAttractorsException)
                 {
-                    MessageBox.Show("Обнаружены недостижимые точки", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Обнаружены изолированные точки", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 catch (ThreadAbortException)
                 {

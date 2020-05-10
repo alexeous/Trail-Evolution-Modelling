@@ -18,7 +18,8 @@ namespace TrailEvolutionModelling {
 			for each(auto attrI in refAttractors) {
 				std::vector<Attractor> reachable;
 				for each(auto attrJ in refAttractors) {
-					if(attrI == attrJ)
+					if(attrI == attrJ || !(attrI->IsSource && attrJ->IsDrain || 
+										   attrI->IsDrain && attrJ->IsSource))
 						continue;
 
 					if(CanReach(graph, attrI, attrJ)) {
