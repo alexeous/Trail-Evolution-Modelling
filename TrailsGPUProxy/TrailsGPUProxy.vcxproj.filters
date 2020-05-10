@@ -11,6 +11,10 @@
     <ClCompile Include="ResourceManager.cpp">
       <Filter>ResourceManagement</Filter>
     </ClCompile>
+    <ClCompile Include="Attractor.cpp" />
+    <ClCompile Include="AttractorsMap.cpp" />
+    <ClCompile Include="TramplabilityMask.cpp" />
+    <ClCompile Include="ComputeNode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EdgesData.h" />
@@ -31,6 +35,10 @@
     <ClInclude Include="kernel.h">
       <Filter>CudaKernels</Filter>
     </ClInclude>
+    <ClInclude Include="Attractor.h" />
+    <ClInclude Include="AttractorsMap.h" />
+    <ClInclude Include="TramplabilityMask.h" />
+    <ClInclude Include="ComputeNode.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Exceptions">

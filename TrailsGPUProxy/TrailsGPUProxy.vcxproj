@@ -90,6 +90,7 @@
   <ItemGroup>
     <ClCompile Include="Attractor.cpp" />
     <ClCompile Include="AttractorsMap.cpp" />
+    <ClCompile Include="ComputeNode.cpp" />
     <ClCompile Include="CudaException.cpp" />
     <ClCompile Include="IsolatedAttractorsException.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
@@ -99,6 +100,7 @@
   <ItemGroup>
     <ClInclude Include="Attractor.h" />
     <ClInclude Include="AttractorsMap.h" />
+    <ClInclude Include="ComputeNode.h" />
     <ClInclude Include="CudaException.h" />
     <ClInclude Include="EdgesData.h" />
     <ClInclude Include="CudaUtils.h" />
