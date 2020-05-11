@@ -7,7 +7,7 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		AttractorsMap::AttractorsMap(Graph^ graph, array<RefAttractor^>^ refAttractors) {
-			std::vector<Attractor> attractors(refAttractors->Length);
+			std::vector<Attractor> attractors;
 			for each(auto refAttr in refAttractors) {
 				attractors.push_back(Attractor(refAttr));
 			}
