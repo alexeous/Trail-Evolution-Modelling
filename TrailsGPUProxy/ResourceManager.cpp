@@ -4,9 +4,11 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		void ResourceManager::FreeAll() {
-			for(IResource* resource : resources) {
+			decltype(resources) resourcesCopy(resources);
+			for(IResource* resource : resourcesCopy) {
 				resource->Free();
 			}
+			resources.clear();
 		}
 
 	}
