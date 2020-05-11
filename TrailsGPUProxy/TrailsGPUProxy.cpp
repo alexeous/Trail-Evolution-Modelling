@@ -1,4 +1,3 @@
-#include "kernel.h"
 #include "TrailsGPUProxy.h"
 #include "IsolatedAttractorsException.h"
 #include "Attractor.h"
@@ -9,10 +8,6 @@
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
-		void f(uint8_t& tramplable, Edge^ edge) {
-			if (edge != nullptr)
-				edge->Trampledness = tramplable;
-		}
 
 		TrailsComputationsOutput^ TrailsGPUProxy::ComputeTrails(TrailsComputationsInput^ input) {
 			TrailsComputationsOutput^ result = nullptr;
@@ -28,10 +23,15 @@ namespace TrailEvolutionModelling {
 				NotifyProgress(L"Инициализация весов рёбер для \"непорядочных пешеходов\"");
 				EdgesWeights indecentEdgesWeights = resources.New<EdgesWeights>(input->Graph, resources, true);
 
+
+
 				NotifyProgress(L"Симуляция движения пешеходов");
-				
+
+				NotifyProgress(L"Выгрузка результата");
 				EdgesDataHost<float> trampledness = resources.New<EdgesDataHost<float>>(indecentEdgesWeights, 
 					input->Graph->Width, input->Graph->Height);
+
+				resources.Free(indecentEdgesWeights);
 
 				result = gcnew TrailsComputationsOutput();
 				result->Graph = input->Graph;
