@@ -6,7 +6,7 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		ComputeNodesPair::ComputeNodesPair(int graphW, int graphH) {
-			size_t size = (graphW + 2) * (graphH + 2);
+			size_t size = (graphW + 2) * (graphH + 2) * sizeof(ComputeNode);
 			CHECK_CUDA(cudaMalloc(&readOnly, size));
 			CHECK_CUDA(cudaMalloc(&writeOnly, size));
 		}
