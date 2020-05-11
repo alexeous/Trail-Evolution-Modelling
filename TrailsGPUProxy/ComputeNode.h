@@ -5,11 +5,12 @@ namespace TrailEvolutionModelling {
     namespace GPUProxy {
 
         struct ComputeNode {
+        public:
             float g;
+        private:
             uint8_t dirNext_isStart;
-            //int dirNext; // clockwise
-            //int isStart;
 
+        public:
             inline bool IsStart();
             inline void SetStart(bool start);
             inline uint8_t GetDirNext();
