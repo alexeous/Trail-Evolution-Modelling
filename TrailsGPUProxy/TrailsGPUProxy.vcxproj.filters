@@ -11,16 +11,26 @@
     <ClCompile Include="ResourceManager.cpp">
       <Filter>ResourceManagement</Filter>
     </ClCompile>
-    <ClCompile Include="Attractor.cpp" />
-    <ClCompile Include="AttractorsMap.cpp" />
-    <ClCompile Include="TramplabilityMask.cpp" />
-    <ClCompile Include="ComputeNode.cpp" />
-    <ClCompile Include="ComputeNodesCreator.cpp" />
-    <ClCompile Include="ComputeNodesPair.cpp" />
-    <ClCompile Include="EdgesWeights.cpp" />
+    <ClCompile Include="EdgesWeights.cpp">
+      <Filter>Data\Edges</Filter>
+    </ClCompile>
+    <ClCompile Include="TramplabilityMask.cpp">
+      <Filter>Data\Edges</Filter>
+    </ClCompile>
+    <ClCompile Include="Attractor.cpp">
+      <Filter>Data\Attractors</Filter>
+    </ClCompile>
+    <ClCompile Include="AttractorsMap.cpp">
+      <Filter>Data\Attractors</Filter>
+    </ClCompile>
+    <ClCompile Include="ComputeNode.cpp">
+      <Filter>Data\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="ComputeNodesPair.cpp">
+      <Filter>Data\Nodes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EdgesData.h" />
     <ClInclude Include="CudaUtils.h" />
     <ClInclude Include="TrailsGPUProxy.h" />
     <ClInclude Include="IsolatedAttractorsException.h">
@@ -38,13 +48,27 @@
     <ClInclude Include="kernel.h">
       <Filter>CudaKernels</Filter>
     </ClInclude>
-    <ClInclude Include="Attractor.h" />
-    <ClInclude Include="AttractorsMap.h" />
-    <ClInclude Include="TramplabilityMask.h" />
-    <ClInclude Include="ComputeNode.h" />
-    <ClInclude Include="ComputeNodesCreator.h" />
-    <ClInclude Include="ComputeNodesPair.h" />
-    <ClInclude Include="EdgesWeights.h" />
+    <ClInclude Include="EdgesData.h">
+      <Filter>Data\Edges</Filter>
+    </ClInclude>
+    <ClInclude Include="EdgesWeights.h">
+      <Filter>Data\Edges</Filter>
+    </ClInclude>
+    <ClInclude Include="TramplabilityMask.h">
+      <Filter>Data\Edges</Filter>
+    </ClInclude>
+    <ClInclude Include="Attractor.h">
+      <Filter>Data\Attractors</Filter>
+    </ClInclude>
+    <ClInclude Include="AttractorsMap.h">
+      <Filter>Data\Attractors</Filter>
+    </ClInclude>
+    <ClInclude Include="ComputeNode.h">
+      <Filter>Data\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="ComputeNodesPair.h">
+      <Filter>Data\Nodes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Exceptions">
@@ -55,6 +79,18 @@
     </Filter>
     <Filter Include="CudaKernels">
       <UniqueIdentifier>{e6e27c5e-6b74-45ac-a778-3bc862b867b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data">
+      <UniqueIdentifier>{a3cd365e-c6b9-4557-b5fa-3e0757885625}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\Edges">
+      <UniqueIdentifier>{49435bc0-db3c-4527-9c59-438ccaa8ea83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\Attractors">
+      <UniqueIdentifier>{8adaac23-2552-4e7a-b7b4-a752fe103146}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data\Nodes">
+      <UniqueIdentifier>{6c2f20c7-ab14-4370-9702-76cfa2caa0ea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
