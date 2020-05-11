@@ -10,10 +10,8 @@ namespace TrailEvolutionModelling {
 		struct TramplabilityMask : public EdgesDataHost<uint8_t> {
 			friend class ResourceManager;
 
+		protected:
 			TramplabilityMask(Graph^ graph);
-		
-		private:
-			static inline bool IsTramplable(Node^ node, Direction direction);
 		};
 
 	}
