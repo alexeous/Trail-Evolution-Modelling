@@ -35,7 +35,7 @@ namespace TrailEvolutionModelling {
 
 		protected:
 			virtual void Free() = 0;
-			static void CudaCopy(const EdgesData<T>& src, const EdgesData<T>& dest, int count, cudaMemcpyKind kind);
+			static void CudaCopy(const EdgesData<T>* src, const EdgesData<T>* dest, int count, cudaMemcpyKind kind);
 			static int ArraySize(int w, int h);
 			static int ArraySizeBytes(int w, int h);
 			static Edge^ GetEdge(Node^ node, Direction direction);
@@ -45,11 +45,11 @@ namespace TrailEvolutionModelling {
 		struct EdgesDataHost : public EdgesData<T> {
 			friend class ResourceManager;
 			
-			void CopyTo(const EdgesDataHost<T>& other, int w, int h) const;
-			void CopyTo(const EdgesDataDevice<T>& other, int w, int h) const;
+			void CopyTo(const EdgesDataHost<T>* other, int w, int h) const;
+			void CopyTo(const EdgesDataDevice<T>* other, int w, int h) const;
 		protected:
 			EdgesDataHost(int w, int h);
-			EdgesDataHost(const EdgesDataDevice<T>& device, int w, int h);
+			EdgesDataHost(const EdgesDataDevice<T>* device, int w, int h);
 			void Free() override;
 		};
 
@@ -57,11 +57,11 @@ namespace TrailEvolutionModelling {
 		struct EdgesDataDevice : public EdgesData<T> {
 			friend class ResourceManager;
 			
-			void CopyTo(const EdgesDataHost<T>& other, int w, int h) const;
-			void CopyTo(const EdgesDataDevice<T>& other, int w, int h) const;
+			void CopyTo(const EdgesDataHost<T>* other, int w, int h) const;
+			void CopyTo(const EdgesDataDevice<T>* other, int w, int h) const;
 		protected:
 			EdgesDataDevice(int w, int h);
-			EdgesDataDevice(const EdgesDataHost<T>& host, int w, int h);
+			EdgesDataDevice(const EdgesDataHost<T>* host, int w, int h);
 			void Free() override;
 		};
 
@@ -108,13 +108,13 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
-		inline void EdgesData<T>::CudaCopy(const EdgesData<T>& src, const EdgesData<T>& dest, 
+		inline void EdgesData<T>::CudaCopy(const EdgesData<T>* src, const EdgesData<T>* dest, 
 			int count, cudaMemcpyKind kind) {
 			size_t size = count * sizeof(T);
-			CHECK_CUDA(cudaMemcpy(dest.vertical, src.vertical, size, kind));
-			CHECK_CUDA(cudaMemcpy(dest.horizontal, src.horizontal, size, kind));
-			CHECK_CUDA(cudaMemcpy(dest.leftDiagonal, src.leftDiagonal, size, kind));
-			CHECK_CUDA(cudaMemcpy(dest.rightDiagonal, src.rightDiagonal, size, kind));
+			CHECK_CUDA(cudaMemcpy(dest->vertical, src->vertical, size, kind));
+			CHECK_CUDA(cudaMemcpy(dest->horizontal, src->horizontal, size, kind));
+			CHECK_CUDA(cudaMemcpy(dest->leftDiagonal, src->leftDiagonal, size, kind));
+			CHECK_CUDA(cudaMemcpy(dest->rightDiagonal, src->rightDiagonal, size, kind));
 		}
 
 		template<typename T>
@@ -131,13 +131,13 @@ namespace TrailEvolutionModelling {
 
 
 		template<typename T>
-		inline void EdgesDataHost<T>::CopyTo(const EdgesDataHost<T>& other, int w, int h) const {
-			CudaCopy(*this, other, ArraySize(w, h), cudaMemcpyHostToHost);
+		inline void EdgesDataHost<T>::CopyTo(const EdgesDataHost<T>* other, int w, int h) const {
+			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyHostToHost);
 		}
 
 		template<typename T>
-		inline void EdgesDataHost<T>::CopyTo(const EdgesDataDevice<T>& other, int w, int h) const {
-			CudaCopy(*this, other, ArraySize(w, h), cudaMemcpyHostToDevice);
+		inline void EdgesDataHost<T>::CopyTo(const EdgesDataDevice<T>* other, int w, int h) const {
+			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyHostToDevice);
 		}
 
 		template<typename T>
@@ -150,10 +150,10 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
-		EdgesDataHost<T>::EdgesDataHost(const EdgesDataDevice<T>& device, int w, int h)
+		EdgesDataHost<T>::EdgesDataHost(const EdgesDataDevice<T>* device, int w, int h)
 			: EdgesDataHost(w, h) 
 		{
-			device.CopyTo(*this, w, h);
+			device->CopyTo(this, w, h);
 		}
 
 		template<typename T>
@@ -177,20 +177,20 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
-		inline void EdgesDataDevice<T>::CopyTo(const EdgesDataHost<T>& other, int w, int h) const {
-			CudaCopy(*this, other, ArraySize(w, h), cudaMemcpyDeviceToHost);
+		inline void EdgesDataDevice<T>::CopyTo(const EdgesDataHost<T>* other, int w, int h) const {
+			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyDeviceToHost);
 		}
 
 		template<typename T>
-		inline void EdgesDataDevice<T>::CopyTo(const EdgesDataDevice<T>& other, int w, int h) const {
-			CudaCopy(*this, other, ArraySize(w, h), cudaMemcpyDeviceToDevice);
+		inline void EdgesDataDevice<T>::CopyTo(const EdgesDataDevice<T>* other, int w, int h) const {
+			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyDeviceToDevice);
 		}
 
 		template<typename T>
-		EdgesDataDevice<T>::EdgesDataDevice(const EdgesDataHost<T>& host, int w, int h) :
+		EdgesDataDevice<T>::EdgesDataDevice(const EdgesDataHost<T>* host, int w, int h) :
 			EdgesDataDevice(w, h)
 		{
-			host.CopyTo(*this, w, h);
+			host->CopyTo(this, w, h);
 		}
 
 		template<typename T>

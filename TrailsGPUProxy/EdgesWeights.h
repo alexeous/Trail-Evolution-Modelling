@@ -12,7 +12,7 @@ namespace TrailEvolutionModelling {
 			EdgesWeights(Graph^ graph, ResourceManager& resources, bool initiallyTrampleAll);
 
 		private:
-			static EdgesDataHost<float> CreateHostWeights(Graph^ graph,
+			static EdgesDataHost<float>* CreateHostWeights(Graph^ graph,
 				ResourceManager& resources, bool initiallyTrampleAll);
 		};
 

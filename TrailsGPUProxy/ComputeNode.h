@@ -11,10 +11,10 @@ namespace TrailEvolutionModelling {
             uint8_t dirNext_isStart;
 
         public:
-            inline bool IsStart();
-            inline void SetStart(bool start);
-            inline uint8_t GetDirNext();
-            inline void SetDirNext(uint8_t dirNext);
+            inline bool IsStart() { return dirNext_isStart >> 3; }
+            inline void SetStart(bool start) { dirNext_isStart = (dirNext_isStart & 7) | (start << 3); }
+            inline uint8_t GetDirNext() { return dirNext_isStart & 7; }
+            inline void SetDirNext(uint8_t dirNext) { dirNext_isStart = ((dirNext_isStart >> 3) << 3) | dirNext; }
         };
 
     }

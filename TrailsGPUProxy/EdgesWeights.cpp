@@ -8,16 +8,16 @@ namespace TrailEvolutionModelling {
 		EdgesWeights::EdgesWeights(Graph^ graph, ResourceManager& resources, bool initiallyTrampleAll)
 			: EdgesDataDevice(graph->Width, graph->Height) 
 		{
-			EdgesDataHost<float> host = CreateHostWeights(graph, resources, initiallyTrampleAll);
-			host.CopyTo(*this, graph->Width, graph->Height);
+			EdgesDataHost<float>* host = CreateHostWeights(graph, resources, initiallyTrampleAll);
+			host->CopyTo(this, graph->Width, graph->Height);
 			resources.Free(host);
 		}
 
-		EdgesDataHost<float> EdgesWeights::CreateHostWeights(Graph^ graph, ResourceManager& resources, bool initiallyTrampleAll) {
+		EdgesDataHost<float>* EdgesWeights::CreateHostWeights(Graph^ graph, ResourceManager& resources, bool initiallyTrampleAll) {
 			auto host = resources.New<EdgesDataHost<float>>(graph->Width, graph->Height);
 
 			if(initiallyTrampleAll) {
-				host.ZipWithGraphEdges(graph, [](float& weight, Edge^ edge) {
+				host->ZipWithGraphEdges(graph, [](float& weight, Edge^ edge) {
 					if(edge == nullptr) {
 						weight = INFINITY;
 						return;
@@ -26,7 +26,7 @@ namespace TrailEvolutionModelling {
 				});
 			}
 			else {
-				host.ZipWithGraphEdges(graph, [](float& weight, Edge^ edge) {
+				host->ZipWithGraphEdges(graph, [](float& weight, Edge^ edge) {
 					if(edge == nullptr) {
 						weight = INFINITY;
 						return;

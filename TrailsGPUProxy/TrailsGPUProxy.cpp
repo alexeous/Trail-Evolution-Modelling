@@ -5,6 +5,8 @@
 #include "EdgesData.h"
 #include "TramplabilityMask.h"
 #include "EdgesWeights.h"
+#include "WavefrontJob.h"
+#include "WavefrontJobsFactory.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -13,22 +15,25 @@ namespace TrailEvolutionModelling {
 			TrailsComputationsOutput^ result = nullptr;
 
 			ResourceManager resources;
+			Graph^ graph = input->Graph;
 			try {
 				NotifyProgress(L"Установление связей между точками притяжения");
-				AttractorsMap attractors(input->Graph, input->Attractors);
+				AttractorsMap attractors(graph, input->Attractors);
 				
 				NotifyProgress(L"Построение маски вытаптываемости");
-				TramplabilityMask tramplabilityMask = resources.New<TramplabilityMask>(input->Graph);
+				TramplabilityMask* tramplabilityMask = resources.New<TramplabilityMask>(graph);
 
 				NotifyProgress(L"Инициализация весов рёбер для \"непорядочных пешеходов\"");
-				EdgesWeights indecentEdgesWeights = resources.New<EdgesWeights>(input->Graph, resources, true);
+				EdgesWeights* indecentEdgesWeights = resources.New<EdgesWeights>(graph, resources, true);
 
-
+				NotifyProgress(L"Создание исполнителей волнового алгоритма на GPU");
+				std::vector<WavefrontJob*> wavefrontJobs =
+					WavefrontJobsFactory::CreateJobs(graph->Width, graph->Height, resources, attractors);
 
 				NotifyProgress(L"Симуляция движения пешеходов");
 
 				NotifyProgress(L"Выгрузка результата");
-				EdgesDataHost<float> trampledness = resources.New<EdgesDataHost<float>>(indecentEdgesWeights, 
+				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(indecentEdgesWeights, 
 					input->Graph->Width, input->Graph->Height);
 
 				resources.Free(indecentEdgesWeights);

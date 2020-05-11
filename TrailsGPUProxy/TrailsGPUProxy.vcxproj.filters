@@ -23,10 +23,16 @@
     <ClCompile Include="AttractorsMap.cpp">
       <Filter>Data\Attractors</Filter>
     </ClCompile>
-    <ClCompile Include="ComputeNode.cpp">
+    <ClCompile Include="ComputeNodesPair.cpp">
       <Filter>Data\Nodes</Filter>
     </ClCompile>
-    <ClCompile Include="ComputeNodesPair.cpp">
+    <ClCompile Include="WavefrontJobsFactory.cpp">
+      <Filter>Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="WavefrontJob.cpp">
+      <Filter>Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="ComputeNodesHost.cpp">
       <Filter>Data\Nodes</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69,6 +75,15 @@
     <ClInclude Include="ComputeNodesPair.h">
       <Filter>Data\Nodes</Filter>
     </ClInclude>
+    <ClInclude Include="WavefrontJobsFactory.h">
+      <Filter>Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="WavefrontJob.h">
+      <Filter>Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="ComputeNodesHost.h">
+      <Filter>Data\Nodes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Exceptions">
@@ -91,6 +106,9 @@
     </Filter>
     <Filter Include="Data\Nodes">
       <UniqueIdentifier>{6c2f20c7-ab14-4370-9702-76cfa2caa0ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Algorithms">
+      <UniqueIdentifier>{5fcf4846-3435-442f-89ff-5c58fc226dad}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

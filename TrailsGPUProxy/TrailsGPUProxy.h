@@ -18,7 +18,7 @@ namespace TrailEvolutionModelling {
 
 		private:
 			void NotifyProgress(const wchar_t* stage);
-			void ApplyTrampledness(Graph^ graph, EdgesDataHost<float> &edgesData);
+			void ApplyTrampledness(Graph^ graph, EdgesDataHost<float>* edgesData);
 		//private:
 		//	Dictionary<Attractor^, List<Attractor^>^>^ CreateAttractorsMap(TrailsComputationsInput^ input);
 		//	bool CanReach(Graph^ graph, Attractor^ a, Attractor^ b);
@@ -30,8 +30,8 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
-		inline void TrailsGPUProxy::ApplyTrampledness(Graph^ graph, EdgesDataHost<float>& edgesData) {
-			edgesData.ZipWithGraphEdges(graph, ApplyTramplednessFunc);
+		inline void TrailsGPUProxy::ApplyTrampledness(Graph^ graph, EdgesDataHost<float>* edgesData) {
+			edgesData->ZipWithGraphEdges(graph, ApplyTramplednessFunc);
 		}
 	}
 }

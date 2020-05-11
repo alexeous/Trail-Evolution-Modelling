@@ -6,11 +6,11 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		class ResourceManager {
+		private:
 		public:
 			template<typename TResource, typename... TConstructorArgs>
-			TResource& New(TConstructorArgs... constructorArgs);
-			template<typename T> void Track(T& resources);
-			template<typename T> void Free(T& resource);
+			TResource* New(TConstructorArgs... constructorArgs);
+			template<typename T> void Free(T*& resource);
 			void FreeAll();
 
 		private:
@@ -18,21 +18,18 @@ namespace TrailEvolutionModelling {
 		};
 
 		template<typename TResource, typename... TConstructorArgs>
-		inline TResource& ResourceManager::New(TConstructorArgs... constructorArgs) {
+		inline TResource* ResourceManager::New(TConstructorArgs... constructorArgs) {
 			auto resource = new TResource(constructorArgs...);
 			resources.insert(resource);
-			return *resource;
+			return resource;
 		}
 
 		template<typename T>
-		inline void ResourceManager::Track(T& resources) {
-			resources.insert(&resouces);
-		}
-
-		template<typename T>
-		inline void ResourceManager::Free(T& resource) {
-			if(resources.erase(&resource) != 0) {
-				resource.Free();
+		inline void ResourceManager::Free(T*& resource) {
+			if(resource != nullptr && resources.erase(resource) != 0) {
+				resource->Free();
+				delete resource;
+				resource = nullptr;
 			}
 		}
 
