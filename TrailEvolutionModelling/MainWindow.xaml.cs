@@ -116,13 +116,16 @@ namespace TrailEvolutionModelling
             mapObjectLayer = new MapObjectLayer();
             boundingAreaLayer = new BoundingAreaLayer();
             attractorLayer = new WritableLayer();
+
             InitializeMapControl();
-            //polygonLayer.AddRange(polygonStorage.Polygons);
             InitTools();
             InitSaver();
 
             RefreshButtons();
             ZoomToPoint(new Point(9231625, 7402608));
+
+            saver.Path = "../../map.tem";
+            LoadFromSaveFile(saver.ReadFromFile(saver.Path));
         }
 
         private void InitTools()

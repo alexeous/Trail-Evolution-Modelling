@@ -91,8 +91,8 @@ namespace TrailEvolutionModelling.Files
             }
         }
 
-
-        private T ReadFromFile(string filename)
+        // TODO: Replace with 'private'
+        public T ReadFromFile(string filename)
         {
             var serializer = new XmlSerializer(typeof(T));
             using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read))
