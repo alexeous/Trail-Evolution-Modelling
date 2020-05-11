@@ -8,11 +8,11 @@ namespace TrailEvolutionModelling {
 			: graphW(graphW),
 			  graphH(graphH),
 			  extendedW(graphW + 2), 
-			  extendedH(graphH + 2)
+			  extendedH(graphH + 2),
+			  arraySize(extendedW* extendedH * sizeof(ComputeNode))
 		{
-			size_t size = extendedW * extendedH * sizeof(ComputeNode);
-			CHECK_CUDA(cudaMallocHost(&nodes, size));
-			CHECK_CUDA(cudaMemset(nodes, 0, size))
+			CHECK_CUDA(cudaMallocHost(&nodes, arraySize));
+			CHECK_CUDA(cudaMemset(nodes, 0, arraySize))
 		}
 
 		void ComputeNodesHost::InitForStartAttractors(const std::vector<Attractor>& attractors) {
@@ -28,9 +28,12 @@ namespace TrailEvolutionModelling {
 		}
 
 		void ComputeNodesHost::CopyToDevicePair(ComputeNodesPair* pair) {
-			int size = extendedW * extendedH * sizeof(ComputeNode);
-			CHECK_CUDA(cudaMemcpy(pair->readOnly, nodes, size, cudaMemcpyHostToDevice));
-			CHECK_CUDA(cudaMemcpy(pair->writeOnly, pair->readOnly, size, cudaMemcpyDeviceToDevice));
+			CHECK_CUDA(cudaMemcpy(pair->readOnly, nodes, arraySize, cudaMemcpyHostToDevice));
+			CHECK_CUDA(cudaMemcpy(pair->writeOnly, pair->readOnly, arraySize, cudaMemcpyDeviceToDevice));
+		}
+
+		void ComputeNodesHost::CopyFromPairsWriteOnly(ComputeNodesPair* pair) {
+			CHECK_CUDA(cudaMemcpy(nodes, pair->writeOnly, arraySize, cudaMemcpyDeviceToHost));
 		}
 
 		void ComputeNodesHost::Free() {

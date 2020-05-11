@@ -55,6 +55,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -72,6 +73,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -95,6 +97,9 @@
     <ClCompile Include="CudaException.cpp" />
     <ClCompile Include="EdgesWeights.cpp" />
     <ClCompile Include="IsolatedAttractorsException.cpp" />
+    <CudaCompile Include="ResetNodesG.cu">
+      <FileType>Document</FileType>
+    </CudaCompile>
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="TrailsGPUProxy.cpp" />
     <ClCompile Include="TramplabilityMask.cpp" />
@@ -114,6 +119,8 @@
     <ClInclude Include="IResource.h" />
     <ClInclude Include="IsolatedAttractorsException.h" />
     <ClInclude Include="kernel.h" />
+    <ClInclude Include="MathUtils.h" />
+    <ClInclude Include="ResetNodesG.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="TrailsGPUProxy.h" />
     <ClInclude Include="TramplabilityMask.h" />

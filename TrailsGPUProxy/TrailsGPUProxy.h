@@ -19,9 +19,10 @@ namespace TrailEvolutionModelling {
 		private:
 			void NotifyProgress(const wchar_t* stage);
 			void ApplyTrampledness(Graph^ graph, EdgesDataHost<float>* edgesData);
-		//private:
-		//	Dictionary<Attractor^, List<Attractor^>^>^ CreateAttractorsMap(TrailsComputationsInput^ input);
-		//	bool CanReach(Graph^ graph, Attractor^ a, Attractor^ b);
+			
+			inline static void WaitForGPU() { 
+				cudaDeviceSynchronize(); 
+			}
 		};
 
 		inline void ApplyTramplednessFunc(float& trampledness, Edge^ edge) {
