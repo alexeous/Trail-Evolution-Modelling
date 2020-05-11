@@ -113,10 +113,7 @@ namespace TrailEvolutionModelling
 
         private void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
-            mapObjectLayer = new MapObjectLayer();
-            boundingAreaLayer = new BoundingAreaLayer();
-            attractorLayer = new WritableLayer();
-
+            InitLayers();
             InitializeMapControl();
             InitTools();
             InitSaver();
@@ -126,6 +123,25 @@ namespace TrailEvolutionModelling
 
             saver.Path = "../../map.tem";
             LoadFromSaveFile(saver.ReadFromFile(saver.Path));
+        }
+
+        private void InitLayers()
+        {
+            mapObjectLayer = new MapObjectLayer();
+            boundingAreaLayer = new BoundingAreaLayer();
+            attractorLayer = new WritableLayer();
+        }
+
+        private void InitializeMapControl()
+        {
+            mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
+
+            mapControl.Map.Layers.Add(mapObjectLayer);
+            mapControl.Map.Layers.Add(attractorLayer);
+            mapControl.Map.Layers.Add(boundingAreaLayer);
+
+            mapControl.MouseLeftButtonDown += OnMapLeftClick;
+            mapControl.MouseRightButtonDown += OnMapRightClick;
         }
 
         private void InitTools()
@@ -154,18 +170,6 @@ namespace TrailEvolutionModelling
         {
             var extent = new Point(1000, 1000);
             mapControl.ZoomToBox(center - extent, center + extent);
-        }
-
-        private void InitializeMapControl()
-        {
-            mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
-
-            mapControl.Map.Layers.Add(mapObjectLayer);
-            mapControl.Map.Layers.Add(attractorLayer);
-            mapControl.Map.Layers.Add(boundingAreaLayer);
-
-            mapControl.MouseLeftButtonDown += OnMapLeftClick;
-            mapControl.MouseRightButtonDown += OnMapRightClick;
         }
 
         private ContextMenu CreateMapObjectContextMenu(IMapObject iMapObject)
