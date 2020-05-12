@@ -3,6 +3,7 @@
 #include "WavefrontJob.h"
 #include "AttractorsMap.h"
 #include "ResourceManager.h"
+#include "CudaScheduler.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -10,7 +11,7 @@ namespace TrailEvolutionModelling {
 		class WavefrontJobsFactory {
 		public:
 			static std::vector<WavefrontJob*> CreateJobs(int graphW, int graphH,
-				ResourceManager& resources, const AttractorsMap& attractors);
+				ResourceManager& resources, const AttractorsMap& attractors, CudaScheduler* cudaScheduler);
 		};
 
 	}

@@ -6,6 +6,7 @@
 #include "ComputeNodesHost.h"
 #include "ComputeNodesPair.h"
 #include "ResourceManager.h"
+#include "CudaScheduler.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -13,14 +14,16 @@ namespace TrailEvolutionModelling {
 		struct WavefrontJob : public IResource {
 			friend class ResourceManager;
 
+			static int asdf;
+			void ResetReadOnlyNodesGParallel();
 
 		protected:
 			WavefrontJob(Attractor goal, const std::vector<Attractor>& starts,
-				ComputeNodesHost* nodesTemplate, ResourceManager* resources);
+				ComputeNodesHost* nodesTemplate, ResourceManager* resources,
+				CudaScheduler* cudaScheduler);
 			void Free() override;
 
 		private:
-			void ResetReadOnlyNodesGParallel();
 
 			static int GetMinIterations(Attractor goal, const std::vector<Attractor>& starts);
 			static ComputeNodesPair* CreateDeviceNodes(ComputeNodesHost* nodesTemplate, 
@@ -34,6 +37,7 @@ namespace TrailEvolutionModelling {
 			ComputeNodesHost* hostNodes = nullptr;
 			ComputeNodesPair* deviceNodes = nullptr;
 			ResourceManager* resources;
+			CudaScheduler* cudaScheduler;
 
 			cudaStream_t stream;
 		};

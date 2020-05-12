@@ -1,99 +1,82 @@
 #pragma once
-#include <vector>
-#include <queue>
-#include <memory>
-#include <thread>
 #include <functional>
 #include <stdexcept>
 
-#ifndef __CLR_VER
-#include <mutex>
-#include <future>
-#include <condition_variable>
-#endif
 
 namespace TrailEvolutionModelling {
-    namespace GPUProxy {
+	namespace GPUProxy {
 
-        class ThreadPool {
-        public:
-            ThreadPool(size_t);
-            template<class F, class... Args> void Enqueue(F&& f, Args&&... args);
-            ~ThreadPool();
+		class ThreadPool {
+			friend class CudaScheduler;
 
-#ifndef __CLR_VER
-        private:
-            // need to keep track of threads so we can join them
-            std::vector< std::thread > workers;
-            // the task queue
-            std::queue< std::function<void()> > tasks;
+		private:
 
-            // synchronization
-            std::mutex queue_mutex;
-            std::condition_variable condition;
-            bool stop;
-#endif
-        };
+			template<typename TFunction, typename ...TArgs>
+			struct CallData {
+				ThreadPool* pool;
+				TFunction function;
+				std::tuple<TArgs...> args;
 
-#ifndef __CLR_VER
-        // the constructor just launches some amount of workers
-        inline ThreadPool::ThreadPool(size_t threads)
-            : stop(false) {
-            for(size_t i = 0; i < threads; ++i)
-                workers.emplace_back(
-                    [this] {
-                for(;;) {
-                    std::function<void()> task;
+				CallData(ThreadPool* pool, TFunction function, std::tuple<TArgs...> args)
+					: pool(pool), function(function), args(args) {
+				}
+			};
 
-                    {
-                        std::unique_lock<std::mutex> lock(this->queue_mutex);
-                        this->condition.wait(lock,
-                            [this] { return this->stop || !this->tasks.empty(); });
-                        if(this->stop && this->tasks.empty())
-                            return;
-                        task = std::move(this->tasks.front());
-                        this->tasks.pop();
-                    }
+			template<typename TFunction, typename ...TArgs>
+			ref class Caller {
+			public:
+				Caller(CallData<TFunction, TArgs...>* callData)
+					: callData(callData) {
+					System::Threading::ThreadPool::QueueUserWorkItem(
+						gcnew System::Threading::WaitCallback(this, &Caller::Call));
+				}
 
-                    task();
-                }
-            }
-            );
-        }
+			private:
+				inline void Call(Object^) {
+					try {
+						std::apply(callData->function, callData->args);
+					}
+					catch(...) {
+						callData->pool->InvokeExceptionCallback(std::current_exception());
+					}
+					delete callData;
+				}
 
-        // add new work item to the pool
-        template<class F, class... Args>
-        void ThreadPool::Enqueue(F&& f, Args&&... args) {
-            using return_type = typename std::result_of<F(Args...)>::type;
+			private:
+				CallData<TFunction, TArgs...>* callData;
+			};
 
-            auto task = std::make_shared< std::packaged_task<return_type()> >(
-                std::bind(std::forward<F>(f), std::forward<Args>(args)...)
-                );
+		public:
+			inline ThreadPool(std::function<void(std::exception_ptr, void*)> onExceptionCallback,
+				void* exceptionCallbackArg)
+				: onExceptionCallback(onExceptionCallback),
+				exceptionCallbackArg(exceptionCallbackArg) {
+			}
 
-            std::future<return_type> res = task->get_future();
-            {
-                std::unique_lock<std::mutex> lock(queue_mutex);
+			template <typename TFunction, typename... TArgs>
+			inline void Schedule(TFunction function, TArgs&&... args) {
+				auto callData = CreateCallData(function, args);
+			}
+			
+			inline void InvokeExceptionCallback(std::exception_ptr ex) {
+				if(isThrown) {
+					return;
+				}
+				isThrown = true;
+				onExceptionCallback(ex, exceptionCallbackArg);
+			}
 
-                // don't allow enqueueing after stopping the pool
-                if(stop)
-                    throw std::runtime_error("enqueue on stopped ThreadPool");
+		private:
+			template <typename TFunction, typename... TArgs>
+			CallData<TFunction, TArgs...> CreateCallData(TFunction function, TArgs&&... args) {
+				return new CallData<TFunction, TArgs...>(this, function, std::make_tuple(args...));
+			}
 
-                tasks.emplace([task]() { (*task)(); });
-            }
-            condition.notify_one();
-        }
+		private:
+			std::function<void(std::exception_ptr, void*)> onExceptionCallback;
+			void* exceptionCallbackArg;
+			bool isThrown = false;
+		};
 
-        // the destructor joins all threads
-        inline ThreadPool::~ThreadPool() {
-            {
-                std::unique_lock<std::mutex> lock(queue_mutex);
-                stop = true;
-            }
-            condition.notify_all();
-            for(std::thread& worker : workers)
-                worker.join();
-        }
-#endif
-
-    }
+	}
 }

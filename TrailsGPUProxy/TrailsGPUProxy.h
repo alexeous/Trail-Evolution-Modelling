@@ -16,24 +16,9 @@ namespace TrailEvolutionModelling {
 
 			TrailsComputationsOutput^ ComputeTrails(TrailsComputationsInput^ input);
 
-		private:
+		internal:
 			void NotifyProgress(const wchar_t* stage);
-			void ApplyTrampledness(Graph^ graph, EdgesDataHost<float>* edgesData);
-			
-			inline static void WaitForGPU() { 
-				cudaDeviceSynchronize(); 
-			}
 		};
-
-		inline void ApplyTramplednessFunc(float& trampledness, Edge^ edge) {
-			if(edge != nullptr) {
-				edge->Trampledness = trampledness;
-			}
-		}
-
-		inline void TrailsGPUProxy::ApplyTrampledness(Graph^ graph, EdgesDataHost<float>* edgesData) {
-			edgesData->ZipWithGraphEdges(graph, ApplyTramplednessFunc);
-		}
 	}
 }
 

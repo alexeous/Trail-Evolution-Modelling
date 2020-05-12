@@ -18,11 +18,11 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
-		cudaError_t ResetNodesG(ComputeNode* nodes, int extendedW, int extendedH, int goalIndex) {
+		cudaError_t ResetNodesG(ComputeNode* nodes, int extendedW, int extendedH, int goalIndex, cudaStream_t stream) {
 			dim3 threadsDim(BLOCK_SIZE_X, BLOCK_SIZE_Y);
 			dim3 blocksDim(divceil(extendedW, BLOCK_SIZE_X), divceil(extendedH , BLOCK_SIZE_Y));
 
-			ResetNodesGKernel<<<blocksDim, threadsDim>>>(nodes, extendedW, extendedH, goalIndex);
+			ResetNodesGKernel<<<blocksDim, threadsDim, 0, stream>>>(nodes, extendedW, extendedH, goalIndex);
 
 			return cudaGetLastError();
 		}

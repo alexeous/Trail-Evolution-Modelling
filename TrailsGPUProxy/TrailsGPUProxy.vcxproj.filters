@@ -35,6 +35,16 @@
     <ClCompile Include="ComputeNodesHost.cpp">
       <Filter>Data\Nodes</Filter>
     </ClCompile>
+    <ClCompile Include="WavefrontCompletenessTable.cpp">
+      <Filter>Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="CudaExceptionNative.cpp">
+      <Filter>Exceptions</Filter>
+    </ClCompile>
+    <ClCompile Include="ComputationThread.cpp" />
+    <ClCompile Include="ThreadPool.cpp">
+      <Filter>Threading</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CudaUtils.h" />
@@ -88,6 +98,19 @@
       <Filter>CudaKernels</Filter>
     </ClInclude>
     <ClInclude Include="MathUtils.h" />
+    <ClInclude Include="WavefrontCompletenessTable.h">
+      <Filter>Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="CudaExceptionNative.h">
+      <Filter>Exceptions</Filter>
+    </ClInclude>
+    <ClInclude Include="CudaScheduler.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="ComputationThread.h" />
+    <ClInclude Include="ThreadPool.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Exceptions">
@@ -113,6 +136,9 @@
     </Filter>
     <Filter Include="Algorithms">
       <UniqueIdentifier>{5fcf4846-3435-442f-89ff-5c58fc226dad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Threading">
+      <UniqueIdentifier>{ca6ffccf-9c89-483c-9d8d-d7bcbe1bd541}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

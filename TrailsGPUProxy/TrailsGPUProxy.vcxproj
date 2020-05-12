@@ -46,9 +46,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -56,6 +60,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -74,6 +79,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -92,27 +98,55 @@
   <ItemGroup>
     <ClCompile Include="Attractor.cpp" />
     <ClCompile Include="AttractorsMap.cpp" />
-    <ClCompile Include="ComputeNodesHost.cpp" />
-    <ClCompile Include="ComputeNodesPair.cpp" />
+    <ClCompile Include="ComputationThread.cpp" />
+    <ClCompile Include="ComputeNodesHost.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="ComputeNodesPair.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="CudaException.cpp" />
+    <ClCompile Include="CudaExceptionNative.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="EdgesWeights.cpp" />
     <ClCompile Include="IsolatedAttractorsException.cpp" />
     <CudaCompile Include="ResetNodesG.cu">
       <FileType>Document</FileType>
     </CudaCompile>
-    <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="ResourceManager.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="TrailsGPUProxy.cpp" />
     <ClCompile Include="TramplabilityMask.cpp" />
-    <ClCompile Include="WavefrontJob.cpp" />
-    <ClCompile Include="WavefrontJobsFactory.cpp" />
+    <ClCompile Include="WavefrontCompletenessTable.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="WavefrontJob.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="WavefrontJobsFactory.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Attractor.h" />
     <ClInclude Include="AttractorsMap.h" />
+    <ClInclude Include="ComputationThread.h" />
     <ClInclude Include="ComputeNode.h" />
     <ClInclude Include="ComputeNodesHost.h" />
     <ClInclude Include="ComputeNodesPair.h" />
     <ClInclude Include="CudaException.h" />
+    <ClInclude Include="CudaExceptionNative.h" />
+    <ClInclude Include="CudaScheduler.h" />
     <ClInclude Include="EdgesData.h" />
     <ClInclude Include="CudaUtils.h" />
     <ClInclude Include="EdgesWeights.h" />
@@ -122,8 +156,10 @@
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="ResetNodesG.h" />
     <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="TrailsGPUProxy.h" />
     <ClInclude Include="TramplabilityMask.h" />
+    <ClInclude Include="WavefrontCompletenessTable.h" />
     <ClInclude Include="WavefrontJob.h" />
     <ClInclude Include="WavefrontJobsFactory.h" />
   </ItemGroup>

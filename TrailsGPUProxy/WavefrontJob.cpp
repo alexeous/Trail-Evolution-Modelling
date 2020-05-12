@@ -2,16 +2,22 @@
 #include <algorithm>
 #include "CudaUtils.h"
 #include "ResetNodesG.h"
+#include "CudaScheduler.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
-		WavefrontJob::WavefrontJob(Attractor goal, const std::vector<Attractor>& starts, 
-			ComputeNodesHost* nodesTemplate, ResourceManager* resources)
-		  : goal(goal), 
+
+		int WavefrontJob::asdf = 10;
+
+		WavefrontJob::WavefrontJob(Attractor goal, const std::vector<Attractor>& starts,
+			ComputeNodesHost* nodesTemplate, ResourceManager* resources, CudaScheduler* cudaScheduler
+		)
+		  : goal(goal),
 			minIterations(GetMinIterations(goal, starts)),
 			hostNodes(CreateHostNodes(nodesTemplate, *resources)),
 			deviceNodes(CreateDeviceNodes(nodesTemplate, *resources)),
-			resources(resources)
+			resources(resources),
+			cudaScheduler(cudaScheduler)
 		{
 			CHECK_CUDA(cudaStreamCreate(&stream));
 		}
@@ -20,12 +26,11 @@ namespace TrailEvolutionModelling {
 			int extW = hostNodes->extendedW;
 			int extH = hostNodes->extendedH;
 			int goalIdx = (goal.nodeI + 1) + (goal.nodeJ + 1) * extW;
-			CHECK_CUDA(ResetNodesG(deviceNodes->readOnly, extW, extH, goalIdx));
-		}
+			CHECK_CUDA(ResetNodesG(deviceNodes->readOnly, extW, extH, goalIdx, stream));
 
-		void WavefrontJob::Free() {
-			cudaStreamDestroy(stream);
-			resources->Free(deviceNodes);
+			cudaScheduler->Schedule(stream, []() {
+				
+			});
 		}
 
 		int WavefrontJob::GetMinIterations(Attractor goal, const std::vector<Attractor>& starts) {
@@ -51,6 +56,11 @@ namespace TrailEvolutionModelling {
 			ComputeNodesHost* nodesTemplate, ResourceManager& resources) 
 		{
 			return resources.New<ComputeNodesHost>(nodesTemplate->graphW, nodesTemplate->graphH);
+		}
+
+		void WavefrontJob::Free() {
+			cudaStreamDestroy(stream);
+			resources->Free(deviceNodes);
 		}
 
 	}
