@@ -5,8 +5,8 @@ using namespace System;
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
-		CudaException::CudaException(const char* message, const char* srcFilename, int line)
-			: Exception(CombineMessage(message, srcFilename, line)) {
+		CudaException::CudaException(const CudaExceptionNative& ex)
+			: Exception(CombineMessage(ex.message, ex.srcFilename, ex.line)) {
 		}
 
 		String^ CudaException::CombineMessage(const char* message, const char* srcFilename, int line) {

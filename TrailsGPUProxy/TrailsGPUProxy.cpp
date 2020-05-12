@@ -1,4 +1,6 @@
 #include "TrailsGPUProxy.h"
+#include "CudaExceptionNative.h"
+#include "CudaException.h"
 #include "IsolatedAttractorsException.h"
 #include "Attractor.h"
 #include "AttractorsMap.h"
@@ -43,6 +45,9 @@ namespace TrailEvolutionModelling {
 				result = gcnew TrailsComputationsOutput();
 				result->Graph = input->Graph;
 				ApplyTrampledness(result->Graph, trampledness);
+			}
+			catch(CudaExceptionNative ex) {
+				throw gcnew CudaException(ex);
 			}
 			finally {
 				resources.FreeAll();
