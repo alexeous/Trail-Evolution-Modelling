@@ -1,15 +1,19 @@
 #include "WavefrontJob.h"
+#include <algorithm>
 #include "CudaUtils.h"
 #include "ResetNodesG.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
-		WavefrontJob::WavefrontJob(Attractor goal, ComputeNodesHost* nodesTemplate, ResourceManager* resources)
-		: goal(goal), 
-		  resources(resources),
-		  hostNodes(CreateHostNodes(nodesTemplate, *resources)),
-		  deviceNodes(CreateDeviceNodes(nodesTemplate, *resources))
+		WavefrontJob::WavefrontJob(Attractor goal, const std::vector<Attractor>& starts, 
+			ComputeNodesHost* nodesTemplate, ResourceManager* resources)
+		  : goal(goal), 
+			minIterations(GetMinIterations(goal, starts)),
+			hostNodes(CreateHostNodes(nodesTemplate, *resources)),
+			deviceNodes(CreateDeviceNodes(nodesTemplate, *resources)),
+			resources(resources)
 		{
+			CHECK_CUDA(cudaStreamCreate(&stream));
 		}
 
 		void WavefrontJob::ResetReadOnlyNodesGParallel() {
@@ -20,7 +24,19 @@ namespace TrailEvolutionModelling {
 		}
 
 		void WavefrontJob::Free() {
+			cudaStreamDestroy(stream);
 			resources->Free(deviceNodes);
+		}
+
+		int WavefrontJob::GetMinIterations(Attractor goal, const std::vector<Attractor>& starts) {
+			int minDistance = INT_MAX;
+			for(Attractor start : starts) {
+				int di = goal.nodeI - start.nodeI;
+				int dj = goal.nodeJ - start.nodeJ;
+				int dist = std::max(std::abs(di), std::abs(dj));
+				minDistance = std::min(minDistance, dist);
+			}
+			return minDistance;
 		}
 
 		ComputeNodesPair* WavefrontJob::CreateDeviceNodes(

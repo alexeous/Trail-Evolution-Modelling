@@ -24,24 +24,21 @@ namespace TrailEvolutionModelling {
 				TramplabilityMask* tramplabilityMask = resources.New<TramplabilityMask>(graph);
 
 				NotifyProgress(L"Инициализация весов рёбер для \"непорядочных пешеходов\"");
-				EdgesWeights* indecentEdgesWeights = resources.New<EdgesWeights>(graph, resources, true);
+				EdgesWeights* edgesWeights = resources.New<EdgesWeights>(graph, resources, true);
 
 				NotifyProgress(L"Создание исполнителей волнового алгоритма на GPU");
 				std::vector<WavefrontJob*> wavefrontJobs =
 					WavefrontJobsFactory::CreateJobs(graph->Width, graph->Height, resources, attractors);
-				
-				for(auto job : wavefrontJobs) {
-					job->ResetReadOnlyNodesGParallel();
-				}
+
 				WaitForGPU();
 
 				NotifyProgress(L"Симуляция движения пешеходов");
 
 				NotifyProgress(L"Выгрузка результата");
-				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(indecentEdgesWeights, 
+				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(edgesWeights,
 					input->Graph->Width, input->Graph->Height);
 
-				resources.Free(indecentEdgesWeights);
+				resources.Free(edgesWeights);
 
 				result = gcnew TrailsComputationsOutput();
 				result->Graph = input->Graph;

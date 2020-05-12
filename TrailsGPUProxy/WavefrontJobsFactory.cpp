@@ -15,7 +15,7 @@ namespace TrailEvolutionModelling {
 				auto& starts = pair.second;
 
 				hostNodes->InitForStartAttractors(starts);
-				WavefrontJob* job = resources.New<WavefrontJob>(goal, hostNodes, &resources);
+				WavefrontJob* job = resources.New<WavefrontJob>(goal, starts, hostNodes, &resources);
 				hostNodes->DeinitForStartAttractors(starts);
 				jobs.push_back(job);
 			}
