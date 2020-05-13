@@ -35,8 +35,12 @@ namespace TrailEvolutionModelling {
             inline int GetSourceNumber() const { return numSources; }
             inline int GetDrainNumber() const { return numDrains; }
 
+        public:
+            const std::vector<Attractor> uniqueAttractors;
+
         private:
             static bool CanReach(Graph^ graph, RefAttractor^ a, RefAttractor^ b);
+            static std::vector<Attractor> ConvertRefAttractors(array<RefAttractor^>^);
         
         private:
             int numSources;
