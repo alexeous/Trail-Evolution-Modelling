@@ -7,8 +7,10 @@
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
-		using namespace TrailEvolutionModelling::GraphTypes;
 
+#ifndef __CUDACC__
+		using namespace TrailEvolutionModelling::GraphTypes;
+#endif
 		template<typename T> struct EdgesData;
 		template<typename T> struct EdgesDataHost;
 		template<typename T> struct EdgesDataDevice;
@@ -22,15 +24,15 @@ namespace TrailEvolutionModelling {
 			T* leftDiagonal = nullptr;
 			T* rightDiagonal = nullptr;
 
-			inline T& NW(int i, int j, int w);
-			inline T& N(int i, int j, int w);
-			inline T& NE(int i, int j, int w);
-			inline T& W(int i, int j, int w);
-			inline T& E(int i, int j, int w);
-			inline T& SW(int i, int j, int w);
-			inline T& S(int i, int j, int w);
-			inline T& SE(int i, int j, int w);
-			
+			inline __host__ __device__ T& NW(int i, int j, int w);
+			inline __host__ __device__ T& N(int i, int j, int w);
+			inline __host__ __device__ T& NE(int i, int j, int w);
+			inline __host__ __device__ T& W(int i, int j, int w);
+			inline __host__ __device__ T& E(int i, int j, int w);
+			inline __host__ __device__ T& SW(int i, int j, int w);
+			inline __host__ __device__ T& S(int i, int j, int w);
+			inline __host__ __device__ T& SE(int i, int j, int w);
+#ifndef __CUDACC__
 			void ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^));
 
 		protected:
@@ -39,12 +41,14 @@ namespace TrailEvolutionModelling {
 			static int ArraySize(int w, int h);
 			static int ArraySizeBytes(int w, int h);
 			static Edge^ GetEdge(Node^ node, Direction direction);
+#endif
 		};
 
+#ifndef __CUDACC__
 		template<typename T>
 		struct EdgesDataHost : public EdgesData<T> {
 			friend class ResourceManager;
-			
+
 			void CopyTo(const EdgesDataHost<T>* other, int w, int h) const;
 			void CopyTo(const EdgesDataDevice<T>* other, int w, int h) const;
 		protected:
@@ -52,11 +56,12 @@ namespace TrailEvolutionModelling {
 			EdgesDataHost(const EdgesDataDevice<T>* device, int w, int h);
 			void Free() override;
 		};
+#endif
 
 		template<typename T>
 		struct EdgesDataDevice : public EdgesData<T> {
 			friend class ResourceManager;
-			
+
 			void CopyTo(const EdgesDataHost<T>* other, int w, int h) const;
 			void CopyTo(const EdgesDataDevice<T>* other, int w, int h) const;
 		protected:
@@ -68,15 +73,16 @@ namespace TrailEvolutionModelling {
 
 
 
-		template<typename T> inline T& EdgesData<T>::NW(int i, int j, int w) { return leftDiagonal[i + j * (w + 1)]; }
-		template<typename T> inline T& EdgesData<T>::N(int i, int j, int w) { return vertical[i + 1 + j * (w + 1)]; }
-		template<typename T> inline T& EdgesData<T>::NE(int i, int j, int w) { return rightDiagonal[i + 1 + j * (w + 1)]; }
-		template<typename T> inline T& EdgesData<T>::W(int i, int j, int w) { return horizontal[i + (j + 1) * (w + 1)]; }
-		template<typename T> inline T& EdgesData<T>::E(int i, int j, int w) { return horizontal[i + 1 + (j + 1) * (w + 1)]; }
-		template<typename T> inline T& EdgesData<T>::SW(int i, int j, int w) { return rightDiagonal[i + (j + 1) * (w + 1)]; }
-		template<typename T> inline T& EdgesData<T>::S(int i, int j, int w) { return vertical[i + 1 + (j + 1) * (w + 1)]; }
-		template<typename T> inline T& EdgesData<T>::SE(int i, int j, int w) { return leftDiagonal[i + 1 + (j + 1) * (w + 1)]; }
+		template<typename T> inline __host__ __device__ T& EdgesData<T>::NW(int i, int j, int w) { return leftDiagonal[i + j * (w + 1)]; }
+		template<typename T> inline __host__ __device__ T& EdgesData<T>::N(int i, int j, int w) { return vertical[i + 1 + j * (w + 1)]; }
+		template<typename T> inline __host__ __device__ T& EdgesData<T>::NE(int i, int j, int w) { return rightDiagonal[i + 1 + j * (w + 1)]; }
+		template<typename T> inline __host__ __device__ T& EdgesData<T>::W(int i, int j, int w) { return horizontal[i + (j + 1) * (w + 1)]; }
+		template<typename T> inline __host__ __device__ T& EdgesData<T>::E(int i, int j, int w) { return horizontal[i + 1 + (j + 1) * (w + 1)]; }
+		template<typename T> inline __host__ __device__ T& EdgesData<T>::SW(int i, int j, int w) { return rightDiagonal[i + (j + 1) * (w + 1)]; }
+		template<typename T> inline __host__ __device__ T& EdgesData<T>::S(int i, int j, int w) { return vertical[i + 1 + (j + 1) * (w + 1)]; }
+		template<typename T> inline __host__ __device__ T& EdgesData<T>::SE(int i, int j, int w) { return leftDiagonal[i + 1 + (j + 1) * (w + 1)]; }
 
+#ifndef __CUDACC__
 		template<typename T>
 		inline void EdgesData<T>::ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^))
 		{
@@ -200,6 +206,8 @@ namespace TrailEvolutionModelling {
 			cudaFree(leftDiagonal);
 			cudaFree(rightDiagonal);
 		}
+
+#endif
 
 	}
 }
