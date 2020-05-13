@@ -36,7 +36,7 @@ namespace TrailEvolutionModelling {
 			}
 
 			template <typename TFunction, typename... TArgs>
-			inline void Schedule(cudaStream_t stream, TFunction function, TArgs&&... args) {
+			inline void Schedule(cudaStream_t stream, TFunction function, TArgs... args) {
 				auto callData = new CallbackData<TFunction, TArgs...>(threadPool,
 					function, std::make_tuple(args...));
 
@@ -50,9 +50,17 @@ namespace TrailEvolutionModelling {
 
 		template<typename TFunction, typename ...TArgs>
 		void CUDART_CB CudaScheduler::Callback(cudaStream_t stream, cudaError_t status, void* data) {
-			CHECK_CUDA(status);
 			auto callData = reinterpret_cast<CallbackData<TFunction, TArgs...>*>(data);
-			callData->threadPool->Schedule(callData->function, callData->args);
+			try {
+				CHECK_CUDA(status);
+				callData->threadPool->Schedule(callData->function, callData->args);
+				delete callData;
+			}
+			catch(...) {
+				ThreadPool* threadPool = callData->threadPool;
+				delete callData;
+				threadPool->InvokeExceptionCallback(std::current_exception());
+			}
 		}
 
 	}
