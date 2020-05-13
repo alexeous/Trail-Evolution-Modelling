@@ -6,10 +6,17 @@ using namespace TrailEvolutionModelling::GPUProxy;
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
-		AttractorsMap::AttractorsMap(Graph^ graph, array<RefAttractor^>^ refAttractors) {
+		AttractorsMap::AttractorsMap(Graph^ graph, array<RefAttractor^>^ refAttractors)
+			: numSources(0), numDrains(0)
+		{
 			std::vector<Attractor> attractors;
 			for each(auto refAttr in refAttractors) {
 				attractors.push_back(Attractor(refAttr));
+				
+				if(refAttr->IsSource)
+					numSources++;
+				if(refAttr->IsDrain)
+					numDrains++;
 			}
 
 #define REF_TO_NATIVE(ref) attractors[Array::IndexOf(refAttractors, (ref))]
