@@ -45,6 +45,9 @@
     <ClCompile Include="ThreadPool.cpp">
       <Filter>Threading</Filter>
     </ClCompile>
+    <ClCompile Include="PathReconstructor.cpp">
+      <Filter>Algorithms</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CudaUtils.h" />
@@ -110,6 +113,9 @@
     <ClInclude Include="ComputationThread.h" />
     <ClInclude Include="ThreadPool.h">
       <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="PathReconstructor.h">
+      <Filter>Algorithms</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

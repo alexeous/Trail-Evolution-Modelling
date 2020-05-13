@@ -82,7 +82,7 @@ namespace TrailEvolutionModelling {
 				std::vector<WavefrontJob*> wavefrontJobs =
 					WavefrontJobsFactory::CreateJobs(graph->Width, graph->Height, &resources, attractors);
 				for(auto j : wavefrontJobs) {
-					j->ResetReadOnlyNodesGParallel();
+					//j->ResetReadOnlyNodesGParallel();
 				}
 
 				WaitForGPU();
