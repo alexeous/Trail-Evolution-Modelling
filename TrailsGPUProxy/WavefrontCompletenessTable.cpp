@@ -76,6 +76,7 @@ namespace TrailEvolutionModelling {
 		void WavefrontCompletenessTable::SetCompleted(const Attractor& attractor, 
 			ComputeNodesHost* calculatedNodes) 
 		{
+			pendingRemaining--;
 			if(attractor.isSource) {
 				SetSourceCompleted(attractor, calculatedNodes);
 			}

@@ -3,26 +3,75 @@
 #include "CudaUtils.h"
 #include "ResetNodesG.h"
 #include "CudaScheduler.h"
+#include "WavefrontPathFinding.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
-
-		WavefrontJob::WavefrontJob(int graphW, int graphH, Attractor goal, 
+		WavefrontJob::WavefrontJob(int graphW, int graphH, Attractor goal,
 			const std::vector<Attractor>& starts, ResourceManager* resources)
 		  : goal(goal),
 			minIterations(GetMinIterations(goal, starts)),
 			hostNodes(CreateHostNodes(graphW, graphH, starts, *resources)),
 			deviceNodes(CreateDeviceNodes(hostNodes, *resources)),
-			resources(resources)
+			resources(resources),
+			exitFlag(resources->New<ExitFlag>())
 		{
 			CHECK_CUDA(cudaStreamCreate(&stream));
+			CHECK_CUDA(cudaMalloc(&maxAgentsGPerGroup, WAVEFRONT_PATH_FINDING_BLOCK_SIZE_X * WAVEFRONT_PATH_FINDING_BLOCK_SIZE_Y));
 		}
 
-		void WavefrontJob::ResetReadOnlyNodesGParallel() {
+		void WavefrontJob::Start(WavefrontCompletenessTable* wavefrontTable, 
+			EdgesWeights* edges, CudaScheduler* scheduler) 
+		{
+			constexpr int ExitFlagCheckPeriod = 10;
+
+			ResetReadOnlyNodesGParallelAsync();
+
+			int graphW = hostNodes->graphW;
+			int graphH = hostNodes->graphH;
+			
+			auto withoutExitFlagCheck = new std::function<void(int)>([=](int doubleIterations) {
+				for(int i = 0; i < doubleIterations; i++) {
+					CHECK_CUDA((WavefrontPathFinding<false, false>(deviceNodes, graphW, graphH, edges, GetGoalIndex(), maxAgentsGPerGroup, nullptr, stream)));
+					if(i < doubleIterations - 1) {
+						CHECK_CUDA((WavefrontPathFinding<true, false>(deviceNodes, graphW, graphH, edges, GetGoalIndex(), maxAgentsGPerGroup, nullptr, stream)));
+					}
+					else {
+						CHECK_CUDA((WavefrontPathFinding<true, true>(deviceNodes, graphW, graphH, edges, GetGoalIndex(), maxAgentsGPerGroup, exitFlag, stream)));
+					}
+				}
+			});
+			(*withoutExitFlagCheck)(minIterations / 2);
+
+			exitFlag->ReadFromDeviceAsync(stream);
+			std::function<void()>* withExitFlagCheck = new std::function<void()>;
+			*withExitFlagCheck = [=]() {
+				if(exitFlag->GetLastHostValue()) {
+					hostNodes->CopyFromDeviceAsync(deviceNodes->readOnly, stream);
+					scheduler->Schedule(stream, [&]() {
+						delete withoutExitFlagCheck;
+						delete withExitFlagCheck;
+						wavefrontTable->SetCompleted(goal, hostNodes);
+					});
+				}
+				else {
+					(*withoutExitFlagCheck)(ExitFlagCheckPeriod / 2);
+					exitFlag->ReadFromDeviceAsync(stream);
+					scheduler->Schedule(stream, *withExitFlagCheck);
+				}
+			};
+
+			scheduler->Schedule(stream, *withExitFlagCheck);
+		}
+
+		void WavefrontJob::ResetReadOnlyNodesGParallelAsync() {
 			int extW = hostNodes->extendedW;
 			int extH = hostNodes->extendedH;
-			int goalIdx = (goal.nodeI + 1) + (goal.nodeJ + 1) * extW;
-			CHECK_CUDA(ResetNodesG(deviceNodes->readOnly, extW, extH, goalIdx, stream));
+			CHECK_CUDA(ResetNodesG(deviceNodes->readOnly, extW, extH, GetGoalIndex(), stream));
+		}
+
+		int WavefrontJob::GetGoalIndex() {
+			return (goal.nodeI + 1) + (goal.nodeJ + 1) * hostNodes->extendedW;
 		}
 
 		int WavefrontJob::GetMinIterations(Attractor goal, const std::vector<Attractor>& starts) {
@@ -54,6 +103,7 @@ namespace TrailEvolutionModelling {
 
 		void WavefrontJob::Free() {
 			cudaStreamDestroy(stream);
+			cudaFree(maxAgentsGPerGroup);
 			resources->Free(hostNodes);
 			resources->Free(deviceNodes);
 		}

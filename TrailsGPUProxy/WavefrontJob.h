@@ -7,6 +7,9 @@
 #include "ComputeNodesPair.h"
 #include "ResourceManager.h"
 #include "CudaScheduler.h"
+#include "ExitFlag.h"
+#include "WavefrontCompletenessTable.h"
+#include "EdgesWeights.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -14,6 +17,9 @@ namespace TrailEvolutionModelling {
 		struct WavefrontJob : public IResource {
 			friend class ResourceManager;
 
+		public:
+			void Start(WavefrontCompletenessTable* wavefrontTable, EdgesWeights* edges,
+				CudaScheduler* scheduler);
 
 		protected:
 			WavefrontJob(int graphW, int graphH, Attractor goal, 
@@ -22,7 +28,8 @@ namespace TrailEvolutionModelling {
 
 		private:
 
-			void ResetReadOnlyNodesGParallel();
+			void ResetReadOnlyNodesGParallelAsync();
+			int GetGoalIndex();
 
 			static int GetMinIterations(Attractor goal, const std::vector<Attractor>& starts);
 			static ComputeNodesHost* CreateHostNodes(int w, int h, const std::vector<Attractor>& starts, 
@@ -36,6 +43,9 @@ namespace TrailEvolutionModelling {
 			ComputeNodesHost* hostNodes = nullptr;
 			ComputeNodesPair* deviceNodes = nullptr;
 			ResourceManager* resources;
+
+			float* maxAgentsGPerGroup;
+			ExitFlag* exitFlag;
 
 			cudaStream_t stream;
 		};

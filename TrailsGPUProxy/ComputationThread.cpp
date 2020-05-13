@@ -24,6 +24,7 @@ namespace TrailEvolutionModelling {
 			: proxy(proxy), input(input)
 		{
 			thread = gcnew Thread(gcnew ThreadStart(this, &ComputationThread::ComputationProc));
+			thread->IsBackground = true;
 			thread->Start();
 		}
 
@@ -42,6 +43,17 @@ namespace TrailEvolutionModelling {
 				exception = gcnew Exception("An unknown unmanaged exception occured");
 			}
 			thread->Abort();
+		}
+
+		void ComputationThread::CancelAll() {
+			if(threadPool) {
+				threadPool->CancelAll();
+				threadPool = nullptr;
+			}
+			if(wavefrontTable) {
+				wavefrontTable->CancelWait();
+				wavefrontTable = nullptr;
+			}
 		}
 
 		TrailsComputationsOutput^ ComputationThread::GetResult() {
@@ -67,7 +79,7 @@ namespace TrailEvolutionModelling {
 			int threadId = Thread::CurrentThread->ManagedThreadId;
 			runThreads[threadId] = this;
 
-			ThreadPool* threadPool = new ThreadPool(&OnSchedulerException, (void*)threadId);
+			threadPool = new ThreadPool(&OnSchedulerException, (void*)threadId);
 			CudaScheduler cudaScheduler(threadPool);
 			try {
 				Graph^ graph = input->Graph;
@@ -87,6 +99,13 @@ namespace TrailEvolutionModelling {
 				
 				PathReconstructor pathReconsturctor;
 				WavefrontCompletenessTable wavefrontTable(attractors, &pathReconsturctor);
+				this->wavefrontTable = &wavefrontTable;
+				
+				wavefrontTable.ResetCompleteness();
+				for(auto job : wavefrontJobs) {
+					job->Start(&wavefrontTable, edgesWeights, &cudaScheduler);
+				}
+				wavefrontTable.WaitForAll();
 
 				NotifyProgress(L"Симуляция движения пешеходов");
 				//wavefrontTable.ResetCompleteness();
@@ -119,6 +138,7 @@ namespace TrailEvolutionModelling {
 			}
 			finally {
 				resources.FreeAll();
+				CancelAll();
 
 				ComputationThread^ unused;
 				runThreads->TryRemove(threadId, unused);

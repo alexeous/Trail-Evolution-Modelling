@@ -59,7 +59,7 @@ namespace TrailEvolutionModelling {
 			int numRows;
 			int numColumns;
 			int numJobs;
-			int pendingRemaining;
+			std::atomic<int> pendingRemaining;
 			std::unordered_map<Attractor, int> sourceToRow;
 			std::unordered_map<Attractor, int> drainToColumn;
 			Cell* table;

@@ -1,6 +1,8 @@
 #pragma once
 #include <stdexcept>
 #include "TrailsGPUProxy.h"
+#include "ThreadPool.h"
+#include "WavefrontCompletenessTable.h"
 
 using namespace System;
 using namespace System::Collections::Concurrent;
@@ -14,6 +16,7 @@ namespace TrailEvolutionModelling {
 		public:
 			ComputationThread(TrailsGPUProxy^ proxy, TrailsComputationsInput^ input);
 			TrailsComputationsOutput^ GetResult();
+			void CancelAll();
 
 		private:
 			void ComputationProc();
@@ -36,6 +39,9 @@ namespace TrailEvolutionModelling {
 			TrailsComputationsOutput^ output;
 			Thread^ thread;
 			volatile Exception^ exception;
+
+			ThreadPool* threadPool = nullptr;
+			WavefrontCompletenessTable* wavefrontTable = nullptr;
 		};
 	}
 }
