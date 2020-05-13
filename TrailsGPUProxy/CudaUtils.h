@@ -4,7 +4,7 @@
 
 
 #define CHECK_CUDA(func){\
-	cudaError_t __m = func;\
+	cudaError_t __m = (func);\
 	if(__m != cudaSuccess) {\
 		throw TrailEvolutionModelling::GPUProxy::CudaExceptionNative(\
 			cudaGetErrorString(__m), __FILE__, __LINE__); } }
