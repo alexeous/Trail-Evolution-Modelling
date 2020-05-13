@@ -14,21 +14,20 @@ namespace TrailEvolutionModelling {
 		struct WavefrontJob : public IResource {
 			friend class ResourceManager;
 
-			static int asdf;
-			void ResetReadOnlyNodesGParallel();
 
 		protected:
-			WavefrontJob(Attractor goal, const std::vector<Attractor>& starts,
-				ComputeNodesHost* nodesTemplate, ResourceManager* resources,
-				CudaScheduler* cudaScheduler);
+			WavefrontJob(int graphW, int graphH, Attractor goal, 
+				const std::vector<Attractor>& starts, ResourceManager* resources);
 			void Free() override;
 
 		private:
 
+			void ResetReadOnlyNodesGParallel();
+
 			static int GetMinIterations(Attractor goal, const std::vector<Attractor>& starts);
-			static ComputeNodesPair* CreateDeviceNodes(ComputeNodesHost* nodesTemplate, 
+			static ComputeNodesHost* CreateHostNodes(int w, int h, const std::vector<Attractor>& starts, 
 				ResourceManager& resources);
-			static ComputeNodesHost* CreateHostNodes(ComputeNodesHost* nodesTemplate,
+			static ComputeNodesPair* CreateDeviceNodes(ComputeNodesHost* hostNodes,
 				ResourceManager& resources);
 
 		private:
@@ -37,7 +36,6 @@ namespace TrailEvolutionModelling {
 			ComputeNodesHost* hostNodes = nullptr;
 			ComputeNodesPair* deviceNodes = nullptr;
 			ResourceManager* resources;
-			CudaScheduler* cudaScheduler;
 
 			cudaStream_t stream;
 		};

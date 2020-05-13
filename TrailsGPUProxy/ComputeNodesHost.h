@@ -21,7 +21,6 @@ namespace TrailEvolutionModelling {
 			ComputeNode* nodes = nullptr;
 			
 			void InitForStartAttractors(const std::vector<Attractor>& attractors);
-			void DeinitForStartAttractors(const std::vector<Attractor>& attractors);
 			void CopyToDevicePair(ComputeNodesPair* pair);
 			void CopyFromPairsWriteOnly(ComputeNodesPair* pair);
 

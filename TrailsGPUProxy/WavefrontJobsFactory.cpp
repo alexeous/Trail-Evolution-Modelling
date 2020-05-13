@@ -6,20 +6,16 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		std::vector<WavefrontJob*> WavefrontJobsFactory::CreateJobs(int graphW, int graphH,
-			ResourceManager& resources, const AttractorsMap& attractors, CudaScheduler* cudaScheduler)
+			ResourceManager* resources, const AttractorsMap& attractors)
 		{
 			std::vector<WavefrontJob*> jobs;
-			ComputeNodesHost* hostNodes = resources.New<ComputeNodesHost>(graphW, graphH);
 			for(auto pair : attractors) {
 				auto goal = pair.first;
 				auto& starts = pair.second;
 
-				hostNodes->InitForStartAttractors(starts);
-				WavefrontJob* job = resources.New<WavefrontJob>(goal, starts, hostNodes, &resources, cudaScheduler);
-				hostNodes->DeinitForStartAttractors(starts);
+				WavefrontJob* job = resources->New<WavefrontJob>(graphW, graphH, goal, starts, resources);
 				jobs.push_back(job);
 			}
-			resources.Free(hostNodes);
 
 			return jobs;
 		}

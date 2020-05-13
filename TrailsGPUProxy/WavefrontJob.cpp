@@ -7,17 +7,13 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
-		int WavefrontJob::asdf = 10;
-
-		WavefrontJob::WavefrontJob(Attractor goal, const std::vector<Attractor>& starts,
-			ComputeNodesHost* nodesTemplate, ResourceManager* resources, CudaScheduler* cudaScheduler
-		)
+		WavefrontJob::WavefrontJob(int graphW, int graphH, Attractor goal, 
+			const std::vector<Attractor>& starts, ResourceManager* resources)
 		  : goal(goal),
 			minIterations(GetMinIterations(goal, starts)),
-			hostNodes(CreateHostNodes(nodesTemplate, *resources)),
-			deviceNodes(CreateDeviceNodes(nodesTemplate, *resources)),
-			resources(resources),
-			cudaScheduler(cudaScheduler)
+			hostNodes(CreateHostNodes(graphW, graphH, starts, *resources)),
+			deviceNodes(CreateDeviceNodes(hostNodes, *resources)),
+			resources(resources)
 		{
 			CHECK_CUDA(cudaStreamCreate(&stream));
 		}
@@ -27,10 +23,6 @@ namespace TrailEvolutionModelling {
 			int extH = hostNodes->extendedH;
 			int goalIdx = (goal.nodeI + 1) + (goal.nodeJ + 1) * extW;
 			CHECK_CUDA(ResetNodesG(deviceNodes->readOnly, extW, extH, goalIdx, stream));
-
-			cudaScheduler->Schedule(stream, []() {
-				
-			});
 		}
 
 		int WavefrontJob::GetMinIterations(Attractor goal, const std::vector<Attractor>& starts) {
@@ -44,22 +36,25 @@ namespace TrailEvolutionModelling {
 			return minDistance;
 		}
 
-		ComputeNodesPair* WavefrontJob::CreateDeviceNodes(
-			ComputeNodesHost* nodesTemplate, ResourceManager& resources) 
+		ComputeNodesPair* WavefrontJob::CreateDeviceNodes(ComputeNodesHost* hostNodes, 
+			ResourceManager& resources) 
 		{
-			auto deviceNodesPair = resources.New<ComputeNodesPair>(nodesTemplate->graphW, nodesTemplate->graphH);
-			nodesTemplate->CopyToDevicePair(deviceNodesPair);
+			auto deviceNodesPair = resources.New<ComputeNodesPair>(hostNodes->graphW, hostNodes->graphH);
+			hostNodes->CopyToDevicePair(deviceNodesPair);
 			return deviceNodesPair;
 		}
 
-		ComputeNodesHost* WavefrontJob::CreateHostNodes(
-			ComputeNodesHost* nodesTemplate, ResourceManager& resources) 
+		ComputeNodesHost* WavefrontJob::CreateHostNodes(int w, int h,
+			const std::vector<Attractor>& starts, ResourceManager& resources)
 		{
-			return resources.New<ComputeNodesHost>(nodesTemplate->graphW, nodesTemplate->graphH);
+			auto hostNodes = resources.New<ComputeNodesHost>(w, h);
+			hostNodes->InitForStartAttractors(starts);
+			return hostNodes;
 		}
 
 		void WavefrontJob::Free() {
 			cudaStreamDestroy(stream);
+			resources->Free(hostNodes);
 			resources->Free(deviceNodes);
 		}
 

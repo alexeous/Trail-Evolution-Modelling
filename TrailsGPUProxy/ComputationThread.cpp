@@ -80,7 +80,7 @@ namespace TrailEvolutionModelling {
 
 				NotifyProgress(L"Создание исполнителей волнового алгоритма на GPU");
 				std::vector<WavefrontJob*> wavefrontJobs =
-					WavefrontJobsFactory::CreateJobs(graph->Width, graph->Height, resources, attractors, cudaScheduler);
+					WavefrontJobsFactory::CreateJobs(graph->Width, graph->Height, &resources, attractors);
 				for(auto j : wavefrontJobs) {
 					j->ResetReadOnlyNodesGParallel();
 				}

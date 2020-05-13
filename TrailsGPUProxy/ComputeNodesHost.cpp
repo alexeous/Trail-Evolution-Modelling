@@ -21,12 +21,6 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
-		void ComputeNodesHost::DeinitForStartAttractors(const std::vector<Attractor>& attractors) {
-			for(Attractor attractor : attractors) {
-				At(attractor.nodeI, attractor.nodeJ).SetStart(false);
-			}
-		}
-
 		void ComputeNodesHost::CopyToDevicePair(ComputeNodesPair* pair) {
 			CHECK_CUDA(cudaMemcpy(pair->readOnly, nodes, arraySize, cudaMemcpyHostToDevice));
 			CHECK_CUDA(cudaMemcpy(pair->writeOnly, pair->readOnly, arraySize, cudaMemcpyDeviceToDevice));

@@ -11,7 +11,7 @@ namespace TrailEvolutionModelling {
 		class WavefrontJobsFactory {
 		public:
 			static std::vector<WavefrontJob*> CreateJobs(int graphW, int graphH,
-				ResourceManager& resources, const AttractorsMap& attractors, CudaScheduler* cudaScheduler);
+				ResourceManager* resources, const AttractorsMap& attractors);
 		};
 
 	}
