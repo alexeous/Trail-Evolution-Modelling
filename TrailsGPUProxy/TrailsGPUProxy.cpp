@@ -8,7 +8,13 @@ namespace TrailEvolutionModelling {
 
 		TrailsComputationsOutput^ TrailsGPUProxy::ComputeTrails(TrailsComputationsInput^ input) {
 			ComputationThread^ computationThread = gcnew ComputationThread(this, input);
-			return computationThread->GetResult();
+			try {
+				return computationThread->GetResult();
+			}
+			catch(ThreadAbortException^ ex) {
+				computationThread->CancelAll();
+				throw ex;
+			}
 		}
 
 		void TrailsGPUProxy::NotifyProgress(const wchar_t* stage) {
