@@ -13,7 +13,7 @@ namespace TrailEvolutionModelling {
 			String^ managedMessage = gcnew String(message);
 			String^ managedSrcFilename = gcnew String(srcFilename);
 			return String::Format("Error '{0}' at line {1} in file {2}",
-				managedMessage, managedSrcFilename, line);
+				managedMessage, line, managedSrcFilename);
 		}
 	}
 }
