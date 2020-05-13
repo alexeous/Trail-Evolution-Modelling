@@ -65,15 +65,22 @@ namespace TrailEvolutionModelling {
 		public:
 			ThreadPool(std::function<void(std::exception_ptr, void*)> onExceptionCallback, 
 				void* exceptionCallbackArg);
+			~ThreadPool();
 
 			template <typename TFunction, typename... TArgs>
-			inline void Schedule(TFunction function, TArgs&&... args) {
+			inline void Schedule(TFunction function, TArgs... args) {
+				if(cancellation->IsCancellationRequested)
+					return;
+
 				auto callData = CreateCallData(function, args);
 				gcnew Caller<TFunction, TArgs...>(callData);
 			}
 
 			template <typename TFunction, typename... TArgs>
 			inline void Schedule(TFunction function, std::tuple<TArgs...> argsTuple) {
+				if(cancellation->IsCancellationRequested)
+					return;
+
 				auto callData = CreateCallData(function, argsTuple);
 				gcnew Caller<TFunction, TArgs...>(callData);
 			}

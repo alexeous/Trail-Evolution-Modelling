@@ -12,6 +12,10 @@ namespace TrailEvolutionModelling {
 		{
 		}
 
+		ThreadPool::~ThreadPool() {
+			CancelAll();
+		}
+
 		void ThreadPool::CancelAll() {
 			cancellation->Cancel();
 		}
