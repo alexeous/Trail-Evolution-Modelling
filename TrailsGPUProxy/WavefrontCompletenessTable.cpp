@@ -9,7 +9,8 @@ namespace TrailEvolutionModelling {
 			: numRows(attractors.GetSourceNumber()), 
 			  numColumns(attractors.GetDrainNumber()),
 			  table(nullptr),
-			  pathReconstructor(pathReconstructor)
+			  pathReconstructor(pathReconstructor),
+			  numJobs(CountJobs(attractors))
 		{
 			InitIndexMaps(attractors);
 			InitTable(attractors);
@@ -55,6 +56,10 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
+		int WavefrontCompletenessTable::CountJobs(const AttractorsMap& attractors) {
+			return attractors.uniqueAttractors.size();
+		}
+
 		void WavefrontCompletenessTable::ResetCompleteness() {
 			int tableSize = numRows * numColumns;
 			for(int i = 0; i < tableSize; i++) {
@@ -65,6 +70,7 @@ namespace TrailEvolutionModelling {
 					cell.drainResult = nullptr;
 				}
 			}
+			pendingRemaining = numJobs;
 		}
 
 		void WavefrontCompletenessTable::SetCompleted(const Attractor& attractor, 
@@ -76,6 +82,16 @@ namespace TrailEvolutionModelling {
 			if(attractor.isDrain) {
 				SetDrainCompleted(attractor, calculatedNodes);
 			}
+		}
+
+		void WavefrontCompletenessTable::WaitForAll() {
+			while(pendingRemaining > 0) {
+				_sleep(5);
+			}
+		}
+
+		void WavefrontCompletenessTable::CancelWait() {
+			pendingRemaining = 0;
 		}
 
 		void WavefrontCompletenessTable::SetSourceCompleted(const Attractor& source, 

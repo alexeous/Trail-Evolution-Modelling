@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <memory>
 #include <atomic>
+#include <gcroot.h>
 #include "Attractor.h"
 #include "AttractorsMap.h"
 #include "ComputeNodesHost.h"
@@ -38,10 +39,13 @@ namespace TrailEvolutionModelling {
 
 			void ResetCompleteness();
 			void SetCompleted(const Attractor& attractor, ComputeNodesHost* calculatedNodes);
+			void WaitForAll();
+			void CancelWait();
 
 		private:
 			void InitIndexMaps(const AttractorsMap& attractors);
 			void InitTable(const AttractorsMap& attractors);
+			int CountJobs(const AttractorsMap& attractors);
 			int GetIndex(const Attractor& source, const Attractor& drain);
 			void SetSourceCompleted(const Attractor& source, ComputeNodesHost* result);
 			void SetDrainCompleted(const Attractor& drain, ComputeNodesHost* result);
@@ -54,6 +58,8 @@ namespace TrailEvolutionModelling {
 		private:
 			int numRows;
 			int numColumns;
+			int numJobs;
+			int pendingRemaining;
 			std::unordered_map<Attractor, int> sourceToRow;
 			std::unordered_map<Attractor, int> drainToColumn;
 			Cell* table;
