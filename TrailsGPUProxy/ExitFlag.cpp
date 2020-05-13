@@ -9,7 +9,7 @@ namespace TrailEvolutionModelling {
 		}
 
 		void ExitFlag::ResetAsync(cudaStream_t stream) {
-			*valueHost = false;
+			*valueHost = true;
 			CHECK_CUDA(cudaMemcpyAsync(valueDevice, valueHost, sizeof(int), cudaMemcpyHostToDevice, stream));
 		}
 

@@ -55,8 +55,8 @@ namespace TrailEvolutionModelling {
 			threadId.x = threadIdx.x;
 			threadId.y = threadIdx.y;
 			uint2 globalId;
-			globalId.x = i;
-			globalId.y = j;
+			globalId.x = i + 1;
+			globalId.y = j + 1;
 			unsigned int ftid = threadIdx.x + threadIdx.y * blockDim.x; // flattened thread id
 
 			ClampGlobalAndThreadIDToNodesBounds(threadId, globalId, graphW, graphH);
@@ -90,9 +90,10 @@ namespace TrailEvolutionModelling {
 			__syncthreads();
 
 			unsigned int ftid = threadIdx.x + threadIdx.y * blockDim.x; // flattened thread id
-			if(ftid < blockDim.x * blockDim.y) {
+			if(ftid < gridDim.x * gridDim.y) {
 				atomicMax(&maxAgentsGSharedAsUint, __float_as_uint(maxAgentsGPerGroup[ftid]));
 			}
+			__syncthreads();
 		}
 
 		inline __device__ ComputeNode GetNode(ComputeNode nodesShared[SHARED_ARRAYS_SIZE_X][SHARED_ARRAYS_SIZE_Y], 
@@ -112,14 +113,14 @@ namespace TrailEvolutionModelling {
 			const ComputeNode& neighbour, float maxAgentsGShared, int dir, bool& repeat)
 		{
 			float oldG = node.g;
-			if constexpr(EdgeType == EdgeType::Diagonal) {
+			if(EdgeType == EdgeType::Diagonal) {
 				edge *= 1.41421356f; // sqrt(2)
 			}
 			float tentativeNewG = neighbour.g + edge;
 			node.SetDirNext(ReplaceIfXLessThanY(node.GetDirNext(), dir, tentativeNewG, node.g));
 			node.g = min(node.g, tentativeNewG);
 			
-			if constexpr(SetRepeatFlag) {
+			if(SetRepeatFlag) {
 				repeat = repeat | ((node.g != oldG) & (node.g < maxAgentsGShared));
 			}
 		}
@@ -165,7 +166,7 @@ namespace TrailEvolutionModelling {
 				if(node.IsStart()) {
 					atomicMax(&newMaxAgentsGSharedAsUint, __float_as_uint(node.g));
 				}
-				if constexpr(SetExitFlag) {
+				if(SetExitFlag) {
 					bool isUninitializedStart = node.IsStart() & isinf(node.g);
 					atomicOr(&repeatShared, repeat | isUninitializedStart);
 				}
@@ -173,8 +174,8 @@ namespace TrailEvolutionModelling {
 			__syncthreads();
 
 			if((threadIdx.x == 0) & (threadIdx.y == 0)) {
-				maxAgentsGPerGroup[blockIdx.x + blockIdx.y * blockDim.x] = __uint_as_float(newMaxAgentsGSharedAsUint);
-				if constexpr(SetExitFlag) {
+				maxAgentsGPerGroup[blockIdx.x + blockIdx.y * gridDim.x] = __uint_as_float(newMaxAgentsGSharedAsUint);
+				if(SetExitFlag) {
 					atomicAnd(exitFlag, !repeatShared);
 				}
 			}
@@ -185,7 +186,7 @@ namespace TrailEvolutionModelling {
 			int goalIndex, float* maxAgentsGPerGroup, ExitFlag* exitFlag, cudaStream_t stream)
 		{
 			dim3 threadsDim(BLOCK_SIZE_X, BLOCK_SIZE_Y);
-			dim3 blocksDim(divceil(graphW + 2, BLOCK_SIZE_X), divceil(graphH + 2, BLOCK_SIZE_Y));
+			dim3 blocksDim(GetWavefrontPathFindingBlocksX(graphW), GetWavefrontPathFindingBlocksY(graphH));
 
 			int* exitFlagDevice = nullptr;
 			if constexpr(SetExitFlag) {

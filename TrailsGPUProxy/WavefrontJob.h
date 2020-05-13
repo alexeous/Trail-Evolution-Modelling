@@ -46,6 +46,8 @@ namespace TrailEvolutionModelling {
 
 			float* maxAgentsGPerGroup;
 			ExitFlag* exitFlag;
+			std::function<void(int)>* withoutExitFlagCheck = nullptr;
+			std::function<void()>* withExitFlagCheck = nullptr;
 
 			cudaStream_t stream;
 		};

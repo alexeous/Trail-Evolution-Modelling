@@ -17,7 +17,8 @@ namespace TrailEvolutionModelling {
 			exitFlag(resources->New<ExitFlag>())
 		{
 			CHECK_CUDA(cudaStreamCreate(&stream));
-			CHECK_CUDA(cudaMalloc(&maxAgentsGPerGroup, WAVEFRONT_PATH_FINDING_BLOCK_SIZE_X * WAVEFRONT_PATH_FINDING_BLOCK_SIZE_Y));
+			size_t maxAgentsGArraySize = sizeof(float) * GetWavefrontPathFindingBlocksX(graphW) * GetWavefrontPathFindingBlocksY(graphH);
+			CHECK_CUDA(cudaMalloc(&maxAgentsGPerGroup, maxAgentsGArraySize));
 		}
 
 		void WavefrontJob::Start(WavefrontCompletenessTable* wavefrontTable, 
@@ -30,13 +31,16 @@ namespace TrailEvolutionModelling {
 			int graphW = hostNodes->graphW;
 			int graphH = hostNodes->graphH;
 			
-			auto withoutExitFlagCheck = new std::function<void(int)>([=](int doubleIterations) {
+			delete withoutExitFlagCheck;
+			delete withExitFlagCheck;
+			withoutExitFlagCheck = new std::function<void(int)>([=](int doubleIterations) {
 				for(int i = 0; i < doubleIterations; i++) {
 					CHECK_CUDA((WavefrontPathFinding<false, false>(deviceNodes, graphW, graphH, edges, GetGoalIndex(), maxAgentsGPerGroup, nullptr, stream)));
 					if(i < doubleIterations - 1) {
 						CHECK_CUDA((WavefrontPathFinding<true, false>(deviceNodes, graphW, graphH, edges, GetGoalIndex(), maxAgentsGPerGroup, nullptr, stream)));
 					}
 					else {
+						exitFlag->ResetAsync(stream);
 						CHECK_CUDA((WavefrontPathFinding<true, true>(deviceNodes, graphW, graphH, edges, GetGoalIndex(), maxAgentsGPerGroup, exitFlag, stream)));
 					}
 				}
@@ -44,13 +48,12 @@ namespace TrailEvolutionModelling {
 			(*withoutExitFlagCheck)(minIterations / 2);
 
 			exitFlag->ReadFromDeviceAsync(stream);
-			std::function<void()>* withExitFlagCheck = new std::function<void()>;
+			withExitFlagCheck = new std::function<void()>;
 			*withExitFlagCheck = [=]() {
 				if(exitFlag->GetLastHostValue()) {
 					hostNodes->CopyFromDeviceAsync(deviceNodes->readOnly, stream);
-					scheduler->Schedule(stream, [&]() {
-						delete withoutExitFlagCheck;
-						delete withExitFlagCheck;
+					scheduler->Schedule(stream, [=]() {
+						WavefrontCompletenessTable* t = wavefrontTable;
 						wavefrontTable->SetCompleted(goal, hostNodes);
 					});
 				}
@@ -106,6 +109,8 @@ namespace TrailEvolutionModelling {
 			cudaFree(maxAgentsGPerGroup);
 			resources->Free(hostNodes);
 			resources->Free(deviceNodes);
+			delete withoutExitFlagCheck;
+			delete withExitFlagCheck;
 		}
 
 	}
