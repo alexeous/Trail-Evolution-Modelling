@@ -10,6 +10,8 @@
 #include "EdgesWeights.h"
 #include "WavefrontJob.h"
 #include "WavefrontJobsFactory.h"
+#include "PathReconstructor.h"
+#include "WavefrontCompletenessTable.h"
 
 using namespace System;
 using namespace System::Collections::Concurrent;
@@ -65,7 +67,8 @@ namespace TrailEvolutionModelling {
 			int threadId = Thread::CurrentThread->ManagedThreadId;
 			runThreads[threadId] = this;
 
-			CudaScheduler* cudaScheduler = new CudaScheduler(&OnSchedulerException, (void*)threadId);
+			ThreadPool* threadPool = new ThreadPool(&OnSchedulerException, (void*)threadId);
+			CudaScheduler cudaScheduler(threadPool);
 			try {
 				Graph^ graph = input->Graph;
 
@@ -81,13 +84,13 @@ namespace TrailEvolutionModelling {
 				NotifyProgress(L"Создание исполнителей волнового алгоритма на GPU");
 				std::vector<WavefrontJob*> wavefrontJobs =
 					WavefrontJobsFactory::CreateJobs(graph->Width, graph->Height, &resources, attractors);
-				for(auto j : wavefrontJobs) {
-					//j->ResetReadOnlyNodesGParallel();
-				}
-
-				WaitForGPU();
+				
+				//PathReconstructor pathReconsturctor;
+				//WavefrontCompletenessTable wavefrontTable(attractors, &pathReconsturctor);
 
 				NotifyProgress(L"Симуляция движения пешеходов");
+				//wavefrontTable.ResetCompleteness();
+				
 
 				NotifyProgress(L"Выгрузка результата");
 				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(edgesWeights,
@@ -101,7 +104,7 @@ namespace TrailEvolutionModelling {
 
 				output = result;
 			}
-			catch(ThreadAbortException^ ex) {
+			catch(ThreadAbortException^) {
 				System::Threading::Thread::ResetAbort();
 			}
 			catch(CudaExceptionNative ex) {
