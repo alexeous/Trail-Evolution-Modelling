@@ -56,7 +56,7 @@ namespace TrailEvolutionModelling {
 			int numColumns;
 			std::unordered_map<Attractor, int> sourceToRow;
 			std::unordered_map<Attractor, int> drainToColumn;
-			Cell*&& table;
+			Cell* table;
 
 			PathReconstructor* pathReconstructor;
 		};

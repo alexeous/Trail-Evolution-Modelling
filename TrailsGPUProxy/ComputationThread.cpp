@@ -85,8 +85,8 @@ namespace TrailEvolutionModelling {
 				std::vector<WavefrontJob*> wavefrontJobs =
 					WavefrontJobsFactory::CreateJobs(graph->Width, graph->Height, &resources, attractors);
 				
-				//PathReconstructor pathReconsturctor;
-				//WavefrontCompletenessTable wavefrontTable(attractors, &pathReconsturctor);
+				PathReconstructor pathReconsturctor;
+				WavefrontCompletenessTable wavefrontTable(attractors, &pathReconsturctor);
 
 				NotifyProgress(L"Симуляция движения пешеходов");
 				//wavefrontTable.ResetCompleteness();
