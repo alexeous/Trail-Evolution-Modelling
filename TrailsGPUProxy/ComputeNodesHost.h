@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "cuda_runtime.h"
 #include "IResource.h"
 #include "ResourceManager.h"
 #include "ComputeNode.h"
@@ -22,7 +23,7 @@ namespace TrailEvolutionModelling {
 			
 			void InitForStartAttractors(const std::vector<Attractor>& attractors);
 			void CopyToDevicePair(ComputeNodesPair* pair);
-			void CopyFromPairsWriteOnly(ComputeNodesPair* pair);
+			void CopyFromDeviceAsync(ComputeNode* device, cudaStream_t stream);
 
 		protected:
 			ComputeNodesHost(int graphW, int graphH);

@@ -26,8 +26,8 @@ namespace TrailEvolutionModelling {
 			CHECK_CUDA(cudaMemcpy(pair->writeOnly, pair->readOnly, arraySize, cudaMemcpyDeviceToDevice));
 		}
 
-		void ComputeNodesHost::CopyFromPairsWriteOnly(ComputeNodesPair* pair) {
-			CHECK_CUDA(cudaMemcpy(nodes, pair->writeOnly, arraySize, cudaMemcpyDeviceToHost));
+		void ComputeNodesHost::CopyFromDeviceAsync(ComputeNode* device, cudaStream_t stream) {
+			CHECK_CUDA(cudaMemcpyAsync(nodes, device, arraySize, cudaMemcpyDeviceToHost, stream));
 		}
 
 		void ComputeNodesHost::Free() {
