@@ -5,11 +5,7 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		ComputeNodesHost::ComputeNodesHost(int graphW, int graphH)
-			: NodesDataHaloedHost<ComputeNode>(graphW, graphH),
-			  graphW(graphW),
-			  graphH(graphH),
-			  extendedW(graphW + 2), 
-			  extendedH(graphH + 2)
+			: NodesDataHaloedHost<ComputeNode>(graphW, graphH)
 		{
 			size_t arraySize = NodesDataHaloed<ComputeNode>::ArraySizeBytes(graphW, graphH);
 			CHECK_CUDA(cudaMemset(data, 0, arraySize));
@@ -22,11 +18,11 @@ namespace TrailEvolutionModelling {
 		}
 
 		void ComputeNodesHost::CopyToDevicePair(ComputeNodesPair* pair, cudaStream_t stream) {
-			CopyTo(pair->readOnly, graphW, graphH, stream);
+			CopyTo(pair->readOnly, stream);
 			pair->CopyReadToWrite(graphW, graphH, stream);
 		}
 
-		void ComputeNodesHost::Free() {
+		void ComputeNodesHost::Free(ResourceManager&) {
 			cudaFreeHost(data);
 		}
 

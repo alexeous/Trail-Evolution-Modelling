@@ -17,7 +17,7 @@ namespace TrailEvolutionModelling {
 
 		protected:
 			ExitFlag();
-			void Free() override;
+			void Free(ResourceManager&) override;
 
 		private:
 			int* valueHost;

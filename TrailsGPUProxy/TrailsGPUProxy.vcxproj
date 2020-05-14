@@ -162,6 +162,7 @@
     <ClInclude Include="NodesTrampledness.h" />
     <ClInclude Include="PathReconstructor.h" />
     <ClInclude Include="PathReconstructorWorker.h" />
+    <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="ResetNodesG.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ThreadPool.h" />

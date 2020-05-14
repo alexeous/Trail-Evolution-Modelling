@@ -8,8 +8,7 @@ namespace TrailEvolutionModelling {
 
 		ComputeNodesPair::ComputeNodesPair(int graphW, int graphH, ResourceManager* resources)
 			: readOnly(resources->New<NodesDataHaloedDevice<ComputeNode>>(graphW, graphH)),
-			  writeOnly(resources->New<NodesDataHaloedDevice<ComputeNode>>(graphW, graphH)),
-			  resources(resources)
+			  writeOnly(resources->New<NodesDataHaloedDevice<ComputeNode>>(graphW, graphH))
 		{	
 		}
 
@@ -23,9 +22,9 @@ namespace TrailEvolutionModelling {
 			CHECK_CUDA(cudaMemcpyAsync(readOnly->data, writeOnly->data, size, cudaMemcpyDeviceToDevice, stream));
 		}
 
-		void ComputeNodesPair::Free() {
-			resources->Free(readOnly);
-			resources->Free(readOnly);
+		void ComputeNodesPair::Free(ResourceManager& resources) {
+			resources.Free(readOnly);
+			resources.Free(readOnly);
 		}
 
 	}

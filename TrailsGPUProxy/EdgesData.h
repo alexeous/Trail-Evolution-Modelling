@@ -36,7 +36,7 @@ namespace TrailEvolutionModelling {
 			void ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^));
 
 		protected:
-			virtual void Free() = 0;
+			virtual void Free(ResourceManager&) = 0;
 			static void CudaCopy(const EdgesData<T>* src, const EdgesData<T>* dest, int count, cudaMemcpyKind kind, cudaStream_t stream);
 			static int ArraySize(int w, int h);
 			static int ArraySizeBytes(int w, int h);
@@ -54,7 +54,7 @@ namespace TrailEvolutionModelling {
 		protected:
 			EdgesDataHost(int w, int h);
 			EdgesDataHost(const EdgesDataDevice<T>* device, int w, int h);
-			void Free() override;
+			void Free(ResourceManager&) override;
 		};
 #endif
 
@@ -67,7 +67,7 @@ namespace TrailEvolutionModelling {
 		protected:
 			EdgesDataDevice(int w, int h);
 			EdgesDataDevice(const EdgesDataHost<T>* host, int w, int h);
-			void Free() override;
+			void Free(ResourceManager&) override;
 		};
 
 
@@ -162,7 +162,7 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
-		void EdgesDataHost<T>::Free() {
+		void EdgesDataHost<T>::Free(ResourceManager&) {
 			cudaFreeHost(vertical);
 			cudaFreeHost(horizontal);
 			cudaFreeHost(leftDiagonal);
@@ -199,7 +199,7 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
-		void EdgesDataDevice<T>::Free() {
+		void EdgesDataDevice<T>::Free(ResourceManager&) {
 			cudaFree(vertical);
 			cudaFree(horizontal);
 			cudaFree(leftDiagonal);

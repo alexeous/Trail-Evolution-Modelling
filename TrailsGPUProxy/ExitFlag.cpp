@@ -21,7 +21,7 @@ namespace TrailEvolutionModelling {
 			return *valueHost;
 		}
 
-		void ExitFlag::Free() {
+		void ExitFlag::Free(ResourceManager&) {
 			cudaFreeHost(valueHost);
 			cudaFree(valueDevice);
 		}

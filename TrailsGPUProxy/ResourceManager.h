@@ -27,7 +27,7 @@ namespace TrailEvolutionModelling {
 		template<typename T>
 		inline void ResourceManager::Free(T*& resource) {
 			if(resource != nullptr && resources.erase(resource) != 0) {
-				resource->Free();
+				resource->Free(*this);
 				delete resource;
 				resource = nullptr;
 			}

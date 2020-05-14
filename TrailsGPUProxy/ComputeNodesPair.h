@@ -18,10 +18,7 @@ namespace TrailEvolutionModelling {
 
 		protected:
 			ComputeNodesPair(int graphW, int graphH, ResourceManager* resources);
-			void Free() override;
-
-		private:
-			ResourceManager* resources;
+			void Free(ResourceManager& resources) override;
 		};
 
 	}

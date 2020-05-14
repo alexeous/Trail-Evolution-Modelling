@@ -7,7 +7,7 @@ namespace TrailEvolutionModelling {
 			friend class ResourceManager;
 
 		protected:
-			virtual void Free() = 0;
+			virtual void Free(ResourceManager& resources) = 0;
 		};
 
 	}

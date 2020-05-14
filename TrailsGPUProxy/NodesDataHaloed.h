@@ -25,7 +25,7 @@ namespace TrailEvolutionModelling {
 			static int ArraySizeBytes(int graphW, int graphH);
 
 		protected:
-			virtual void Free() = 0; 
+			virtual void Free(ResourceManager&) = 0;
 			static void CudaCopy(const NodesDataHaloed<T>* src, const NodesDataHaloed<T>* dest, int count, cudaMemcpyKind kind, cudaStream_t stream);
 #endif
 		};
@@ -45,7 +45,7 @@ namespace TrailEvolutionModelling {
 			void CopyTo(NodesDataHaloedDevice<T>* other, int graphW, int graphH, cudaStream_t stream = 0) const;
 		protected:
 			NodesDataHaloedHost(int graphW, int graphH);
-			void Free() override;
+			void Free(ResourceManager&) override;
 		};
 #endif
 		
@@ -60,7 +60,7 @@ namespace TrailEvolutionModelling {
 			NodesDataHaloedDevice(int graphW, int graphH);
 #endif
 		protected:
-			void Free() override;
+			void Free(ResourceManager&) override;
 		};
 
 #ifndef __CUDACC__
@@ -97,7 +97,7 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
-		inline void NodesDataHaloedHost<T>::Free() {
+		inline void NodesDataHaloedHost<T>::Free(ResourceManager&) {
 			cudaFreeHost(data);
 		}
 
@@ -119,7 +119,7 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
-		inline void NodesDataHaloedDevice<T>::Free() {
+		inline void NodesDataHaloedDevice<T>::Free(ResourceManager&) {
 			cudaFree(data);
 		}
 

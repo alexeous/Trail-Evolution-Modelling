@@ -13,7 +13,6 @@ namespace TrailEvolutionModelling {
 			minIterations(GetMinIterations(goal, starts)),
 			hostNodes(CreateHostNodes(graphW, graphH, starts, resources)),
 			deviceNodes(CreateDeviceNodes(hostNodes, resources)),
-			resources(resources),
 			exitFlag(resources->New<ExitFlag>())
 		{
 			CHECK_CUDA(cudaStreamCreate(&stream));
@@ -104,11 +103,11 @@ namespace TrailEvolutionModelling {
 			return hostNodes;
 		}
 
-		void WavefrontJob::Free() {
+		void WavefrontJob::Free(ResourceManager& resources) {
 			cudaStreamDestroy(stream);
 			cudaFree(maxAgentsGPerGroup);
-			resources->Free(hostNodes);
-			resources->Free(deviceNodes);
+			resources.Free(hostNodes);
+			resources.Free(deviceNodes);
 			delete withoutExitFlagCheck;
 			delete withExitFlagCheck;
 		}

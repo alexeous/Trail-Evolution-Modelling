@@ -24,7 +24,7 @@ namespace TrailEvolutionModelling {
 		protected:
 			WavefrontJob(int graphW, int graphH, Attractor goal, 
 				const std::vector<Attractor>& starts, ResourceManager* resources);
-			void Free() override;
+			void Free(ResourceManager& resources) override;
 
 		private:
 
@@ -42,7 +42,6 @@ namespace TrailEvolutionModelling {
 			int minIterations;
 			ComputeNodesHost* hostNodes = nullptr;
 			ComputeNodesPair* deviceNodes = nullptr;
-			ResourceManager* resources;
 
 			float* maxAgentsGPerGroup;
 			ExitFlag* exitFlag;

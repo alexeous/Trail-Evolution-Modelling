@@ -41,7 +41,6 @@
     <ClCompile Include="CudaExceptionNative.cpp">
       <Filter>Exceptions</Filter>
     </ClCompile>
-    <ClCompile Include="ComputationThread.cpp" />
     <ClCompile Include="ThreadPool.cpp">
       <Filter>Threading</Filter>
     </ClCompile>
@@ -57,6 +56,7 @@
     <ClCompile Include="NodesTrampledness.cpp">
       <Filter>Data\Nodes</Filter>
     </ClCompile>
+    <ClCompile Include="ComputationThread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CudaUtils.h" />
@@ -116,7 +116,6 @@
     <ClInclude Include="CudaScheduler.h">
       <Filter>Threading</Filter>
     </ClInclude>
-    <ClInclude Include="ComputationThread.h" />
     <ClInclude Include="ThreadPool.h">
       <Filter>Threading</Filter>
     </ClInclude>
@@ -137,6 +136,10 @@
     </ClInclude>
     <ClInclude Include="NodesDataHaloed.h">
       <Filter>Data\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="ComputationThread.h" />
+    <ClInclude Include="ObjectPool.h">
+      <Filter>ResourceManagement</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

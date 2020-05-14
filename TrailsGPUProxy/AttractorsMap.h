@@ -38,7 +38,6 @@ namespace TrailEvolutionModelling {
         public:
             const std::vector<Attractor> uniqueAttractors;
 
-        private:
             static bool CanReach(Graph^ graph, RefAttractor^ a, RefAttractor^ b);
             static std::vector<Attractor> ConvertRefAttractors(array<RefAttractor^>^);
         
