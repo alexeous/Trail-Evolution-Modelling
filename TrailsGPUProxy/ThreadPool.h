@@ -72,7 +72,7 @@ namespace TrailEvolutionModelling {
 				if(cancellation->IsCancellationRequested)
 					return;
 
-				auto callData = CreateCallData(function, args);
+				auto callData = CreateCallData(function, args...);
 				gcnew Caller<TFunction, TArgs...>(callData);
 			}
 
