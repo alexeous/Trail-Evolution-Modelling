@@ -6,19 +6,26 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
-		ComputeNodesPair::ComputeNodesPair(int graphW, int graphH) {
-			size_t size = (graphW + 2) * (graphH + 2) * sizeof(ComputeNode);
-			CHECK_CUDA(cudaMalloc(&readOnly, size));
-			CHECK_CUDA(cudaMalloc(&writeOnly, size));
+		ComputeNodesPair::ComputeNodesPair(int graphW, int graphH, ResourceManager* resources)
+			: readOnly(resources->New<NodesDataHaloedDevice<ComputeNode>>(graphW, graphH)),
+			  writeOnly(resources->New<NodesDataHaloedDevice<ComputeNode>>(graphW, graphH)),
+			  resources(resources)
+		{	
 		}
 
-		void ComputeNodesPair::Swap() {
-			std::swap(readOnly, writeOnly);
+		void ComputeNodesPair::CopyReadToWrite(int graphW, int graphH, cudaStream_t stream) {
+			size_t size = NodesDataHaloed<ComputeNode>::ArraySizeBytes(graphW, graphH);
+			CHECK_CUDA(cudaMemcpyAsync(writeOnly->data, readOnly->data, size, cudaMemcpyDeviceToDevice, stream));
+		}
+
+		void ComputeNodesPair::CopyWriteToRead(int graphW, int graphH, cudaStream_t stream) {
+			size_t size = NodesDataHaloed<ComputeNode>::ArraySizeBytes(graphW, graphH);
+			CHECK_CUDA(cudaMemcpyAsync(readOnly->data, writeOnly->data, size, cudaMemcpyDeviceToDevice, stream));
 		}
 
 		void ComputeNodesPair::Free() {
-			cudaFree(readOnly);
-			cudaFree(writeOnly);
+			resources->Free(readOnly);
+			resources->Free(readOnly);
 		}
 
 	}

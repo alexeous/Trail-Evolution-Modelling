@@ -11,8 +11,8 @@ namespace TrailEvolutionModelling {
 			const std::vector<Attractor>& starts, ResourceManager* resources)
 		  : goal(goal),
 			minIterations(GetMinIterations(goal, starts)),
-			hostNodes(CreateHostNodes(graphW, graphH, starts, *resources)),
-			deviceNodes(CreateDeviceNodes(hostNodes, *resources)),
+			hostNodes(CreateHostNodes(graphW, graphH, starts, resources)),
+			deviceNodes(CreateDeviceNodes(hostNodes, resources)),
 			resources(resources),
 			exitFlag(resources->New<ExitFlag>())
 		{
@@ -51,7 +51,7 @@ namespace TrailEvolutionModelling {
 			withExitFlagCheck = new std::function<void()>;
 			*withExitFlagCheck = [=]() {
 				if(exitFlag->GetLastHostValue()) {
-					hostNodes->CopyFromDeviceAsync(deviceNodes->readOnly, stream);
+					deviceNodes->readOnly->CopyTo(hostNodes, graphW, graphH, stream);
 					scheduler->Schedule(stream, [=]() {
 						WavefrontCompletenessTable* t = wavefrontTable;
 						wavefrontTable->SetCompleted(goal, hostNodes);
@@ -70,7 +70,7 @@ namespace TrailEvolutionModelling {
 		void WavefrontJob::ResetReadOnlyNodesGParallelAsync() {
 			int extW = hostNodes->extendedW;
 			int extH = hostNodes->extendedH;
-			CHECK_CUDA(ResetNodesG(deviceNodes->readOnly, extW, extH, GetGoalIndex(), stream));
+			CHECK_CUDA(ResetNodesG(*deviceNodes->readOnly, extW, extH, GetGoalIndex(), stream));
 		}
 
 		int WavefrontJob::GetGoalIndex() {
@@ -89,17 +89,17 @@ namespace TrailEvolutionModelling {
 		}
 
 		ComputeNodesPair* WavefrontJob::CreateDeviceNodes(ComputeNodesHost* hostNodes, 
-			ResourceManager& resources) 
+			ResourceManager* resources) 
 		{
-			auto deviceNodesPair = resources.New<ComputeNodesPair>(hostNodes->graphW, hostNodes->graphH);
+			auto deviceNodesPair = resources->New<ComputeNodesPair>(hostNodes->graphW, hostNodes->graphH, resources);
 			hostNodes->CopyToDevicePair(deviceNodesPair);
 			return deviceNodesPair;
 		}
 
 		ComputeNodesHost* WavefrontJob::CreateHostNodes(int w, int h,
-			const std::vector<Attractor>& starts, ResourceManager& resources)
+			const std::vector<Attractor>& starts, ResourceManager* resources)
 		{
-			auto hostNodes = resources.New<ComputeNodesHost>(w, h);
+			auto hostNodes = resources->New<ComputeNodesHost>(w, h);
 			hostNodes->InitForStartAttractors(starts);
 			return hostNodes;
 		}

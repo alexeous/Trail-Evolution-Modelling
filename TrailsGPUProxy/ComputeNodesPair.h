@@ -1,7 +1,8 @@
 #pragma once
 #include "IResource.h"
-#include "ComputeNode.h"
 #include "ResourceManager.h"
+#include "ComputeNode.h"
+#include "NodesDataHaloed.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -9,14 +10,18 @@ namespace TrailEvolutionModelling {
 		struct ComputeNodesPair : public IResource {
 			friend class ResourceManager;
 
-			ComputeNode* readOnly = nullptr;
-			ComputeNode* writeOnly = nullptr;
+			NodesDataHaloedDevice<ComputeNode>* readOnly = nullptr;
+			NodesDataHaloedDevice<ComputeNode>* writeOnly = nullptr;
 
-			void Swap();
+			void CopyReadToWrite(int graphW, int graphH, cudaStream_t stream = 0);
+			void CopyWriteToRead(int graphW, int graphH, cudaStream_t stream = 0);
 
 		protected:
-			ComputeNodesPair(int graphW, int graphH);
+			ComputeNodesPair(int graphW, int graphH, ResourceManager* resources);
 			void Free() override;
+
+		private:
+			ResourceManager* resources;
 		};
 
 	}

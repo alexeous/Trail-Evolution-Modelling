@@ -8,17 +8,21 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
-		__global__ void ResetNodesGKernel(ComputeNode* nodes, int extendedW, int extendedH, int goalIndex) {
+		__global__ void ResetNodesGKernel(NodesDataHaloedDevice<ComputeNode> nodes, 
+			int extendedW, int extendedH, int goalIndex) 
+		{
 			int i = blockIdx.x * blockDim.x + threadIdx.x;
 			int j = blockIdx.y * blockDim.y + threadIdx.y;
 			if(i < extendedW && j < extendedH) {
 				int index = i + j * extendedW;
 
-				nodes[index].g = (index == goalIndex ? 0 : INFINITY);
+				nodes.data[index].g = (index == goalIndex ? 0 : INFINITY);
 			}
 		}
 
-		cudaError_t ResetNodesG(ComputeNode* nodes, int extendedW, int extendedH, int goalIndex, cudaStream_t stream) {
+		cudaError_t ResetNodesG(NodesDataHaloedDevice<ComputeNode> nodes, 
+			int extendedW, int extendedH, int goalIndex, cudaStream_t stream) 
+		{
 			dim3 threadsDim(BLOCK_SIZE_X, BLOCK_SIZE_Y);
 			dim3 blocksDim(divceil(extendedW, BLOCK_SIZE_X), divceil(extendedH , BLOCK_SIZE_Y));
 

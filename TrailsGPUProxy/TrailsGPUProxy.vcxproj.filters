@@ -51,6 +51,12 @@
     <ClCompile Include="ExitFlag.cpp">
       <Filter>Data</Filter>
     </ClCompile>
+    <ClCompile Include="PathReconstructorWorker.cpp">
+      <Filter>Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="NodesTrampledness.cpp">
+      <Filter>Data\Nodes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CudaUtils.h" />
@@ -122,6 +128,15 @@
     </ClInclude>
     <ClInclude Include="WavefrontPathFinding.h">
       <Filter>CudaKernels</Filter>
+    </ClInclude>
+    <ClInclude Include="PathReconstructorWorker.h">
+      <Filter>Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="NodesTrampledness.h">
+      <Filter>Data\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="NodesDataHaloed.h">
+      <Filter>Data\Nodes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

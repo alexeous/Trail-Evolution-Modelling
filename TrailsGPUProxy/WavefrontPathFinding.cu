@@ -12,6 +12,7 @@
 #undef __CUDACC__
 #endif
 
+#include "NodesDataHaloed.h"
 #include "CudaUtils.h"
 #include "MathUtils.h"
 
@@ -49,7 +50,7 @@ namespace TrailEvolutionModelling {
 		}
 
 		inline __device__ void LoadNodesToSharedMemory(int i, int j, int graphW, int graphH,
-			ComputeNode* read, ComputeNode nodesShared[SHARED_ARRAYS_SIZE_X][SHARED_ARRAYS_SIZE_Y])
+			NodesDataHaloedDevice<ComputeNode> read, ComputeNode nodesShared[SHARED_ARRAYS_SIZE_X][SHARED_ARRAYS_SIZE_Y])
 		{
 			uint2 threadId;
 			threadId.x = threadIdx.x;
@@ -60,7 +61,7 @@ namespace TrailEvolutionModelling {
 			unsigned int ftid = threadIdx.x + threadIdx.y * blockDim.x; // flattened thread id
 
 			ClampGlobalAndThreadIDToNodesBounds(threadId, globalId, graphW, graphH);
-			nodesShared[threadId.x + 1][threadId.y + 1] = read[NODES_1D_INDEX(globalId.x, globalId.y)];
+			nodesShared[threadId.x + 1][threadId.y + 1] = read.At(globalId.x, globalId.y, graphW);
 			// X is index of thread - flattenedThreadId - ftid
 			// 0 -- BLOCK_SIZE_X+1 => (X; 0)     // top halo row
 			// BLOCK_SIZE_X+2 -- 2*BLOCK_SIZE_X+3 => (X - (BLOCK_SIZE_X + 2); BLOCK_SIZE_Y + 1) // bottom halo row
@@ -81,7 +82,7 @@ namespace TrailEvolutionModelling {
 				threadId.x = haloThreadIdX;
 				threadId.y = haloThreadIdY;
 				ClampGlobalAndThreadIDToNodesBounds(threadId, globalId, graphW, graphH);
-				nodesShared[threadId.x][threadId.y] = read[NODES_1D_INDEX(globalId.x, globalId.y)];
+				nodesShared[threadId.x][threadId.y] = read.At(globalId.x, globalId.y, graphW);
 			}
 		}
 		
@@ -126,7 +127,8 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<bool SetExitFlag>
-		__global__ void WavefrontPathFindingKernel(ComputeNode* read, ComputeNode* write, 
+		__global__ void WavefrontPathFindingKernel(NodesDataHaloedDevice<ComputeNode> read, 
+			NodesDataHaloedDevice<ComputeNode> write,
 			int graphW, int graphH, EdgesWeights edges, int goalIndex, 
 			float* maxAgentsGPerGroup, int* exitFlag)
 		{
@@ -138,8 +140,6 @@ namespace TrailEvolutionModelling {
 
 			int i = blockIdx.x * blockDim.x + threadIdx.x;
 			int j = blockIdx.y * blockDim.y + threadIdx.y;
-
-			int index = NODES_1D_INDEX(i + 1, j + 1);
 			
 			LoadNodesToSharedMemory(i, j, graphW, graphH, read, nodesShared);
 			CalcMaxAgentsG(maxAgentsGPerGroup, maxAgentsGSharedAsUint);
@@ -161,7 +161,7 @@ namespace TrailEvolutionModelling {
 				ProcessNeighbour<SetExitFlag, EdgeType::Diagonal>(edges.SW(i, j, graphW), node, GetNode(nodesShared, threadIdx.x - 1,	threadIdx.y + 1),	maxAgentsGShared, 5, repeat);
 				ProcessNeighbour<SetExitFlag, EdgeType::Straight>(edges.S (i, j, graphW), node, GetNode(nodesShared, threadIdx.x,		threadIdx.y + 1),	maxAgentsGShared, 6, repeat);
 				ProcessNeighbour<SetExitFlag, EdgeType::Diagonal>(edges.SE(i, j, graphW), node, GetNode(nodesShared, threadIdx.x + 1,	threadIdx.y + 1),	maxAgentsGShared, 7, repeat);
-				write[index] = node;
+				write.At(i + 1, j + 1, graphW) = node;
 
 				if(node.IsStart()) {
 					atomicMax(&newMaxAgentsGSharedAsUint, __float_as_uint(node.g));
@@ -195,11 +195,11 @@ namespace TrailEvolutionModelling {
 
 			if constexpr(!SwapNodesPair) {
 				WavefrontPathFindingKernel<SetExitFlag><<<blocksDim, threadsDim, 0, stream>>>
-					(nodes->readOnly, nodes->writeOnly, graphW, graphH, *edgesWeights, goalIndex, maxAgentsGPerGroup, exitFlagDevice);
+					(*nodes->readOnly, *nodes->writeOnly, graphW, graphH, *edgesWeights, goalIndex, maxAgentsGPerGroup, exitFlagDevice);
 			}
 			else {
 				WavefrontPathFindingKernel<SetExitFlag><<<blocksDim, threadsDim, 0, stream>>>
-					(nodes->writeOnly, nodes->readOnly, graphW, graphH, *edgesWeights, goalIndex, maxAgentsGPerGroup, exitFlagDevice);
+					(*nodes->writeOnly, *nodes->readOnly, graphW, graphH, *edgesWeights, goalIndex, maxAgentsGPerGroup, exitFlagDevice);
 			}
 
 			return cudaGetLastError();

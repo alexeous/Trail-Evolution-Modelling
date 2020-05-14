@@ -33,9 +33,9 @@ namespace TrailEvolutionModelling {
 
 			static int GetMinIterations(Attractor goal, const std::vector<Attractor>& starts);
 			static ComputeNodesHost* CreateHostNodes(int w, int h, const std::vector<Attractor>& starts, 
-				ResourceManager& resources);
+				ResourceManager* resources);
 			static ComputeNodesPair* CreateDeviceNodes(ComputeNodesHost* hostNodes,
-				ResourceManager& resources);
+				ResourceManager* resources);
 
 		private:
 			Attractor goal;
