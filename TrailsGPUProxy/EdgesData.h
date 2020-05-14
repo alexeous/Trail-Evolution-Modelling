@@ -37,7 +37,7 @@ namespace TrailEvolutionModelling {
 
 		protected:
 			virtual void Free() = 0;
-			static void CudaCopy(const EdgesData<T>* src, const EdgesData<T>* dest, int count, cudaMemcpyKind kind);
+			static void CudaCopy(const EdgesData<T>* src, const EdgesData<T>* dest, int count, cudaMemcpyKind kind, cudaStream_t stream);
 			static int ArraySize(int w, int h);
 			static int ArraySizeBytes(int w, int h);
 			static Edge^ GetEdge(Node^ node, Direction direction);
@@ -49,8 +49,8 @@ namespace TrailEvolutionModelling {
 		struct EdgesDataHost : public EdgesData<T> {
 			friend class ResourceManager;
 
-			void CopyTo(const EdgesDataHost<T>* other, int w, int h) const;
-			void CopyTo(const EdgesDataDevice<T>* other, int w, int h) const;
+			void CopyTo(const EdgesDataHost<T>* other, int w, int h, cudaStream_t stream = 0) const;
+			void CopyTo(const EdgesDataDevice<T>* other, int w, int h, cudaStream_t stream = 0) const;
 		protected:
 			EdgesDataHost(int w, int h);
 			EdgesDataHost(const EdgesDataDevice<T>* device, int w, int h);
@@ -62,8 +62,8 @@ namespace TrailEvolutionModelling {
 		struct EdgesDataDevice : public EdgesData<T> {
 			friend class ResourceManager;
 
-			void CopyTo(const EdgesDataHost<T>* other, int w, int h) const;
-			void CopyTo(const EdgesDataDevice<T>* other, int w, int h) const;
+			void CopyTo(const EdgesDataHost<T>* other, int w, int h, cudaStream_t stream = 0) const;
+			void CopyTo(const EdgesDataDevice<T>* other, int w, int h, cudaStream_t stream = 0) const;
 		protected:
 			EdgesDataDevice(int w, int h);
 			EdgesDataDevice(const EdgesDataHost<T>* host, int w, int h);
@@ -115,12 +115,12 @@ namespace TrailEvolutionModelling {
 
 		template<typename T>
 		inline void EdgesData<T>::CudaCopy(const EdgesData<T>* src, const EdgesData<T>* dest, 
-			int count, cudaMemcpyKind kind) {
+			int count, cudaMemcpyKind kind, cudaStream_t stream) {
 			size_t size = count * sizeof(T);
-			CHECK_CUDA(cudaMemcpy(dest->vertical, src->vertical, size, kind));
-			CHECK_CUDA(cudaMemcpy(dest->horizontal, src->horizontal, size, kind));
-			CHECK_CUDA(cudaMemcpy(dest->leftDiagonal, src->leftDiagonal, size, kind));
-			CHECK_CUDA(cudaMemcpy(dest->rightDiagonal, src->rightDiagonal, size, kind));
+			CHECK_CUDA(cudaMemcpyAsync(dest->vertical, src->vertical, size, kind, stream));
+			CHECK_CUDA(cudaMemcpyAsync(dest->horizontal, src->horizontal, size, kind, stream));
+			CHECK_CUDA(cudaMemcpyAsync(dest->leftDiagonal, src->leftDiagonal, size, kind, stream));
+			CHECK_CUDA(cudaMemcpyAsync(dest->rightDiagonal, src->rightDiagonal, size, kind, stream));
 		}
 
 		template<typename T>
@@ -137,13 +137,13 @@ namespace TrailEvolutionModelling {
 
 
 		template<typename T>
-		inline void EdgesDataHost<T>::CopyTo(const EdgesDataHost<T>* other, int w, int h) const {
-			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyHostToHost);
+		inline void EdgesDataHost<T>::CopyTo(const EdgesDataHost<T>* other, int w, int h, cudaStream_t stream) const {
+			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyHostToHost, stream);
 		}
 
 		template<typename T>
-		inline void EdgesDataHost<T>::CopyTo(const EdgesDataDevice<T>* other, int w, int h) const {
-			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyHostToDevice);
+		inline void EdgesDataHost<T>::CopyTo(const EdgesDataDevice<T>* other, int w, int h, cudaStream_t stream) const {
+			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyHostToDevice, stream);
 		}
 
 		template<typename T>
@@ -157,8 +157,7 @@ namespace TrailEvolutionModelling {
 
 		template<typename T>
 		EdgesDataHost<T>::EdgesDataHost(const EdgesDataDevice<T>* device, int w, int h)
-			: EdgesDataHost(w, h) 
-		{
+			: EdgesDataHost(w, h) {
 			device->CopyTo(this, w, h);
 		}
 
@@ -183,13 +182,13 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
-		inline void EdgesDataDevice<T>::CopyTo(const EdgesDataHost<T>* other, int w, int h) const {
-			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyDeviceToHost);
+		inline void EdgesDataDevice<T>::CopyTo(const EdgesDataHost<T>* other, int w, int h, cudaStream_t stream) const {
+			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyDeviceToHost, stream);
 		}
 
 		template<typename T>
-		inline void EdgesDataDevice<T>::CopyTo(const EdgesDataDevice<T>* other, int w, int h) const {
-			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyDeviceToDevice);
+		inline void EdgesDataDevice<T>::CopyTo(const EdgesDataDevice<T>* other, int w, int h, cudaStream_t stream) const {
+			CudaCopy(this, other, ArraySize(w, h), cudaMemcpyDeviceToDevice, stream);
 		}
 
 		template<typename T>
