@@ -5,18 +5,16 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
-		struct EdgesWeights : public EdgesDataDevice<float> {
+#ifndef __CUDACC__
+		struct EdgesWeightsHost : public EdgesDataHost<float> {
 			friend class ResourceManager;
 
-#ifndef __CUDACC__
 		protected:
-			EdgesWeights(Graph^ graph, ResourceManager& resources, bool initiallyTrampleAll);
-
-		private:
-			static EdgesDataHost<float>* CreateHostWeights(Graph^ graph,
-				ResourceManager& resources, bool initiallyTrampleAll);
-#endif
+			EdgesWeightsHost(Graph^ graph, bool initiallyTrampleAll);
 		};
+#endif
+
+		using EdgesWeightsDevice = EdgesDataDevice<float>;
 
 	}
 }

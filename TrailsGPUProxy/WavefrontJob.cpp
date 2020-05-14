@@ -21,7 +21,7 @@ namespace TrailEvolutionModelling {
 		}
 
 		void WavefrontJob::Start(WavefrontCompletenessTable* wavefrontTable, 
-			EdgesWeights* edges, CudaScheduler* scheduler) 
+			EdgesWeightsDevice* edges, CudaScheduler* scheduler) 
 		{
 			constexpr int ExitFlagCheckPeriod = 10;
 
@@ -52,7 +52,12 @@ namespace TrailEvolutionModelling {
 				if(exitFlag->GetLastHostValue()) {
 					deviceNodes->readOnly->CopyTo(hostNodes, graphW, graphH, stream);
 					scheduler->Schedule(stream, [=]() {
-						WavefrontCompletenessTable* t = wavefrontTable;
+						int ww = graphW;
+						int hh = graphH;
+						ComputeNode aa[105 * 201];
+						for(int i = 0; i < 105 * 201; i++) {
+							aa[i] = hostNodes->data[i];
+						}
 						wavefrontTable->SetCompleted(goal, hostNodes);
 					});
 				}

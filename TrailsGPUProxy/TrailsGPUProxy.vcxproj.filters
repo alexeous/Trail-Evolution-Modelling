@@ -23,9 +23,6 @@
     <ClCompile Include="AttractorsMap.cpp">
       <Filter>Data\Attractors</Filter>
     </ClCompile>
-    <ClCompile Include="ComputeNodesPair.cpp">
-      <Filter>Data\Nodes</Filter>
-    </ClCompile>
     <ClCompile Include="WavefrontJobsFactory.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
@@ -50,13 +47,10 @@
     <ClCompile Include="ExitFlag.cpp">
       <Filter>Data</Filter>
     </ClCompile>
-    <ClCompile Include="PathReconstructorWorker.cpp">
+    <ClCompile Include="ComputationThread.cpp" />
+    <ClCompile Include="PathThickener.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="NodesTrampledness.cpp">
-      <Filter>Data\Nodes</Filter>
-    </ClCompile>
-    <ClCompile Include="ComputationThread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CudaUtils.h" />
@@ -128,18 +122,21 @@
     <ClInclude Include="WavefrontPathFinding.h">
       <Filter>CudaKernels</Filter>
     </ClInclude>
-    <ClInclude Include="PathReconstructorWorker.h">
-      <Filter>Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="NodesTrampledness.h">
-      <Filter>Data\Nodes</Filter>
-    </ClInclude>
     <ClInclude Include="NodesDataHaloed.h">
       <Filter>Data\Nodes</Filter>
     </ClInclude>
     <ClInclude Include="ComputationThread.h" />
     <ClInclude Include="ObjectPool.h">
       <Filter>ResourceManagement</Filter>
+    </ClInclude>
+    <ClInclude Include="PathThickener.h">
+      <Filter>Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="NodesDataDevicePair.h">
+      <Filter>Data\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeIndex.h">
+      <Filter>Data\Nodes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

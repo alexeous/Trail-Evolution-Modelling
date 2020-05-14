@@ -100,10 +100,6 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="ComputeNodesPair.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
-    </ClCompile>
     <ClCompile Include="CudaException.cpp" />
     <ClCompile Include="CudaExceptionNative.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
@@ -118,9 +114,8 @@
     <CudaCompile Include="ResetNodesG.cu">
       <FileType>Document</FileType>
     </CudaCompile>
-    <ClCompile Include="NodesTrampledness.cpp" />
     <ClCompile Include="PathReconstructor.cpp" />
-    <ClCompile Include="PathReconstructorWorker.cpp" />
+    <ClCompile Include="PathThickener.cpp" />
     <ClCompile Include="ResourceManager.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
@@ -158,11 +153,12 @@
     <ClInclude Include="IResource.h" />
     <ClInclude Include="IsolatedAttractorsException.h" />
     <ClInclude Include="MathUtils.h" />
+    <ClInclude Include="NodeIndex.h" />
+    <ClInclude Include="NodesDataDevicePair.h" />
     <ClInclude Include="NodesDataHaloed.h" />
-    <ClInclude Include="NodesTrampledness.h" />
     <ClInclude Include="PathReconstructor.h" />
-    <ClInclude Include="PathReconstructorWorker.h" />
     <ClInclude Include="ObjectPool.h" />
+    <ClInclude Include="PathThickener.h" />
     <ClInclude Include="ResetNodesG.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ThreadPool.h" />

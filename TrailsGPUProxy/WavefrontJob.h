@@ -18,7 +18,7 @@ namespace TrailEvolutionModelling {
 			friend class ResourceManager;
 
 		public:
-			void Start(WavefrontCompletenessTable* wavefrontTable, EdgesWeights* edges,
+			void Start(WavefrontCompletenessTable* wavefrontTable, EdgesWeightsDevice* edges,
 				CudaScheduler* scheduler);
 
 		protected:

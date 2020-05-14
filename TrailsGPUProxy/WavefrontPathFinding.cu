@@ -129,7 +129,7 @@ namespace TrailEvolutionModelling {
 		template<bool SetExitFlag>
 		__global__ void WavefrontPathFindingKernel(NodesDataHaloedDevice<ComputeNode> read, 
 			NodesDataHaloedDevice<ComputeNode> write,
-			int graphW, int graphH, EdgesWeights edges, int goalIndex, 
+			int graphW, int graphH, EdgesWeightsDevice edges, int goalIndex, 
 			float* maxAgentsGPerGroup, int* exitFlag)
 		{
 			__shared__ float maxAgentsGShared;
@@ -182,7 +182,7 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<bool SwapNodesPair, bool SetExitFlag>
-		cudaError_t WavefrontPathFinding(ComputeNodesPair* nodes, int graphW, int graphH, EdgesWeights* edgesWeights,
+		cudaError_t WavefrontPathFinding(ComputeNodesPair* nodes, int graphW, int graphH, EdgesWeightsDevice* edgesWeights,
 			int goalIndex, float* maxAgentsGPerGroup, ExitFlag* exitFlag, cudaStream_t stream)
 		{
 			dim3 threadsDim(BLOCK_SIZE_X, BLOCK_SIZE_Y);

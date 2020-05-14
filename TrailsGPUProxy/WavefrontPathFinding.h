@@ -13,7 +13,7 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		template<bool SwapNodesPair, bool SetExitFlag>
-		cudaError_t WavefrontPathFinding(ComputeNodesPair* nodes, int graphW, int graphH, EdgesWeights* edgesWeights,
+		cudaError_t WavefrontPathFinding(ComputeNodesPair* nodes, int graphW, int graphH, EdgesWeightsDevice* edgesWeights,
 			int goalIndex, float* maxAgentsGPerGroup, ExitFlag* exitFlag, cudaStream_t stream);
 
 		inline int GetWavefrontPathFindingBlocksX(int graphW) {
@@ -23,10 +23,10 @@ namespace TrailEvolutionModelling {
 			return divceil(graphH + 2, WAVEFRONT_PATH_FINDING_BLOCK_SIZE_Y);
 		}
 
-		template cudaError_t WavefrontPathFinding<false, false>(ComputeNodesPair*, int, int, EdgesWeights*, int, float*, ExitFlag*, cudaStream_t);
-		template cudaError_t WavefrontPathFinding<false, true>(ComputeNodesPair*, int, int, EdgesWeights*, int, float*, ExitFlag*, cudaStream_t);
-		template cudaError_t WavefrontPathFinding<true, false>(ComputeNodesPair*, int, int, EdgesWeights*, int, float*, ExitFlag*, cudaStream_t);
-		template cudaError_t WavefrontPathFinding<true, true>(ComputeNodesPair*, int, int, EdgesWeights*, int, float*, ExitFlag*, cudaStream_t);
+		template cudaError_t WavefrontPathFinding<false, false>(ComputeNodesPair*, int, int, EdgesWeightsDevice*, int, float*, ExitFlag*, cudaStream_t);
+		template cudaError_t WavefrontPathFinding<false, true>(ComputeNodesPair*, int, int, EdgesWeightsDevice*, int, float*, ExitFlag*, cudaStream_t);
+		template cudaError_t WavefrontPathFinding<true, false>(ComputeNodesPair*, int, int, EdgesWeightsDevice*, int, float*, ExitFlag*, cudaStream_t);
+		template cudaError_t WavefrontPathFinding<true, true>(ComputeNodesPair*, int, int, EdgesWeightsDevice*, int, float*, ExitFlag*, cudaStream_t);
 
 
 

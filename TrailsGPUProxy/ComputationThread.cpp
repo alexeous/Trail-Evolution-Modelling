@@ -11,6 +11,7 @@
 #include "WavefrontJob.h"
 #include "WavefrontJobsFactory.h"
 #include "PathReconstructor.h"
+#include "PathThickener.h"
 #include "WavefrontCompletenessTable.h"
 
 using namespace System;
@@ -91,31 +92,31 @@ namespace TrailEvolutionModelling {
 				TramplabilityMask* tramplabilityMask = resources.New<TramplabilityMask>(graph);
 
 				NotifyProgress(L"Инициализация весов рёбер для \"непорядочных пешеходов\"");
-				EdgesWeights* edgesWeights = resources.New<EdgesWeights>(graph, resources, true);
+				EdgesWeightsHost* edgesHost = resources.New<EdgesWeightsHost>(graph, true);
+				EdgesWeightsDevice* edgesDevice = resources.New<EdgesWeightsDevice>(edgesHost, graph->Width, graph->Height);
 
 				NotifyProgress(L"Создание исполнителей волнового алгоритма на GPU");
 				std::vector<WavefrontJob*> wavefrontJobs =
 					WavefrontJobsFactory::CreateJobs(graph->Width, graph->Height, &resources, attractors);
 				
-				PathReconstructor pathReconsturctor;
-				WavefrontCompletenessTable wavefrontTable(attractors, &pathReconsturctor);
+				PathThickener pathThickener;
+				PathReconstructor *pathReconsturctor = resources.New<PathReconstructor>(graph->Width, graph->Height,
+					edgesHost, &cudaScheduler, &resources, &pathThickener);
+
+				WavefrontCompletenessTable wavefrontTable(attractors, pathReconsturctor);
 				this->wavefrontTable = &wavefrontTable;
 				
 				wavefrontTable.ResetCompleteness();
 				for(auto job : wavefrontJobs) {
-					job->Start(&wavefrontTable, edgesWeights, &cudaScheduler);
+					job->Start(&wavefrontTable, edgesDevice, &cudaScheduler);
 				}
 				wavefrontTable.WaitForAll();
 
 				NotifyProgress(L"Симуляция движения пешеходов");
-				//wavefrontTable.ResetCompleteness();
-				
 
 				NotifyProgress(L"Выгрузка результата");
-				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(edgesWeights,
+				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(edgesDevice,
 					input->Graph->Width, input->Graph->Height);
-
-				resources.Free(edgesWeights);
 
 				auto result = gcnew TrailsComputationsOutput();
 				result->Graph = input->Graph;

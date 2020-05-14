@@ -13,7 +13,7 @@ namespace TrailEvolutionModelling {
 
 		void ComputeNodesHost::InitForStartAttractors(const std::vector<Attractor>& attractors) {
 			for(Attractor attractor : attractors) {
-				At(attractor.nodeI + 1, attractor.nodeJ + 1, graphW).SetStart(true);
+				At(attractor.nodeI + 1, attractor.nodeJ + 1).SetStart(true);
 			}
 		}
 

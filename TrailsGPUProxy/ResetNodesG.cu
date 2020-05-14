@@ -16,7 +16,7 @@ namespace TrailEvolutionModelling {
 			if(i < extendedW && j < extendedH) {
 				int index = i + j * extendedW;
 
-				nodes.data[index].g = (index == goalIndex ? 0 : INFINITY);
+				nodes.data[index].g = 7;// (index == goalIndex ? 0 : INFINITY);
 			}
 		}
 
