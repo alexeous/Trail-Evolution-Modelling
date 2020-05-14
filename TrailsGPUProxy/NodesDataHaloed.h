@@ -40,9 +40,16 @@ namespace TrailEvolutionModelling {
 		template<typename T>
 		struct NodesDataHaloedHost : public NodesDataHaloed<T> {
 			friend class ResourceManager;
+
+			const int graphW;
+			const int graphH;
+			const int extendedW;
+			const int extendedH;
 			
-			void CopyTo(NodesDataHaloedHost<T>* other, int graphW, int graphH, cudaStream_t stream = 0) const;
-			void CopyTo(NodesDataHaloedDevice<T>* other, int graphW, int graphH, cudaStream_t stream = 0) const;
+			void CopyTo(NodesDataHaloedHost<T>* other, cudaStream_t stream = 0) const;
+			void CopyTo(NodesDataHaloedDevice<T>* other, cudaStream_t stream = 0) const;
+			void Fill(T value);
+
 		protected:
 			NodesDataHaloedHost(int graphW, int graphH);
 			void Free(ResourceManager&) override;
@@ -82,17 +89,27 @@ namespace TrailEvolutionModelling {
 
 
 		template<typename T>
-		inline void NodesDataHaloedHost<T>::CopyTo(NodesDataHaloedHost<T>* other, int graphW, int graphH, cudaStream_t stream) const {
+		inline void NodesDataHaloedHost<T>::CopyTo(NodesDataHaloedHost<T>* other, cudaStream_t stream) const {
 			CudaCopy(this, other, ArraySize(graphW, graphH), cudaMemcpyHostToHost, stream);
 		}
 
 		template<typename T>
-		inline void NodesDataHaloedHost<T>::CopyTo(NodesDataHaloedDevice<T>* other, int graphW, int graphH, cudaStream_t stream) const {
+		inline void NodesDataHaloedHost<T>::CopyTo(NodesDataHaloedDevice<T>* other, cudaStream_t stream) const {
 			CudaCopy(this, other, ArraySize(graphW, graphH), cudaMemcpyHostToDevice, stream);
 		}
 
 		template<typename T>
-		inline NodesDataHaloedHost<T>::NodesDataHaloedHost(int graphW, int graphH) {
+		inline void NodesDataHaloedHost<T>::Fill(T value) {
+			std::fill_n(data, extendedW * extendedH, value);
+		}
+
+		template<typename T>
+		inline NodesDataHaloedHost<T>::NodesDataHaloedHost(int graphW, int graphH) 
+		  : graphW(graphW),
+			graphH(graphH),
+			extendedW(graphW + 2),
+			extendedH(graphH + 2) 
+		{
 			CHECK_CUDA(cudaMallocHost(&data, ArraySizeBytes(graphW, graphH)));
 		}
 
