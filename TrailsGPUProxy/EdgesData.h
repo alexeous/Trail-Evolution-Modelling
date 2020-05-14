@@ -1,5 +1,7 @@
 #pragma once
 #include <functional>
+#include <exception>
+#include <string>
 #include "cuda_runtime.h"
 #include "CudaUtils.h"
 #include "IResource.h"
@@ -32,7 +34,9 @@ namespace TrailEvolutionModelling {
 			inline __host__ __device__ T& SW(int i, int j, int w);
 			inline __host__ __device__ T& S(int i, int j, int w);
 			inline __host__ __device__ T& SE(int i, int j, int w);
+
 #ifndef __CUDACC__
+			inline T& AtDir(int i, int j, int w, int dir);
 			void ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^));
 
 		protected:
@@ -82,7 +86,24 @@ namespace TrailEvolutionModelling {
 		template<typename T> inline __host__ __device__ T& EdgesData<T>::S(int i, int j, int w) { return vertical[i + 1 + (j + 1) * (w + 1)]; }
 		template<typename T> inline __host__ __device__ T& EdgesData<T>::SE(int i, int j, int w) { return leftDiagonal[i + 1 + (j + 1) * (w + 1)]; }
 
+
 #ifndef __CUDACC__
+		template<typename T>
+		inline __host__ T& EdgesData<T>::AtDir(int i, int j, int w, int dir) {
+			switch(dir) {
+				case 0: return NW(i, j, w);
+				case 1: return N (i, j, w);
+				case 2: return NE(i, j, w);
+				case 3: return W (i, j, w);
+				case 4: return E (i, j, w);
+				case 5: return SW(i, j, w);
+				case 6: return S (i, j, w);
+				case 7: return SE(i, j, w);
+				default:
+					throw std::exception(("Invalid direction: " + std::to_string(dir)).c_str());
+			}
+		}
+
 		template<typename T>
 		inline void EdgesData<T>::ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^))
 		{
