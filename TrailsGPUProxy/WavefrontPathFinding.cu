@@ -113,14 +113,14 @@ namespace TrailEvolutionModelling {
 			const ComputeNode& neighbour, float maxAgentsGShared, int dir, bool& repeat)
 		{
 			float oldG = node.g;
-			if(EdgeType == EdgeType::Diagonal) {
+			if constexpr(EdgeType == EdgeType::Diagonal) {
 				edge *= 1.41421356f; // sqrt(2)
 			}
 			float tentativeNewG = neighbour.g + edge;
 			node.SetDirNext(ReplaceIfXLessThanY(node.GetDirNext(), dir, tentativeNewG, node.g));
 			node.g = min(node.g, tentativeNewG);
 			
-			if(SetRepeatFlag) {
+			if constexpr(SetRepeatFlag) {
 				repeat = repeat | ((node.g != oldG) & (node.g < maxAgentsGShared));
 			}
 		}
@@ -166,7 +166,7 @@ namespace TrailEvolutionModelling {
 				if(node.IsStart()) {
 					atomicMax(&newMaxAgentsGSharedAsUint, __float_as_uint(node.g));
 				}
-				if(SetExitFlag) {
+				if constexpr(SetExitFlag) {
 					bool isUninitializedStart = node.IsStart() & isinf(node.g);
 					atomicOr(&repeatShared, repeat | isUninitializedStart);
 				}
@@ -175,7 +175,7 @@ namespace TrailEvolutionModelling {
 
 			if((threadIdx.x == 0) & (threadIdx.y == 0)) {
 				maxAgentsGPerGroup[blockIdx.x + blockIdx.y * gridDim.x] = __uint_as_float(newMaxAgentsGSharedAsUint);
-				if(SetExitFlag) {
+				if constexpr(SetExitFlag) {
 					atomicAnd(exitFlag, !repeatShared);
 				}
 			}
