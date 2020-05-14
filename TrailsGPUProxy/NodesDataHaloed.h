@@ -3,6 +3,7 @@
 #include "CudaUtils.h"
 #include "IResource.h"
 #include "ResourceManager.h"
+#include "NodeIndex.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -46,6 +47,9 @@ namespace TrailEvolutionModelling {
 			const int extendedW;
 			const int extendedH;
 			
+		public:
+			inline T& At(int i, int j);
+			inline T& At(NodeIndex index);
 			void CopyTo(NodesDataHaloedHost<T>* other, cudaStream_t stream = 0) const;
 			void CopyTo(NodesDataHaloedDevice<T>* other, cudaStream_t stream = 0) const;
 			void Fill(T value);
@@ -87,6 +91,16 @@ namespace TrailEvolutionModelling {
 		}
 
 
+
+		template<typename T>
+		inline T& NodesDataHaloedHost<T>::At(int i, int j) {
+			return NodesDataHaloed<T>::At(i, j, graphW);
+		}
+
+		template<typename T>
+		inline T& NodesDataHaloedHost<T>::At(NodeIndex index) {
+			return At(index.i, index.j);
+		}
 
 		template<typename T>
 		inline void NodesDataHaloedHost<T>::CopyTo(NodesDataHaloedHost<T>* other, cudaStream_t stream) const {
