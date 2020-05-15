@@ -17,10 +17,10 @@ namespace TrailEvolutionModelling {
 			int goalIndex, float* maxAgentsGPerGroup, ExitFlag* exitFlag, cudaStream_t stream);
 
 		inline int GetWavefrontPathFindingBlocksX(int graphW) {
-			return divceil(graphW + 2, WAVEFRONT_PATH_FINDING_BLOCK_SIZE_X);
+			return divceil(graphW, WAVEFRONT_PATH_FINDING_BLOCK_SIZE_X);
 		}
 		inline int GetWavefrontPathFindingBlocksY(int graphH) {
-			return divceil(graphH + 2, WAVEFRONT_PATH_FINDING_BLOCK_SIZE_Y);
+			return divceil(graphH, WAVEFRONT_PATH_FINDING_BLOCK_SIZE_Y);
 		}
 
 		template cudaError_t WavefrontPathFinding<false, false>(ComputeNodesPair*, int, int, EdgesWeightsDevice*, int, float*, ExitFlag*, cudaStream_t);

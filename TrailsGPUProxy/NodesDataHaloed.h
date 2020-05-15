@@ -27,6 +27,7 @@ namespace TrailEvolutionModelling {
 
 		protected:
 			virtual void Free(ResourceManager&) = 0;
+			static void CudaCopySync(const NodesDataHaloed<T>* src, const NodesDataHaloed<T>* dest, int count, cudaMemcpyKind kind);
 			static void CudaCopy(const NodesDataHaloed<T>* src, const NodesDataHaloed<T>* dest, int count, cudaMemcpyKind kind, cudaStream_t stream);
 #endif
 		};
@@ -50,8 +51,10 @@ namespace TrailEvolutionModelling {
 		public:
 			inline T& At(int i, int j);
 			inline T& At(NodeIndex index);
-			void CopyTo(NodesDataHaloedHost<T>* other, cudaStream_t stream = 0) const;
-			void CopyTo(NodesDataHaloedDevice<T>* other, cudaStream_t stream = 0) const;
+			void CopyToSync(NodesDataHaloedHost<T>* other) const;
+			void CopyToSync(NodesDataHaloedDevice<T>* other) const;
+			void CopyTo(NodesDataHaloedHost<T>* other, cudaStream_t stream) const;
+			void CopyTo(NodesDataHaloedDevice<T>* other, cudaStream_t stream) const;
 			void Fill(T value);
 
 		protected:
@@ -65,8 +68,10 @@ namespace TrailEvolutionModelling {
 #ifndef __CUDACC__
 			friend class ResourceManager;
 
-			void CopyTo(NodesDataHaloedHost<T>* other, int graphW, int graphH, cudaStream_t stream = 0) const;
-			void CopyTo(NodesDataHaloedDevice<T>* other, int graphW, int graphH, cudaStream_t stream = 0) const;
+			void CopyToSync(NodesDataHaloedHost<T>* other, int graphW, int graphH) const;
+			void CopyToSync(NodesDataHaloedDevice<T>* other, int graphW, int graphH) const;
+			void CopyTo(NodesDataHaloedHost<T>* other, int graphW, int graphH, cudaStream_t stream) const;
+			void CopyTo(NodesDataHaloedDevice<T>* other, int graphW, int graphH, cudaStream_t stream) const;
 		protected:
 			NodesDataHaloedDevice(int graphW, int graphH);
 #endif
@@ -86,6 +91,11 @@ namespace TrailEvolutionModelling {
 		}
 
 		template<typename T>
+		inline void NodesDataHaloed<T>::CudaCopySync(const NodesDataHaloed<T>* src, const NodesDataHaloed<T>* dest, int count, cudaMemcpyKind kind) {
+			CHECK_CUDA(cudaMemcpy(dest->data, src->data, count * sizeof(T), kind));
+		}
+
+		template<typename T>
 		inline void NodesDataHaloed<T>::CudaCopy(const NodesDataHaloed<T>* src, const NodesDataHaloed<T>* dest, int count, cudaMemcpyKind kind, cudaStream_t stream) {
 			CHECK_CUDA(cudaMemcpyAsync(dest->data, src->data, count * sizeof(T), kind, stream));
 		}
@@ -100,6 +110,16 @@ namespace TrailEvolutionModelling {
 		template<typename T>
 		inline T& NodesDataHaloedHost<T>::At(NodeIndex index) {
 			return At(index.i, index.j);
+		}
+
+		template<typename T>
+		inline void NodesDataHaloedHost<T>::CopyToSync(NodesDataHaloedHost<T>* other) const {
+			CudaCopySync(this, other, ArraySize(graphW, graphH), cudaMemcpyHostToHost);
+		}
+
+		template<typename T>
+		inline void NodesDataHaloedHost<T>::CopyToSync(NodesDataHaloedDevice<T>* other) const {
+			CudaCopySync(this, other, ArraySize(graphW, graphH), cudaMemcpyHostToDevice);
 		}
 
 		template<typename T>
@@ -133,6 +153,16 @@ namespace TrailEvolutionModelling {
 		}
 
 
+
+		template<typename T>
+		inline void NodesDataHaloedDevice<T>::CopyToSync(NodesDataHaloedHost<T>* other, int graphW, int graphH) const {
+			CudaCopySync(this, other, ArraySize(graphW, graphH), cudaMemcpyDeviceToHost);
+		}
+
+		template<typename T>
+		inline void NodesDataHaloedDevice<T>::CopyToSync(NodesDataHaloedDevice<T>* other, int graphW, int graphH) const {
+			CudaCopySync(this, other, ArraySize(graphW, graphH), cudaMemcpyDeviceToDevice);
+		}
 
 		template<typename T>
 		inline void NodesDataHaloedDevice<T>::CopyTo(NodesDataHaloedHost<T>* other, int graphW, int graphH, cudaStream_t stream) const {

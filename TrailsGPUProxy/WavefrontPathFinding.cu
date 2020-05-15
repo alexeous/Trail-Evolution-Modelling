@@ -39,10 +39,10 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
-		inline __device__ void ClampGlobalAndThreadIDToNodesBounds(uint2& threadId, uint2& globalId, int graphW, int graphH) {
+		inline __device__ void ClampGlobalAndThreadIDToNodesBounds(int2& threadId, int2& globalId, int graphW, int graphH) {
 			
-			unsigned int clampedGlobalX = min(globalId.x, graphW + 1);
-			unsigned int clampedGlobalY = min(globalId.y, graphH + 1);
+			int clampedGlobalX = min(globalId.x, graphW + 1);
+			int clampedGlobalY = min(globalId.y, graphH + 1);
 			threadId.x -= globalId.x - clampedGlobalX;
 			threadId.y -= globalId.y - clampedGlobalY;
 			globalId.x = clampedGlobalX;
@@ -52,13 +52,13 @@ namespace TrailEvolutionModelling {
 		inline __device__ void LoadNodesToSharedMemory(int i, int j, int graphW, int graphH,
 			NodesDataHaloedDevice<ComputeNode> read, ComputeNode nodesShared[SHARED_ARRAYS_SIZE_X][SHARED_ARRAYS_SIZE_Y])
 		{
-			uint2 threadId;
+			int2 threadId;
 			threadId.x = threadIdx.x;
 			threadId.y = threadIdx.y;
-			uint2 globalId;
+			int2 globalId;
 			globalId.x = i + 1;
 			globalId.y = j + 1;
-			unsigned int ftid = threadIdx.x + threadIdx.y * blockDim.x; // flattened thread id
+			int ftid = threadIdx.x + threadIdx.y * blockDim.x; // flattened thread id
 
 			ClampGlobalAndThreadIDToNodesBounds(threadId, globalId, graphW, graphH);
 			nodesShared[threadId.x + 1][threadId.y + 1] = read.At(globalId.x, globalId.y, graphW);
@@ -68,12 +68,12 @@ namespace TrailEvolutionModelling {
 			// else ((X mod 2) * (BLOCK_SIZE_X+1); (X - (2*BLOCK_SIZE_X+4)) / 2)  // alternating left and right halo columns
 
 			if(ftid < NUM_SHARED_HALO_NODES) {				
-				unsigned int haloThreadIdX = 
+				int haloThreadIdX = 
 					((ftid <= BLOCK_SIZE_X + 1) * ftid) +
 					(((ftid >= BLOCK_SIZE_X + 2) & (ftid <= 2 * BLOCK_SIZE_X + 3)) * (ftid - (BLOCK_SIZE_X + 2))) +
 					(((ftid >= 2 * BLOCK_SIZE_X + 4) * (ftid % 2) * (BLOCK_SIZE_X + 1)));
 
-				unsigned int haloThreadIdY = 
+				int haloThreadIdY = 
 					(((ftid >= BLOCK_SIZE_X + 2) & (ftid <= 2 * BLOCK_SIZE_X + 3)) * (BLOCK_SIZE_Y + 1)) +
 					((ftid >= 2 * BLOCK_SIZE_X + 4) * (1 + (ftid - (2 * BLOCK_SIZE_X + 4)) / 2));
 				
@@ -90,7 +90,7 @@ namespace TrailEvolutionModelling {
 			maxAgentsGSharedAsUint = __float_as_uint(0);
 			__syncthreads();
 
-			unsigned int ftid = threadIdx.x + threadIdx.y * blockDim.x; // flattened thread id
+			int ftid = threadIdx.x + threadIdx.y * blockDim.x; // flattened thread id
 			if(ftid < gridDim.x * gridDim.y) {
 				atomicMax(&maxAgentsGSharedAsUint, __float_as_uint(maxAgentsGPerGroup[ftid]));
 			}
@@ -153,14 +153,14 @@ namespace TrailEvolutionModelling {
 			if(i < graphW && j < graphH) {
 				ComputeNode node = GetNode(nodesShared, threadIdx.x, threadIdx.y);
 				bool repeat = false;
-				ProcessNeighbour<SetExitFlag, EdgeType::Diagonal>(edges.NW(i, j, graphW), node, GetNode(nodesShared, threadIdx.x - 1,	threadIdx.y - 1),	maxAgentsGShared, 0, repeat);
-				ProcessNeighbour<SetExitFlag, EdgeType::Straight>(edges.N (i, j, graphW), node, GetNode(nodesShared, threadIdx.x,		threadIdx.y - 1),	maxAgentsGShared, 1, repeat);
-				ProcessNeighbour<SetExitFlag, EdgeType::Diagonal>(edges.NE(i, j, graphW), node, GetNode(nodesShared, threadIdx.x + 1,	threadIdx.y - 1),	maxAgentsGShared, 2, repeat);
-				ProcessNeighbour<SetExitFlag, EdgeType::Straight>(edges.W (i, j, graphW), node, GetNode(nodesShared, threadIdx.x - 1,	threadIdx.y),		maxAgentsGShared, 3, repeat);
-				ProcessNeighbour<SetExitFlag, EdgeType::Straight>(edges.E (i, j, graphW), node, GetNode(nodesShared, threadIdx.x + 1,	threadIdx.y),		maxAgentsGShared, 4, repeat);
-				ProcessNeighbour<SetExitFlag, EdgeType::Diagonal>(edges.SW(i, j, graphW), node, GetNode(nodesShared, threadIdx.x - 1,	threadIdx.y + 1),	maxAgentsGShared, 5, repeat);
-				ProcessNeighbour<SetExitFlag, EdgeType::Straight>(edges.S (i, j, graphW), node, GetNode(nodesShared, threadIdx.x,		threadIdx.y + 1),	maxAgentsGShared, 6, repeat);
-				ProcessNeighbour<SetExitFlag, EdgeType::Diagonal>(edges.SE(i, j, graphW), node, GetNode(nodesShared, threadIdx.x + 1,	threadIdx.y + 1),	maxAgentsGShared, 7, repeat);
+				ProcessNeighbour<SetExitFlag, EdgeType::Diagonal>(edges.NW(i, j, graphW), node, GetNode(nodesShared, (int)threadIdx.x - 1,	(int)threadIdx.y - 1),	maxAgentsGShared, 0, repeat);
+				ProcessNeighbour<SetExitFlag, EdgeType::Straight>(edges.N (i, j, graphW), node, GetNode(nodesShared, (int)threadIdx.x,		(int)threadIdx.y - 1),	maxAgentsGShared, 1, repeat);
+				ProcessNeighbour<SetExitFlag, EdgeType::Diagonal>(edges.NE(i, j, graphW), node, GetNode(nodesShared, (int)threadIdx.x + 1,	(int)threadIdx.y - 1),	maxAgentsGShared, 2, repeat);
+				ProcessNeighbour<SetExitFlag, EdgeType::Straight>(edges.W (i, j, graphW), node, GetNode(nodesShared, (int)threadIdx.x - 1,	(int)threadIdx.y),		maxAgentsGShared, 3, repeat);
+				ProcessNeighbour<SetExitFlag, EdgeType::Straight>(edges.E (i, j, graphW), node, GetNode(nodesShared, (int)threadIdx.x + 1,	(int)threadIdx.y),		maxAgentsGShared, 4, repeat);
+				ProcessNeighbour<SetExitFlag, EdgeType::Diagonal>(edges.SW(i, j, graphW), node, GetNode(nodesShared, (int)threadIdx.x - 1,	(int)threadIdx.y + 1),	maxAgentsGShared, 5, repeat);
+				ProcessNeighbour<SetExitFlag, EdgeType::Straight>(edges.S (i, j, graphW), node, GetNode(nodesShared, (int)threadIdx.x,		(int)threadIdx.y + 1),	maxAgentsGShared, 6, repeat);
+				ProcessNeighbour<SetExitFlag, EdgeType::Diagonal>(edges.SE(i, j, graphW), node, GetNode(nodesShared, (int)threadIdx.x + 1,	(int)threadIdx.y + 1),	maxAgentsGShared, 7, repeat);
 				write.At(i + 1, j + 1, graphW) = node;
 
 				if(node.IsStart()) {

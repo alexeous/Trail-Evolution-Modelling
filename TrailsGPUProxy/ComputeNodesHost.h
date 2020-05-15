@@ -17,7 +17,8 @@ namespace TrailEvolutionModelling {
 			friend class ResourceManager;
 			
 			void InitForStartAttractors(const std::vector<Attractor>& attractors);
-			void CopyToDevicePair(ComputeNodesPair* pair, cudaStream_t stream = 0);
+			void CopyToDevicePairSync(ComputeNodesPair* pair);
+			void CopyToDevicePair(ComputeNodesPair* pair, cudaStream_t stream);
 
 		protected:
 			ComputeNodesHost(int graphW, int graphH);

@@ -8,7 +8,7 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		cudaError_t ResetNodesG(NodesDataHaloedDevice<ComputeNode> nodes, 
-			int extendedW, int extendedH, int goalIndex, cudaStream_t stream);
+			int graphW, int graphH, int goalIndex, cudaStream_t stream);
 
 	}
 }

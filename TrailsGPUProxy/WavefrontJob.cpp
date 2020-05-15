@@ -25,7 +25,7 @@ namespace TrailEvolutionModelling {
 		{
 			constexpr int ExitFlagCheckPeriod = 10;
 
-			ResetReadOnlyNodesGParallelAsync();
+			ResetNodesGParallelAsync();
 
 			int graphW = hostNodes->graphW;
 			int graphH = hostNodes->graphH;
@@ -35,6 +35,7 @@ namespace TrailEvolutionModelling {
 			withoutExitFlagCheck = new std::function<void(int)>([=](int doubleIterations) {
 				for(int i = 0; i < doubleIterations; i++) {
 					CHECK_CUDA((WavefrontPathFinding<false, false>(deviceNodes, graphW, graphH, edges, GetGoalIndex(), maxAgentsGPerGroup, nullptr, stream)));
+
 					if(i < doubleIterations - 1) {
 						CHECK_CUDA((WavefrontPathFinding<true, false>(deviceNodes, graphW, graphH, edges, GetGoalIndex(), maxAgentsGPerGroup, nullptr, stream)));
 					}
@@ -52,12 +53,6 @@ namespace TrailEvolutionModelling {
 				if(exitFlag->GetLastHostValue()) {
 					deviceNodes->readOnly->CopyTo(hostNodes, graphW, graphH, stream);
 					scheduler->Schedule(stream, [=]() {
-						int ww = graphW;
-						int hh = graphH;
-						ComputeNode aa[105 * 201];
-						for(int i = 0; i < 105 * 201; i++) {
-							aa[i] = hostNodes->data[i];
-						}
 						wavefrontTable->SetCompleted(goal, hostNodes);
 					});
 				}
@@ -71,10 +66,14 @@ namespace TrailEvolutionModelling {
 			scheduler->Schedule(stream, *withExitFlagCheck);
 		}
 
-		void WavefrontJob::ResetReadOnlyNodesGParallelAsync() {
-			int extW = hostNodes->extendedW;
-			int extH = hostNodes->extendedH;
-			CHECK_CUDA(ResetNodesG(*deviceNodes->readOnly, extW, extH, GetGoalIndex(), stream));
+		void WavefrontJob::ResetNodesGParallelAsync() {
+			int graphW = hostNodes->graphW;
+			int graphH = hostNodes->graphH;
+			CHECK_CUDA(ResetNodesG(*deviceNodes->readOnly, graphW, graphH, GetGoalIndex(), stream));
+			// Wavefront path finding kernel doesn't write to halo nodes
+			// but next iteration read-only and write-only arrays are swapped
+			// so without the following line it will read garbage from read-only (write-only in the p)
+			deviceNodes->CopyReadToWrite(graphW, graphH, stream);
 		}
 
 		int WavefrontJob::GetGoalIndex() {
@@ -96,7 +95,7 @@ namespace TrailEvolutionModelling {
 			ResourceManager* resources) 
 		{
 			auto deviceNodesPair = resources->New<ComputeNodesPair>(hostNodes->graphW, hostNodes->graphH, resources);
-			hostNodes->CopyToDevicePair(deviceNodesPair);
+			hostNodes->CopyToDevicePairSync(deviceNodesPair);
 			return deviceNodesPair;
 		}
 

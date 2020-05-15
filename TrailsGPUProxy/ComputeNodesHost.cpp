@@ -17,6 +17,11 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
+		void ComputeNodesHost::CopyToDevicePairSync(ComputeNodesPair* pair) {
+			CopyToSync(pair->readOnly);
+			pair->CopyReadToWriteSync(graphW, graphH);
+		}
+
 		void ComputeNodesHost::CopyToDevicePair(ComputeNodesPair* pair, cudaStream_t stream) {
 			CopyTo(pair->readOnly, stream);
 			pair->CopyReadToWrite(graphW, graphH, stream);

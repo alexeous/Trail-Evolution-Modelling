@@ -28,7 +28,7 @@ namespace TrailEvolutionModelling {
 
 		private:
 
-			void ResetReadOnlyNodesGParallelAsync();
+			void ResetNodesGParallelAsync();
 			int GetGoalIndex();
 
 			static int GetMinIterations(Attractor goal, const std::vector<Attractor>& starts);

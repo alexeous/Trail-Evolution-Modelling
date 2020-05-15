@@ -14,8 +14,10 @@ namespace TrailEvolutionModelling {
 			NodesDataHaloedDevice<T>* writeOnly = nullptr;
 
 #ifndef __CUDACC__
-			void CopyReadToWrite(int graphW, int graphH, cudaStream_t stream = 0);
-			void CopyWriteToRead(int graphW, int graphH, cudaStream_t stream = 0);
+			void CopyReadToWriteSync(int graphW, int graphH);
+			void CopyWriteToReadSync(int graphW, int graphH);
+			void CopyReadToWrite(int graphW, int graphH, cudaStream_t stream);
+			void CopyWriteToRead(int graphW, int graphH, cudaStream_t stream);
 
 		protected:
 			NodesDataDevicePair(int graphW, int graphH, ResourceManager* resources);
@@ -31,6 +33,19 @@ namespace TrailEvolutionModelling {
 			: readOnly(resources->New<NodesDataHaloedDevice<T>>(graphW, graphH)),
 			  writeOnly(resources->New<NodesDataHaloedDevice<T>>(graphW, graphH)) 
 		{
+		}
+
+
+		template<typename T>
+		inline void NodesDataDevicePair<T>::CopyReadToWriteSync(int graphW, int graphH) {
+			size_t size = NodesDataHaloed<T>::ArraySizeBytes(graphW, graphH);
+			CHECK_CUDA(cudaMemcpy(writeOnly->data, readOnly->data, size, cudaMemcpyDeviceToDevice));
+		}
+
+		template<typename T>
+		inline void NodesDataDevicePair<T>::CopyWriteToReadSync(int graphW, int graphH) {
+			size_t size = NodesDataHaloed<T>::ArraySizeBytes(graphW, graphH);
+			CHECK_CUDA(cudaMemcpy(readOnly->data, writeOnly->data, size, cudaMemcpyDeviceToDevice));
 		}
 
 		template<typename T>
