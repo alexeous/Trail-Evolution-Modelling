@@ -51,6 +51,9 @@
     <ClCompile Include="PathThickener.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
+    <ClCompile Include="PathThickenerJob.cpp">
+      <Filter>Algorithms</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CudaUtils.h" />
@@ -137,6 +140,9 @@
     </ClInclude>
     <ClInclude Include="NodeIndex.h">
       <Filter>Data\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="PathThickenerJob.h">
+      <Filter>Algorithms</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

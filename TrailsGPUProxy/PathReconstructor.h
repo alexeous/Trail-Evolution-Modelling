@@ -20,7 +20,6 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		using NodesFloatHost = NodesDataHaloedHost<float>;
-		using NodesFloatDevice = NodesDataHaloedDevice<float>;
 
 		class PathReconstructor : public IResource {
 			friend class ResourceManager;
@@ -39,7 +38,6 @@ namespace TrailEvolutionModelling {
 
 		private:
 			ObjectPool<NodesFloatHost>* CreateDistanceHostPool(ResourceManager*);
-			ObjectPool<NodesFloatDevice>* CreateDistanceDevicePool(ResourceManager*);
 			
 			void ReconstructPath(Attractor start, Attractor goal,
 				ComputeNodesHost* startNodes, ComputeNodesHost* goalNodes, 
@@ -63,8 +61,7 @@ namespace TrailEvolutionModelling {
 			CudaScheduler* cudaScheduler;
 			ThreadPool* threadPool;
 			PathThickener* pathThickener;
-			ObjectPool<NodesFloatHost>* distanceHostPool;
-			ObjectPool<NodesFloatDevice>* distanceDevicePool;
+			ObjectPool<NodesFloatHost>* distancePool;
 		};
 
 	}

@@ -10,7 +10,7 @@ namespace TrailEvolutionModelling {
 			  numColumns(attractors.GetDrainNumber()),
 			  table(nullptr),
 			  pathReconstructor(pathReconstructor),
-			  numJobs(CountJobs(attractors))
+			  numPaths(CountPaths(attractors))
 		{
 			InitIndexMaps(attractors);
 			InitTable(attractors);
@@ -43,7 +43,7 @@ namespace TrailEvolutionModelling {
 			}
 
 			for(auto pair : attractors) {
-				// it's enough to iterate over sources only to
+				// it's enough to iterate over sources only (or drains only) to
 				// process all source-drain pairs
 				if(pair.first.isDrain)
 					continue;
@@ -56,8 +56,17 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
-		int WavefrontCompletenessTable::CountJobs(const AttractorsMap& attractors) {
-			return attractors.uniqueAttractors.size();
+		int WavefrontCompletenessTable::CountPaths(const AttractorsMap& attractors) {
+			int count = 0;
+			for(auto pair : attractors) {
+				// it's enough to iterate over sources only (or drains only) to
+				// process all source-drain pairs
+				if(pair.first.isDrain)
+					continue;
+
+				count += pair.second.size();
+			}
+			return count;
 		}
 
 		void WavefrontCompletenessTable::ResetCompleteness() {
@@ -70,29 +79,17 @@ namespace TrailEvolutionModelling {
 					cell.drainResult = nullptr;
 				}
 			}
-			pendingRemaining = numJobs;
 		}
 
 		void WavefrontCompletenessTable::SetCompleted(const Attractor& attractor, 
 			ComputeNodesHost* calculatedNodes) 
 		{
-			pendingRemaining--;
 			if(attractor.isSource) {
 				SetSourceCompleted(attractor, calculatedNodes);
 			}
 			if(attractor.isDrain) {
 				SetDrainCompleted(attractor, calculatedNodes);
 			}
-		}
-
-		void WavefrontCompletenessTable::WaitForAll() {
-			while(pendingRemaining > 0) {
-				_sleep(5);
-			}
-		}
-
-		void WavefrontCompletenessTable::CancelWait() {
-			pendingRemaining = 0;
 		}
 
 		void WavefrontCompletenessTable::SetSourceCompleted(const Attractor& source, 

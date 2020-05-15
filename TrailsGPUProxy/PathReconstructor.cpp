@@ -12,8 +12,7 @@ namespace TrailEvolutionModelling {
 			  cudaScheduler(cudaScheduler),
 			  threadPool(threadPool),
 			  pathThickener(pathThickener),
-			  distanceHostPool(CreateDistanceHostPool(resources)),
-			  distanceDevicePool(CreateDistanceDevicePool(resources))
+			  distancePool(CreateDistanceHostPool(resources))
 		{
 		}
 
@@ -26,22 +25,12 @@ namespace TrailEvolutionModelling {
 			);
 		}
 
-		ObjectPool<NodesFloatDevice>* PathReconstructor::CreateDistanceDevicePool(
-			ResourceManager* resources) 
-		{
-			return resources->New<ObjectPool<NodesFloatDevice>>(
-				DISTANCE_DEVICE_POOL_SIZE,
-				[=] { return resources->New<NodesFloatDevice>(graphW, graphH); }
-			);
-		}
-
 		void PathReconstructor::StartPathReconstruction(Attractor start, Attractor goal, 
 			ComputeNodesHost* startNodes, ComputeNodesHost* goalNodes) 
 		{
-			PoolEntry<NodesFloatHost> distanceToPathEntry = distanceHostPool->Take();
-			NodesFloatHost* distanceToPath = distanceToPathEntry.object;
-
-			ReconstructPath(start, goal, startNodes, goalNodes, distanceToPath);
+			PoolEntry<NodesFloatHost> distanceEntry = distancePool->Take();
+			ReconstructPath(start, goal, startNodes, goalNodes, distanceEntry.object);
+			pathThickener->StartThickening(distanceEntry, cudaScheduler);
 		}
 		
 		template<typename T> int sign(T val) { return (T(0) < val) - (val < T(0)); }
@@ -143,8 +132,7 @@ namespace TrailEvolutionModelling {
 		}
 
 		void PathReconstructor::Free(ResourceManager& resources) {
-			resources.Free(distanceHostPool);
-			resources.Free(distanceDevicePool);
+			resources.Free(distancePool);
 		}
 
 

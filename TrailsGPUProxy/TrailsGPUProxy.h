@@ -12,6 +12,9 @@ namespace TrailEvolutionModelling {
 			static initonly int StepSeconds = 5 * 60;
 			static initonly float MinimumTramplableWeight = 1.1f;
 
+			static constexpr float FirstPhasePathThickness = 5;
+			static constexpr float SecondPhasePathThickness = 1.5f;
+
 			event Action<String^>^ ProgressChanged;
 
 			TrailsComputationsOutput^ ComputeTrails(TrailsComputationsInput^ input);

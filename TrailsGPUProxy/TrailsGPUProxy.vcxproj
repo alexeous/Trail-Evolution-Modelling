@@ -116,6 +116,7 @@
     </CudaCompile>
     <ClCompile Include="PathReconstructor.cpp" />
     <ClCompile Include="PathThickener.cpp" />
+    <ClCompile Include="PathThickenerJob.cpp" />
     <ClCompile Include="ResourceManager.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
@@ -159,6 +160,7 @@
     <ClInclude Include="PathReconstructor.h" />
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="PathThickener.h" />
+    <ClInclude Include="PathThickenerJob.h" />
     <ClInclude Include="ResetNodesG.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ThreadPool.h" />

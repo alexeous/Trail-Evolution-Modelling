@@ -41,7 +41,6 @@ namespace TrailEvolutionModelling {
 			volatile Exception^ exception;
 
 			ThreadPool* threadPool = nullptr;
-			WavefrontCompletenessTable* wavefrontTable = nullptr;
 		};
 	}
 }

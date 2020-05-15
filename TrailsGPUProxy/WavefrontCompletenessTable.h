@@ -34,18 +34,19 @@ namespace TrailEvolutionModelling {
 			};
 
 		public:
+			const int numPaths;
+
+		public:
 			WavefrontCompletenessTable(const AttractorsMap& attractors, PathReconstructor* pathReconstructor);
 			~WavefrontCompletenessTable();
 
 			void ResetCompleteness();
 			void SetCompleted(const Attractor& attractor, ComputeNodesHost* calculatedNodes);
-			void WaitForAll();
-			void CancelWait();
 
 		private:
 			void InitIndexMaps(const AttractorsMap& attractors);
 			void InitTable(const AttractorsMap& attractors);
-			int CountJobs(const AttractorsMap& attractors);
+			int CountPaths(const AttractorsMap& attractors);
 			int GetIndex(const Attractor& source, const Attractor& drain);
 			void SetSourceCompleted(const Attractor& source, ComputeNodesHost* result);
 			void SetDrainCompleted(const Attractor& drain, ComputeNodesHost* result);
@@ -58,8 +59,6 @@ namespace TrailEvolutionModelling {
 		private:
 			int numRows;
 			int numColumns;
-			int numJobs;
-			std::atomic<int> pendingRemaining;
 			std::unordered_map<Attractor, int> sourceToRow;
 			std::unordered_map<Attractor, int> drainToColumn;
 			Cell* table;

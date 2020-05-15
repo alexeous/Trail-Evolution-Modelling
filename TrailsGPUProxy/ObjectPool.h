@@ -16,7 +16,7 @@ namespace TrailEvolutionModelling {
             T* object;
 
             PoolEntry(T* object, ObjectPool<T>* pool);
-            void ReturnToPool();
+            void ReturnToPool() const;
         private:
             ObjectPool<T>* pool;
         };
@@ -130,7 +130,7 @@ namespace TrailEvolutionModelling {
         }
 
         template<typename T>
-        inline void PoolEntry<T>::ReturnToPool() {
+        inline void PoolEntry<T>::ReturnToPool() const {
             pool->Return(*this);
         }
 

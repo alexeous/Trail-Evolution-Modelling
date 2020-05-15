@@ -30,10 +30,6 @@
 #error Too small block size! Not enough nodes within group to load all halo nodes at once!
 #endif
 
-#define NODES_WIDTH_INCLUDING_HALO (graphW + 2)
-#define NODES_HEIGHT_INCLUDING_HALO (graphH + 2)
-#define NODES_1D_INDEX(i, j) ((i) + NODES_WIDTH_INCLUDING_HALO * (j))
-
 
 
 namespace TrailEvolutionModelling {
