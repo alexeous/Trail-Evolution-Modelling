@@ -3,6 +3,7 @@
 #include "ResourceManager.h"
 #include "PathThickenerJob.h"
 #include "ObjectPool.h"
+#include "TramplabilityMask.h"
 
 #define PATH_THICKENER_JOBS_POOL_SIZE 20
 
@@ -20,7 +21,8 @@ namespace TrailEvolutionModelling {
 				CudaScheduler* scheduler);
 
 		protected:
-			PathThickener(int graphW, int graphH, float thickness, ResourceManager* resources);
+			PathThickener(int graphW, int graphH, float graphStep, float thickness, 
+				TramplabilityMask* tramplabilityMask, ResourceManager* resources);
 			void Free(ResourceManager& resources) override;
 
 		private:
@@ -29,6 +31,8 @@ namespace TrailEvolutionModelling {
 		private:
 			int graphW;
 			int graphH;
+			float graphStep;
+			TramplabilityMask* tramplabilityMask;
 			ObjectPool<PathThickenerJob>* jobsPool;
 		};
 

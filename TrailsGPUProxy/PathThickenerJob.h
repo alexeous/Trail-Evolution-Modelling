@@ -5,14 +5,15 @@
 #include "IResource.h"
 #include "ResourceManager.h"
 #include "NodesDataHaloed.h"
+#include "NodesDataDevicePair.h"
 #include "CudaScheduler.h"
 #include "ObjectPool.h"
+#include "TramplabilityMask.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		using NodesFloatHost = NodesDataHaloedHost<float>;
-		using NodesFloatDevice = NodesDataHaloedDevice<float>;
 
 		class PathThickenerJob : public IResource {
 			friend class ResourceManager;
@@ -22,21 +23,21 @@ namespace TrailEvolutionModelling {
 			static std::atomic<int> numRemaining;
 
 			void StartThickening(PoolEntry<NodesFloatHost> distanceToPath, 
-				float thickness, PoolEntry<PathThickenerJob> selfInPool,
-				CudaScheduler* scheduler);
+				float thickness, float graphStep, TramplabilityMask* tramplabilityMask, 
+				PoolEntry<PathThickenerJob> selfInPool, CudaScheduler* scheduler);
 
 		protected:
 			PathThickenerJob(int graphW, int graphH, ResourceManager* resources);
 			void Free(ResourceManager& resources) override;
 
 		private:
-			void ThickenPathAsync(float thickness);
+			void ThickenPathAsync(float thickness, float graphStep, TramplabilityMask* tramplabilityMask);
 
 		private:
 			int graphW;
 			int graphH;
 			cudaStream_t stream;
-			NodesFloatDevice* distanceDevice;
+			NodesDataDevicePair<float>* distanceDevicePair;
 		};
 
 	}

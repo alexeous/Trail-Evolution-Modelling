@@ -1,5 +1,6 @@
 #include "PathThickenerJob.h"
 #include "CudaUtils.h"
+#include "PathThickeningKernel.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -8,18 +9,19 @@ namespace TrailEvolutionModelling {
 		PathThickenerJob::PathThickenerJob(int graphW, int graphH, ResourceManager* resources)
 			: graphW(graphW),
 			  graphH(graphH),
-			  distanceDevice(resources->New<NodesFloatDevice>(graphW, graphH))
+			  distanceDevicePair(resources->New<NodesDataDevicePair<float>>(graphW, graphH, resources))
 		{
 			CHECK_CUDA(cudaStreamCreate(&stream));
 		}
 
 		void PathThickenerJob::StartThickening(PoolEntry<NodesFloatHost> distanceToPath,
-			float thickness, PoolEntry<PathThickenerJob> selfInPool, CudaScheduler* scheduler)
+			float thickness, float graphStep, TramplabilityMask* tramplabilityMask, 
+			PoolEntry<PathThickenerJob> selfInPool, CudaScheduler* scheduler)
 		{
-			distanceToPath.object->CopyTo(distanceDevice, stream);
+			distanceToPath.object->CopyToDevicePair(distanceDevicePair, stream);
 			scheduler->Schedule(stream, [=] {
 				distanceToPath.ReturnToPool();
-				ThickenPathAsync(thickness);
+				ThickenPathAsync(thickness, graphStep, tramplabilityMask);
 				scheduler->Schedule(stream, [=] {
 					// TODO: pass result for further work
 					selfInPool.ReturnToPool();
@@ -28,12 +30,17 @@ namespace TrailEvolutionModelling {
 			});
 		}
 
-		void PathThickenerJob::ThickenPathAsync(float thickness) {
+		void PathThickenerJob::ThickenPathAsync(float thickness, float graphStep, TramplabilityMask* tramplabilityMask) {
+			int doubleIterations = (int)ceilf(thickness / graphStep / 2);
+			for(int i = 0; i < doubleIterations; i++) {
+				CHECK_CUDA((PathThickening<false>(distanceDevicePair, graphW, graphH, tramplabilityMask, stream)));
+				CHECK_CUDA((PathThickening<true>(distanceDevicePair, graphW, graphH, tramplabilityMask, stream)));
+			}
 		}
 
 		void PathThickenerJob::Free(ResourceManager& resources) {
 			cudaStreamDestroy(stream);
-			resources.Free(distanceDevice);
+			resources.Free(distanceDevicePair);
 		}
 
 	}

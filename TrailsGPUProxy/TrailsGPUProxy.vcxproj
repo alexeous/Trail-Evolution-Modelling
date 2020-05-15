@@ -117,6 +117,9 @@
     <ClCompile Include="PathReconstructor.cpp" />
     <ClCompile Include="PathThickener.cpp" />
     <ClCompile Include="PathThickenerJob.cpp" />
+    <CudaCompile Include="PathThickeningKernel.cu">
+      <FileType>Document</FileType>
+    </CudaCompile>
     <ClCompile Include="ResourceManager.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
@@ -161,6 +164,7 @@
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="PathThickener.h" />
     <ClInclude Include="PathThickenerJob.h" />
+    <ClInclude Include="PathThickeningKernel.h" />
     <ClInclude Include="ResetNodesG.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ThreadPool.h" />

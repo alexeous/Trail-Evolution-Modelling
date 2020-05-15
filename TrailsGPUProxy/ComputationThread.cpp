@@ -97,7 +97,7 @@ namespace TrailEvolutionModelling {
 					WavefrontJobsFactory::CreateJobs(graph->Width, graph->Height, &resources, attractors);
 				
 				PathThickener *pathThickener = resources.New<PathThickener>(graph->Width, graph->Height, 
-					TrailsGPUProxy::FirstPhasePathThickness, &resources);
+					graph->Step, TrailsGPUProxy::FirstPhasePathThickness, tramplabilityMask, &resources);
 
 				PathReconstructor *pathReconsturctor = resources.New<PathReconstructor>(graph->Width, graph->Height,
 					edgesHost, &cudaScheduler, &resources, pathThickener);
@@ -105,15 +105,16 @@ namespace TrailEvolutionModelling {
 				WavefrontCompletenessTable wavefrontTable(attractors, pathReconsturctor);
 				PathThickenerJob::numRemaining = wavefrontTable.numPaths;
 
+				NotifyProgress(L"Симуляция движения \"непорядочных пешеходов\"");
 				wavefrontTable.ResetCompleteness();
 				for(auto job : wavefrontJobs) {
 					job->Start(&wavefrontTable, edgesDevice, &cudaScheduler);
 				}
+
 				while(PathThickenerJob::numRemaining > 0) {
 					_sleep(5);
 				}
 
-				NotifyProgress(L"Симуляция движения пешеходов");
 
 				NotifyProgress(L"Выгрузка результата");
 				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(edgesDevice,

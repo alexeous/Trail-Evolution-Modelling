@@ -15,8 +15,8 @@ namespace TrailEvolutionModelling {
 #ifndef __CUDACC__
 		protected:
 			TramplabilityMask(Graph^ graph, ResourceManager& resources);
-		};
 #endif
+		};
 
 	}
 }

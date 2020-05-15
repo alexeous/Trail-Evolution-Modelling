@@ -2,10 +2,13 @@
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
-		PathThickener::PathThickener(int graphW, int graphH, float thickness, ResourceManager* resources)
+		PathThickener::PathThickener(int graphW, int graphH, float graphStep, 
+			float thickness, TramplabilityMask* tramplabilityMask, ResourceManager* resources)
 			: graphW(graphW),
 			  graphH(graphH),
+			  graphStep(graphStep),
 			  thickness(thickness),
+			  tramplabilityMask(tramplabilityMask),
 			  jobsPool(CreateJobsPool(resources))
 		{
 		}
@@ -14,7 +17,7 @@ namespace TrailEvolutionModelling {
 			CudaScheduler* scheduler) 
 		{
 			PoolEntry<PathThickenerJob> job = jobsPool->Take();
-			job.object->StartThickening(distanceToPath, thickness, job, scheduler);
+			job.object->StartThickening(distanceToPath, thickness, graphStep, tramplabilityMask, job, scheduler);
 		}
 
 		ObjectPool<PathThickenerJob>* PathThickener::CreateJobsPool(ResourceManager* resources) {
