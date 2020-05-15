@@ -4,6 +4,7 @@
 #include "IResource.h"
 #include "ResourceManager.h"
 #include "NodeIndex.h"
+#include "NodesDataDevicePair.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -51,6 +52,8 @@ namespace TrailEvolutionModelling {
 		public:
 			inline T& At(int i, int j);
 			inline T& At(NodeIndex index);
+			void CopyToDevicePairSync(NodesDataDevicePair<T>* pair);
+			void CopyToDevicePair(NodesDataDevicePair<T>* pair, cudaStream_t stream);
 			void CopyToSync(NodesDataHaloedHost<T>* other) const;
 			void CopyToSync(NodesDataHaloedDevice<T>* other) const;
 			void CopyTo(NodesDataHaloedHost<T>* other, cudaStream_t stream) const;
@@ -110,6 +113,18 @@ namespace TrailEvolutionModelling {
 		template<typename T>
 		inline T& NodesDataHaloedHost<T>::At(NodeIndex index) {
 			return At(index.i, index.j);
+		}
+
+		template<typename T>
+		inline void NodesDataHaloedHost<T>::CopyToDevicePairSync(NodesDataDevicePair<T>* pair) {
+			CopyToSync(pair->readOnly);
+			pair->CopyReadToWriteSync(graphW, graphH);
+		}
+
+		template<typename T>
+		inline void NodesDataHaloedHost<T>::CopyToDevicePair(NodesDataDevicePair<T>* pair, cudaStream_t stream) {
+			CopyTo(pair->readOnly, stream);
+			pair->CopyReadToWrite(graphW, graphH, stream);
 		}
 
 		template<typename T>

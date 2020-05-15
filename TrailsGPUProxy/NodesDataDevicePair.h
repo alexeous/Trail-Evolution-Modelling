@@ -6,6 +6,8 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
+		template <typename T> struct NodesDataHaloedDevice;
+
 		template<typename T>
 		struct NodesDataDevicePair : public IResource {
 			friend class ResourceManager;
