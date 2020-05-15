@@ -121,6 +121,7 @@ namespace TrailEvolutionModelling
             RefreshButtons();
             ZoomToPoint(new Point(9231625, 7402608));
 
+            // TODO: remove autoload of 'map.tem'
             saver.Path = "../../map.tem";
             LoadFromSaveFile(saver.ReadFromFile(saver.Path));
         }
