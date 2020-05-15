@@ -5,14 +5,18 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
+#ifndef __CUDACC__
 		using namespace TrailEvolutionModelling::GraphTypes;
+#endif
 
-		struct TramplabilityMask : public EdgesDataHost<uint8_t> {
+		struct TramplabilityMask : public EdgesDataDevice<bool> {
 			friend class ResourceManager;
 
+#ifndef __CUDACC__
 		protected:
-			TramplabilityMask(Graph^ graph);
+			TramplabilityMask(Graph^ graph, ResourceManager& resources);
 		};
+#endif
 
 	}
 }

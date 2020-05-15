@@ -86,7 +86,7 @@ namespace TrailEvolutionModelling {
 				AttractorsMap attractors(graph, input->Attractors);
 
 				NotifyProgress(L"Построение маски вытаптываемости");
-				TramplabilityMask* tramplabilityMask = resources.New<TramplabilityMask>(graph);
+				TramplabilityMask* tramplabilityMask = resources.New<TramplabilityMask>(graph, resources);
 
 				NotifyProgress(L"Инициализация весов рёбер для \"непорядочных пешеходов\"");
 				EdgesWeightsHost* edgesHost = resources.New<EdgesWeightsHost>(graph, true);

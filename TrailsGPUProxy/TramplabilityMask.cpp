@@ -3,12 +3,17 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
-		TramplabilityMask::TramplabilityMask(Graph^ graph)
-			: EdgesDataHost<uint8_t>(graph->Width, graph->Height) 
+		TramplabilityMask::TramplabilityMask(Graph^ graph, ResourceManager& resources)
+			: EdgesDataDevice<bool>(graph->Width, graph->Height) 
 		{
-			ZipWithGraphEdges(graph, [](uint8_t& tramplable, Edge^ edge) {
+			EdgesDataHost<bool>* host = resources.New<EdgesDataHost<bool>>(graph->Width, graph->Height);
+			
+			host->ZipWithGraphEdges(graph, [](bool& tramplable, Edge^ edge) {
 				tramplable = (edge != nullptr && edge->IsTramplable);
 			});
+			host->CopyToSync(this, graph->Width, graph->Height);
+
+			resources.Free(host);
 		}
 	}
 }
