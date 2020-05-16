@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include "TrailsGPUProxy.h"
 #include "ThreadPool.h"
-#include "WavefrontCompletenessTable.h"
+#include "NodesTramplingEffect.h"
 
 using namespace System;
 using namespace System::Collections::Concurrent;
@@ -23,9 +23,6 @@ namespace TrailEvolutionModelling {
 			void NotifyProgress(const wchar_t* stage);
 
 			void ApplyTrampledness(Graph^ graph, EdgesDataHost<float>* edgesData);
-			inline static void WaitForGPU() {
-				cudaDeviceSynchronize();
-			}
 
 		internal:
 			void AbortWithException(std::exception_ptr ex);
@@ -41,6 +38,7 @@ namespace TrailEvolutionModelling {
 			volatile Exception^ exception;
 
 			ThreadPool* threadPool = nullptr;
+			NodesTramplingEffect* pendingTramplingEffect = nullptr;
 		};
 	}
 }

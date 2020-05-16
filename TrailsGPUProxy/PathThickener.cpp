@@ -4,22 +4,22 @@
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
-		std::atomic<int> PathThickener::numRemaining = 0;
-
 		PathThickener::PathThickener(int graphW, int graphH, float graphStep, 
-			float thickness, TramplabilityMask* tramplabilityMask, ResourceManager* resources)
+			float thickness, TramplabilityMask* tramplabilityMask, 
+			NodesTramplingEffect* targetTramplingEffect, ResourceManager* resources)
 			: graphW(graphW),
 			  graphH(graphH),
 			  graphStep(graphStep),
 			  thickness(thickness),
 			  tramplabilityMask(tramplabilityMask),
+			  targetTramplingEffect(targetTramplingEffect),
 			  streamsPool(CreateStreamsPool(resources)),
 			  distancePairPool(CreateDistancePairPool(resources))
 		{
 		}
 
-		void PathThickener::StartThickening(PoolEntry<NodesFloatHost*> distanceToPath,
-			CudaScheduler* scheduler) 
+		void PathThickener::StartThickening(PoolEntry<NodesFloatHost*> distanceToPath, 
+			float peoplePerSecond, CudaScheduler* scheduler) 
 		{
 			PoolEntry<DistancePairDevice*> distancePairEntry = distancePairPool->Take();
 			DistancePairDevice* distancePair = distancePairEntry.object;
@@ -31,10 +31,7 @@ namespace TrailEvolutionModelling {
 				distanceToPath.ReturnToPool();
 				ThickenPathAsync(thickness, graphStep, distancePair, tramplabilityMask, stream);
 				scheduler->Schedule(stream, [=] {
-					// TODO: pass result for further work
-					distancePairEntry.ReturnToPool();
-					streamEntry.ReturnToPool();
-					numRemaining--;
+					targetTramplingEffect->ApplyTramplingAsync(distancePairEntry, thickness, peoplePerSecond, streamEntry, scheduler);
 				});
 			});
 		}

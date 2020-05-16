@@ -51,6 +51,11 @@
     <ClCompile Include="PathThickener.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
+    <ClCompile Include="NodesApplyTramplingKernel.cu">
+      <Filter>CudaKernels</Filter>
+    </ClCompile>
+    <ClCompile Include="NodesTramplingEffect.cpp">
+      <Filter>Algorithms</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -141,6 +146,13 @@
     </ClInclude>
     <ClInclude Include="PathThickeningKernel.h">
       <Filter>CudaKernels</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.h" />
+    <ClInclude Include="NodesApplyTramplingKernel.h">
+      <Filter>CudaKernels</Filter>
+    </ClInclude>
+    <ClInclude Include="NodesTramplingEffect.h">
+      <Filter>Algorithms</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

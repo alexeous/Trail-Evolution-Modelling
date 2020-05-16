@@ -57,11 +57,11 @@ namespace TrailEvolutionModelling {
 		private:
 			int graphW;
 			int graphH;
-			EdgesWeightsHost* edges;
-			CudaScheduler* cudaScheduler;
-			ThreadPool* threadPool;
-			PathThickener* pathThickener;
-			ObjectPool<NodesFloatHost*>* distancePool;
+			EdgesWeightsHost* edges = nullptr;
+			CudaScheduler* cudaScheduler = nullptr;
+			ThreadPool* threadPool = nullptr;
+			PathThickener* pathThickener = nullptr;
+			ObjectPool<NodesFloatHost*>* distancePool = nullptr;
 		};
 
 	}

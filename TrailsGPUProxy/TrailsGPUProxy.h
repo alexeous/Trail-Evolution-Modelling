@@ -1,4 +1,5 @@
 #pragma once
+#include "Constants.h"
 #include "EdgesData.h"
 
 using namespace System;
@@ -9,11 +10,10 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 		public ref class TrailsGPUProxy {
 		public:
-			static initonly int StepSeconds = 5 * 60;
-			static initonly float MinimumTramplableWeight = 1.1f;
+			static initonly int StepSeconds = SIMULATION_STEP_SECONDS;
+			static initonly float MinimumTramplableWeight = MIN_TRAMPLABLE_WEIGHT;
 
-			static constexpr float FirstPhasePathThickness = 5;
-			static constexpr float SecondPhasePathThickness = 1.5f;
+		public:
 
 			event Action<String^>^ ProgressChanged;
 

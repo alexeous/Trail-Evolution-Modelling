@@ -1,12 +1,11 @@
 #pragma once
-// TODO: remove
-#include <atomic>
 #include "cuda_runtime.h"
 #include "IResource.h"
 #include "ResourceManager.h"
 #include "ObjectPool.h"
 #include "CudaScheduler.h"
 #include "TramplabilityMask.h"
+#include "NodesTramplingEffect.h"
 
 #define PATH_THICKENER_STREAMS_POOL_SIZE 10
 #define PATH_THICKENER_DISTANCE_DEVICE_POOL_SIZE 20
@@ -21,16 +20,15 @@ namespace TrailEvolutionModelling {
 			friend class ResourceManager;
 
 		public:
-			// TODO: remove
-			static std::atomic<int> numRemaining;
-
 			float thickness;
-			void StartThickening(PoolEntry<NodesFloatHost*> distanceToPath,
+
+			void StartThickening(PoolEntry<NodesFloatHost*> distanceToPath, float peoplePerSecond,
 				CudaScheduler* scheduler);
 
 		protected:
 			PathThickener(int graphW, int graphH, float graphStep, float thickness, 
-				TramplabilityMask* tramplabilityMask, ResourceManager* resources);
+				TramplabilityMask* tramplabilityMask, NodesTramplingEffect* targetTramplingEffect,
+				ResourceManager* resources);
 			void Free(ResourceManager& resources) override;
 
 		private:
@@ -44,11 +42,10 @@ namespace TrailEvolutionModelling {
 			int graphW;
 			int graphH;
 			float graphStep;
-			TramplabilityMask* tramplabilityMask;
-			ObjectPool<cudaStream_t>* streamsPool;
-			ObjectPool<DistancePairDevice*>* distancePairPool;
-
-			//ObjectPool<PathThickenerJob*>* jobsPool;
+			TramplabilityMask* tramplabilityMask = nullptr;
+			NodesTramplingEffect* targetTramplingEffect;
+			ObjectPool<cudaStream_t>* streamsPool = nullptr;
+			ObjectPool<DistancePairDevice*>* distancePairPool = nullptr;
 		};
 
 	}

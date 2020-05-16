@@ -114,6 +114,10 @@
     <CudaCompile Include="ResetNodesG.cu">
       <FileType>Document</FileType>
     </CudaCompile>
+    <CudaCompile Include="NodesApplyTramplingKernel.cu">
+      <FileType>Document</FileType>
+    </CudaCompile>
+    <ClCompile Include="NodesTramplingEffect.cpp" />
     <ClCompile Include="PathReconstructor.cpp" />
     <ClCompile Include="PathThickener.cpp" />
     <CudaCompile Include="PathThickeningKernel.cu">
@@ -146,6 +150,7 @@
     <ClInclude Include="ComputeNode.h" />
     <ClInclude Include="ComputeNodesHost.h" />
     <ClInclude Include="ComputeNodesPair.h" />
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="CudaException.h" />
     <ClInclude Include="CudaExceptionNative.h" />
     <ClInclude Include="CudaScheduler.h" />
@@ -157,8 +162,10 @@
     <ClInclude Include="IsolatedAttractorsException.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="NodeIndex.h" />
+    <ClInclude Include="NodesApplyTramplingKernel.h" />
     <ClInclude Include="NodesDataDevicePair.h" />
     <ClInclude Include="NodesDataHaloed.h" />
+    <ClInclude Include="NodesTramplingEffect.h" />
     <ClInclude Include="PathReconstructor.h" />
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="PathThickener.h" />

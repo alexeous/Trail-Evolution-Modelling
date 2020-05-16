@@ -30,7 +30,8 @@ namespace TrailEvolutionModelling {
 		{
 			PoolEntry<NodesFloatHost*> distanceEntry = distancePool->Take();
 			ReconstructPath(start, goal, startNodes, goalNodes, distanceEntry.object);
-			pathThickener->StartThickening(distanceEntry, cudaScheduler);
+			float averagePerformance = (start.performance + goal.performance) / 2;
+			pathThickener->StartThickening(distanceEntry, averagePerformance, cudaScheduler);
 		}
 		
 		template<typename T> int sign(T val) { return (T(0) < val) - (val < T(0)); }

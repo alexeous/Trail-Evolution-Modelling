@@ -13,6 +13,7 @@
 #include "PathReconstructor.h"
 #include "PathThickener.h"
 #include "WavefrontCompletenessTable.h"
+#include "NodesTramplingEffect.h"
 
 using namespace System;
 using namespace System::Collections::Concurrent;
@@ -54,7 +55,10 @@ namespace TrailEvolutionModelling {
 				threadPool->CancelAll();
 				threadPool = nullptr;
 			}
-			PathThickener::numRemaining = 0;
+			if(pendingTramplingEffect) {
+				pendingTramplingEffect->CancelWaiting();
+				pendingTramplingEffect = nullptr;
+			}
 		}
 
 		TrailsComputationsOutput^ ComputationThread::GetResult() {
@@ -101,24 +105,28 @@ namespace TrailEvolutionModelling {
 				NotifyProgress(L"Создание исполнителей волнового алгоритма на GPU");
 				std::vector<WavefrontJob*> wavefrontJobs = WavefrontJobsFactory::CreateJobs(w, h, &resources, attractors);
 				
+				NodesTramplingEffect* tramplingEffect = resources.New<NodesTramplingEffect>(w, h, 
+					stepMeters, INDECENT_PEDESTRIANS_SHARE, &resources);
+
 				PathThickener *pathThickener = resources.New<PathThickener>(w, h, stepMeters, 
-					TrailsGPUProxy::FirstPhasePathThickness, tramplabilityMask, &resources);
+					FIRST_PHASE_PATH_THICKNESS, tramplabilityMask, tramplingEffect, &resources);
 
 				PathReconstructor *pathReconsturctor = resources.New<PathReconstructor>(w, h,
 					edgesHost, &cudaScheduler, &resources, pathThickener);
 
 				WavefrontCompletenessTable wavefrontTable(attractors, pathReconsturctor);
-				PathThickener::numRemaining = wavefrontTable.numPaths;
 
 				NotifyProgress(L"Симуляция движения \"непорядочных пешеходов\"");
+				tramplingEffect->SetAwaitedPathsNumber(wavefrontTable.numPaths);
+				pendingTramplingEffect = tramplingEffect;
+				tramplingEffect->ClearSync();
+				
 				wavefrontTable.ResetCompleteness();
 				for(auto job : wavefrontJobs) {
 					job->Start(&wavefrontTable, edgesDevice, &cudaScheduler);
 				}
-
-				while(PathThickener::numRemaining > 0) {
-					_sleep(5);
-				}
+				
+				pendingTramplingEffect->AwaitAllPaths();
 
 				NotifyProgress(L"Выгрузка результата");
 				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(edgesDevice, w, h);
