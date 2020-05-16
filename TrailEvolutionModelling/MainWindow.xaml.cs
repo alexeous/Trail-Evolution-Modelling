@@ -135,6 +135,10 @@ namespace TrailEvolutionModelling
 
         private void InitializeMapControl()
         {
+            var resolutions = mapControl.Map.Resolutions;
+            mapControl.Map.Limiter.ZoomLimits = new Mapsui.UI.MinMax(
+                resolutions.Min() / 8, resolutions.Max());
+
             mapControl.Map.Layers.Add(OpenStreetMap.CreateTileLayer());
 
             mapControl.Map.Layers.Add(mapObjectLayer);
@@ -451,14 +455,19 @@ namespace TrailEvolutionModelling
 
                         Color minCol = Color.FromArgb(255, 0, 255, 0);
                         Color maxCol = Color.Red;
-                        const float minW = 1f;
-                        const float maxW = 3.4f;
+                        //const float minW = 1f;
+                        //const float maxW = 3.4f;
+                        const float minW = 0;
+                        const float maxW = 0.05f;
 
                         foreach (var edge in graph.Edges)
                         {
+                            if (edge.Trampledness == 0)
+                                continue;
+
                             Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
                             Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();
-                            float t = (edge.Weight - edge.Trampledness - minW) / (maxW - minW);
+                            float t = (edge.Trampledness - minW) / (maxW - minW);
                             Color color = Color.FromArgb(255, Lerp(minCol.R, maxCol.R, t), Lerp(minCol.G, maxCol.G, t), Lerp(minCol.B, maxCol.B, t));
                             edgeLayer.Add(new Feature
                             {
