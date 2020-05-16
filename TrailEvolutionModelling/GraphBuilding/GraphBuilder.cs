@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Mapsui.Geometries;
+using Mapsui.Projection;
 using TrailEvolutionModelling.Attractors;
 using TrailEvolutionModelling.GPUProxy;
 using TrailEvolutionModelling.GraphTypes;
@@ -17,11 +18,12 @@ namespace TrailEvolutionModelling.GraphBuilding
         public static Graph Build(GraphBuilderInput input)
         {
             BoundingBox bounds = input.World.BoundingArea.Geometry.BoundingBox;
-            Point min = bounds.Min;
+            Point origin = bounds.Min;
 
             float step = ClampStep(input.DesiredStep, bounds, out int w, out int h);
+            float stepMeters = CalcStepMeters(step, origin);
 
-            var graph = new Graph(w, h, (float)min.X, (float)min.Y, step);
+            var graph = new Graph(w, h, (float)origin.X, (float)origin.Y, step, stepMeters);
             BuildNodes(graph, input.World);
             BuildEdges(graph, input.World);
 
@@ -60,6 +62,20 @@ namespace TrailEvolutionModelling.GraphBuilding
             w = Math.Min(Graph.MaximumSteps, (int)Math.Ceiling(bounds.Width / step));
             h = Math.Min(Graph.MaximumSteps, (int)Math.Ceiling(bounds.Height / step));
             return step;
+        }
+
+        private static float CalcStepMeters(float step, Point origin)
+        {
+            const double earthRadius = 6371000; //meters
+            const double deg2rad = Math.PI / 180;
+
+            Point offseted = origin + new Point(step, 0);
+            double lat = deg2rad * SphericalMercator.ToLonLat(origin.X, origin.Y).X;
+            double lon1 = deg2rad * SphericalMercator.ToLonLat(origin.X, origin.Y).X;
+            double lon2 = deg2rad * SphericalMercator.ToLonLat(offseted.X, offseted.Y).X;
+            double deltaLon = lon2 - lon1;
+
+            return (float)(2 * earthRadius * Math.Asin(Math.Abs(Math.Sin(deltaLon / 2) * Math.Cos(lat / 2))));
         }
 
         static void BuildNodes(Graph graph, World world)

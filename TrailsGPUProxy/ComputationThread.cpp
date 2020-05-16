@@ -81,6 +81,9 @@ namespace TrailEvolutionModelling {
 			CudaScheduler cudaScheduler(threadPool);
 			try {
 				Graph^ graph = input->Graph;
+				int w = graph->Width;
+				int h = graph->Height;
+				float stepMeters = graph->StepPhysicalMeters;
 
 				NotifyProgress(L"Установление связей между точками притяжения");
 				AttractorsMap attractors(graph, input->Attractors);
@@ -90,16 +93,15 @@ namespace TrailEvolutionModelling {
 
 				NotifyProgress(L"Инициализация весов рёбер для \"непорядочных пешеходов\"");
 				EdgesWeightsHost* edgesHost = resources.New<EdgesWeightsHost>(graph, true);
-				EdgesWeightsDevice* edgesDevice = resources.New<EdgesWeightsDevice>(edgesHost, graph->Width, graph->Height);
+				EdgesWeightsDevice* edgesDevice = resources.New<EdgesWeightsDevice>(edgesHost, w, h);
 
 				NotifyProgress(L"Создание исполнителей волнового алгоритма на GPU");
-				std::vector<WavefrontJob*> wavefrontJobs =
-					WavefrontJobsFactory::CreateJobs(graph->Width, graph->Height, &resources, attractors);
+				std::vector<WavefrontJob*> wavefrontJobs = WavefrontJobsFactory::CreateJobs(w, h, &resources, attractors);
 				
-				PathThickener *pathThickener = resources.New<PathThickener>(graph->Width, graph->Height, 
-					graph->Step, TrailsGPUProxy::FirstPhasePathThickness, tramplabilityMask, &resources);
+				PathThickener *pathThickener = resources.New<PathThickener>(w, h, stepMeters, 
+					TrailsGPUProxy::FirstPhasePathThickness, tramplabilityMask, &resources);
 
-				PathReconstructor *pathReconsturctor = resources.New<PathReconstructor>(graph->Width, graph->Height,
+				PathReconstructor *pathReconsturctor = resources.New<PathReconstructor>(w, h,
 					edgesHost, &cudaScheduler, &resources, pathThickener);
 
 				WavefrontCompletenessTable wavefrontTable(attractors, pathReconsturctor);
@@ -115,10 +117,8 @@ namespace TrailEvolutionModelling {
 					_sleep(5);
 				}
 
-
 				NotifyProgress(L"Выгрузка результата");
-				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(edgesDevice,
-					input->Graph->Width, input->Graph->Height);
+				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(edgesDevice, w, h);
 
 				auto result = gcnew TrailsComputationsOutput();
 				result->Graph = input->Graph;

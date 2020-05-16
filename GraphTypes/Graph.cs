@@ -16,6 +16,7 @@ namespace TrailEvolutionModelling.GraphTypes
         public float OriginX { get; set; }
         public float OriginY { get; set; }
         public float Step { get; set; }
+        public float StepPhysicalMeters { get; set; }
         public IReadOnlyList<Edge> Edges => edges;
 
 
@@ -24,7 +25,7 @@ namespace TrailEvolutionModelling.GraphTypes
 
         private Graph() { }
 
-        public Graph(int width, int height, float originX, float originY, float step)
+        public Graph(int width, int height, float originX, float originY, float step, float stepPhysicalMeters)
         {
             if (width < 0 || height < 0)
             {
@@ -47,6 +48,7 @@ namespace TrailEvolutionModelling.GraphTypes
             OriginX = originX;
             OriginY = originY;
             Step = step;
+            StepPhysicalMeters = stepPhysicalMeters;
 
             nodes = new Node[width, height];
             edges = new List<Edge>();
