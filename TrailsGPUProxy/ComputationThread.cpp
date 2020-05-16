@@ -36,6 +36,9 @@ namespace TrailEvolutionModelling {
 			catch(CudaExceptionNative ex) {
 				exception = gcnew CudaException(ex);
 			}
+			catch(Exception^ ex) {
+				exception = ex;
+			}
 			catch(std::exception& ex) {
 				std::string msg = ex.what();
 				exception = gcnew Exception("An unmanaged exception occured: " + gcnew String(msg.c_str()));
@@ -132,16 +135,23 @@ namespace TrailEvolutionModelling {
 			catch(CudaExceptionNative ex) {
 				exception = gcnew CudaException(ex);
 			}
+			catch(Exception^ ex) {
+				exception = ex;
+			}
 			catch(std::exception& ex) {
 				std::string msg = ex.what();
 				exception = gcnew Exception("An unmanaged exception occured: " + gcnew String(msg.c_str()));
 			}
 			catch(...) {
+#ifdef _DEBUG
+				throw;
+#else
 				exception = gcnew Exception("An unknown unmanaged exception occured");
+#endif
 			}
 			finally {
-				resources.FreeAll();
 				CancelAll();
+				resources.FreeAll();
 
 				ComputationThread^ unused;
 				runThreads->TryRemove(threadId, unused);
