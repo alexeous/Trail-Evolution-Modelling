@@ -57,6 +57,9 @@
     <ClCompile Include="NodesTramplingEffect.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
+    <ClCompile Include="SaveNodesTramplingAsEdgesKernel.cu">
+      <Filter>CudaKernels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CudaUtils.h" />
@@ -153,6 +156,9 @@
     </ClInclude>
     <ClInclude Include="NodesTramplingEffect.h">
       <Filter>Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveNodesTramplingAsEdgesKernel.h">
+      <Filter>CudaKernels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

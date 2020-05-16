@@ -7,6 +7,8 @@
 #include "ObjectPool.h"
 #include "CudaScheduler.h"
 #include "Constants.h"
+#include "EdgesData.h"
+#include "TramplabilityMask.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -26,6 +28,8 @@ namespace TrailEvolutionModelling {
 			void ApplyTramplingAsync(PoolEntry<DistancePairDevice*> distancePairEntry,
 				float pathThickness, float peoplePerSecond, PoolEntry<cudaStream_t> streamEntry,
 				CudaScheduler* scheduler);
+			void SaveAsEdgesSync(EdgesDataDevice<float>* target, TramplabilityMask* tramplabilityMask);
+
 			void AwaitAllPaths();
 			void CancelWaiting();
 

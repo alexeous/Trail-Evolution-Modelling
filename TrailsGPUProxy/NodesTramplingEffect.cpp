@@ -1,5 +1,6 @@
 #include "NodesTramplingEffect.h"
 #include "NodesApplyTramplingKernel.h"
+#include "SaveNodesTramplingAsEdgesKernel.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -13,6 +14,10 @@ namespace TrailEvolutionModelling {
 			  effectDataDevice(resources->New<NodesFloatDevice>(graphW, graphH))
 		{
 			InitWaitObject();
+		}
+
+		void NodesTramplingEffect::InitWaitObject() {
+			waitObj = gcnew Object();
 		}
 
 		void NodesTramplingEffect::Free(ResourceManager& resources) {
@@ -42,8 +47,10 @@ namespace TrailEvolutionModelling {
 			});
 		}
 
-		void NodesTramplingEffect::InitWaitObject() {
-			waitObj = gcnew Object();
+		void NodesTramplingEffect::SaveAsEdgesSync(EdgesDataDevice<float>* target, 
+			TramplabilityMask* tramplabilityMask) 
+		{
+			SaveNodesTramplingAsEdges(effectDataDevice, graphW, graphH, target, tramplabilityMask);
 		}
 
 		float NodesTramplingEffect::CalcTramplingFactor(float peoplePerSecond) {

@@ -105,21 +105,21 @@ namespace TrailEvolutionModelling {
 				NotifyProgress(L"Создание исполнителей волнового алгоритма на GPU");
 				std::vector<WavefrontJob*> wavefrontJobs = WavefrontJobsFactory::CreateJobs(w, h, &resources, attractors);
 				
-				NodesTramplingEffect* tramplingEffect = resources.New<NodesTramplingEffect>(w, h, 
+				NodesTramplingEffect* nodesTramplingEffect = resources.New<NodesTramplingEffect>(w, h, 
 					stepMeters, INDECENT_PEDESTRIANS_SHARE, &resources);
 
 				PathThickener *pathThickener = resources.New<PathThickener>(w, h, stepMeters, 
-					FIRST_PHASE_PATH_THICKNESS, tramplabilityMask, tramplingEffect, &resources);
+					FIRST_PHASE_PATH_THICKNESS, tramplabilityMask, nodesTramplingEffect, &resources);
 
 				PathReconstructor *pathReconsturctor = resources.New<PathReconstructor>(w, h,
 					edgesHost, &cudaScheduler, &resources, pathThickener);
 
 				WavefrontCompletenessTable wavefrontTable(attractors, pathReconsturctor);
 
-				NotifyProgress(L"Симуляция движения \"непорядочных пешеходов\"");
-				tramplingEffect->SetAwaitedPathsNumber(wavefrontTable.numPaths);
-				pendingTramplingEffect = tramplingEffect;
-				tramplingEffect->ClearSync();
+				NotifyProgress(L"Вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
+				nodesTramplingEffect->SetAwaitedPathsNumber(wavefrontTable.numPaths);
+				pendingTramplingEffect = nodesTramplingEffect;
+				nodesTramplingEffect->ClearSync();
 				
 				wavefrontTable.ResetCompleteness();
 				for(auto job : wavefrontJobs) {
@@ -128,8 +128,14 @@ namespace TrailEvolutionModelling {
 				
 				pendingTramplingEffect->AwaitAllPaths();
 
+				EdgesDataDevice<float>* indecentTrampling = resources.New<EdgesDataDevice<float>>(w, h);
+				nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
+
+				EdgesWeightsDevice* maximumWeights = resources.New<EdgesWeightsDevice>(w, h);
+				edgesDevice->CopyToSync(maximumWeights, w, h);
+
 				NotifyProgress(L"Выгрузка результата");
-				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(edgesDevice, w, h);
+				EdgesDataHost<float>* trampledness = resources.New<EdgesDataHost<float>>(indecentTrampling, w, h);
 
 				auto result = gcnew TrailsComputationsOutput();
 				result->Graph = input->Graph;

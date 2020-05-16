@@ -127,6 +127,9 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
     </ClCompile>
+    <CudaCompile Include="SaveNodesTramplingAsEdgesKernel.cu">
+      <FileType>Document</FileType>
+    </CudaCompile>
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="TrailsGPUProxy.cpp" />
     <ClCompile Include="TramplabilityMask.cpp" />
@@ -172,6 +175,7 @@
     <ClInclude Include="PathThickeningKernel.h" />
     <ClInclude Include="ResetNodesG.h" />
     <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="SaveNodesTramplingAsEdgesKernel.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="TrailsGPUProxy.h" />
     <ClInclude Include="TramplabilityMask.h" />
