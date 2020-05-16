@@ -22,9 +22,9 @@ namespace TrailEvolutionModelling {
 			// TODO: remove
 			static std::atomic<int> numRemaining;
 
-			void StartThickening(PoolEntry<NodesFloatHost> distanceToPath, 
+			void StartThickening(PoolEntry<NodesFloatHost*> distanceToPath, 
 				float thickness, float graphStep, TramplabilityMask* tramplabilityMask, 
-				PoolEntry<PathThickenerJob> selfInPool, CudaScheduler* scheduler);
+				PoolEntry<PathThickenerJob*> selfInPool, CudaScheduler* scheduler);
 
 		protected:
 			PathThickenerJob(int graphW, int graphH, ResourceManager* resources);

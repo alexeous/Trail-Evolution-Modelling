@@ -13,9 +13,9 @@ namespace TrailEvolutionModelling {
 
         template <typename T>
         struct PoolEntry {
-            T* object;
+            T object;
 
-            PoolEntry(T* object, ObjectPool<T>* pool);
+            PoolEntry(T object, ObjectPool<T>* pool);
             void ReturnToPool() const;
         private:
             ObjectPool<T>* pool;
@@ -35,31 +35,31 @@ namespace TrailEvolutionModelling {
             PoolEntry<T> Instantiate();
 
         protected:
-            ObjectPool(int initialSize, std::function<T* ()> factory);
-            ObjectPool(int initialSize, std::function<T* ()> factory,
-                std::function<void(T*, ResourceManager&)> deleter);
+            ObjectPool(int initialSize, std::function<T()> factory);
+            ObjectPool(int initialSize, std::function<T()> factory,
+                std::function<void(T, ResourceManager&)> deleter);
             void Free(ResourceManager& resources) override;
 
         private:
-            static void DefaultDeleter(T* object, ResourceManager& resources);
+            static void DefaultDeleter(T object, ResourceManager& resources);
 
         private:
             std::vector<PoolEntry<T>> all;
             std::vector<PoolEntry<T>> available;
-            std::function<T* ()> factory;
-            std::function<void(T*, ResourceManager&)> deleter;
+            std::function<T()> factory;
+            std::function<void(T, ResourceManager&)> deleter;
             gcroot<Object^> sync;
         };
 
         template<typename T>
-        inline ObjectPool<T>::ObjectPool(int initialSize, std::function<T* ()> factory) 
+        inline ObjectPool<T>::ObjectPool(int initialSize, std::function<T()> factory) 
             : ObjectPool(initialSize, factory, DefaultDeleter)
         {
         }
 
         template<typename T>
-        inline ObjectPool<T>::ObjectPool(int initialSize, std::function<T* ()> factory,
-            std::function<void(T*, ResourceManager&)> deleter)
+        inline ObjectPool<T>::ObjectPool(int initialSize, std::function<T()> factory,
+            std::function<void(T, ResourceManager&)> deleter)
             : factory(factory),
               deleter(deleter),
               sync(gcnew Object)
@@ -115,7 +115,7 @@ namespace TrailEvolutionModelling {
         }
 
         template<typename T>
-        inline void ObjectPool<T>::DefaultDeleter(T* object, ResourceManager& resources) {
+        inline void ObjectPool<T>::DefaultDeleter(T object, ResourceManager& resources) {
             resources.Free(object);
         }
 
@@ -124,7 +124,7 @@ namespace TrailEvolutionModelling {
 
 
         template<typename T>
-        inline PoolEntry<T>::PoolEntry(T* object, ObjectPool<T>* pool)
+        inline PoolEntry<T>::PoolEntry(T object, ObjectPool<T>* pool)
             : object(object), pool(pool) 
         {
         }

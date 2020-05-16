@@ -17,7 +17,7 @@ namespace TrailEvolutionModelling {
 
 		public:
 			float thickness;
-			void StartThickening(PoolEntry<NodesFloatHost> distanceToPath,
+			void StartThickening(PoolEntry<NodesFloatHost*> distanceToPath,
 				CudaScheduler* scheduler);
 
 		protected:
@@ -26,14 +26,14 @@ namespace TrailEvolutionModelling {
 			void Free(ResourceManager& resources) override;
 
 		private:
-			ObjectPool<PathThickenerJob>* CreateJobsPool(ResourceManager* resources);
+			ObjectPool<PathThickenerJob*>* CreateJobsPool(ResourceManager* resources);
 
 		private:
 			int graphW;
 			int graphH;
 			float graphStep;
 			TramplabilityMask* tramplabilityMask;
-			ObjectPool<PathThickenerJob>* jobsPool;
+			ObjectPool<PathThickenerJob*>* jobsPool;
 		};
 
 	}

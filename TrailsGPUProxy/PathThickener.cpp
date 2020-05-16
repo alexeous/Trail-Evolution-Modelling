@@ -13,15 +13,15 @@ namespace TrailEvolutionModelling {
 		{
 		}
 
-		void PathThickener::StartThickening(PoolEntry<NodesFloatHost> distanceToPath,
+		void PathThickener::StartThickening(PoolEntry<NodesFloatHost*> distanceToPath,
 			CudaScheduler* scheduler) 
 		{
-			PoolEntry<PathThickenerJob> job = jobsPool->Take();
+			PoolEntry<PathThickenerJob*> job = jobsPool->Take();
 			job.object->StartThickening(distanceToPath, thickness, graphStep, tramplabilityMask, job, scheduler);
 		}
 
-		ObjectPool<PathThickenerJob>* PathThickener::CreateJobsPool(ResourceManager* resources) {
-			return resources->New<ObjectPool<PathThickenerJob>>(
+		ObjectPool<PathThickenerJob*>* PathThickener::CreateJobsPool(ResourceManager* resources) {
+			return resources->New<ObjectPool<PathThickenerJob*>>(
 				PATH_THICKENER_JOBS_POOL_SIZE,
 				[=] { return resources->New<PathThickenerJob>(graphW, graphH, resources); }
 			);

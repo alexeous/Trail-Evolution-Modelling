@@ -16,10 +16,10 @@ namespace TrailEvolutionModelling {
 		{
 		}
 
-		ObjectPool<NodesFloatHost>* PathReconstructor::CreateDistanceHostPool(
+		ObjectPool<NodesFloatHost*>* PathReconstructor::CreateDistanceHostPool(
 			ResourceManager* resources) 
 		{
-			return resources->New<ObjectPool<NodesFloatHost>>(
+			return resources->New<ObjectPool<NodesFloatHost*>>(
 				DISTANCE_HOST_POOL_SIZE, 
 				[=] { return resources->New<NodesFloatHost>(graphW, graphH); }
 			);
@@ -28,7 +28,7 @@ namespace TrailEvolutionModelling {
 		void PathReconstructor::StartPathReconstruction(Attractor start, Attractor goal, 
 			ComputeNodesHost* startNodes, ComputeNodesHost* goalNodes) 
 		{
-			PoolEntry<NodesFloatHost> distanceEntry = distancePool->Take();
+			PoolEntry<NodesFloatHost*> distanceEntry = distancePool->Take();
 			ReconstructPath(start, goal, startNodes, goalNodes, distanceEntry.object);
 			pathThickener->StartThickening(distanceEntry, cudaScheduler);
 		}

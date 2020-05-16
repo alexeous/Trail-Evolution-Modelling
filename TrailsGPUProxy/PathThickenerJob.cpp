@@ -14,9 +14,9 @@ namespace TrailEvolutionModelling {
 			CHECK_CUDA(cudaStreamCreate(&stream));
 		}
 
-		void PathThickenerJob::StartThickening(PoolEntry<NodesFloatHost> distanceToPath,
+		void PathThickenerJob::StartThickening(PoolEntry<NodesFloatHost*> distanceToPath,
 			float thickness, float graphStep, TramplabilityMask* tramplabilityMask, 
-			PoolEntry<PathThickenerJob> selfInPool, CudaScheduler* scheduler)
+			PoolEntry<PathThickenerJob*> selfInPool, CudaScheduler* scheduler)
 		{
 			distanceToPath.object->CopyToDevicePair(distanceDevicePair, stream);
 			scheduler->Schedule(stream, [=] {

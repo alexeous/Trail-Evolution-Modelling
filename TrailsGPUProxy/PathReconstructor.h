@@ -37,7 +37,7 @@ namespace TrailEvolutionModelling {
 			void Free(ResourceManager& resources) override;
 
 		private:
-			ObjectPool<NodesFloatHost>* CreateDistanceHostPool(ResourceManager*);
+			ObjectPool<NodesFloatHost*>* CreateDistanceHostPool(ResourceManager*);
 			
 			void ReconstructPath(Attractor start, Attractor goal,
 				ComputeNodesHost* startNodes, ComputeNodesHost* goalNodes, 
@@ -61,7 +61,7 @@ namespace TrailEvolutionModelling {
 			CudaScheduler* cudaScheduler;
 			ThreadPool* threadPool;
 			PathThickener* pathThickener;
-			ObjectPool<NodesFloatHost>* distancePool;
+			ObjectPool<NodesFloatHost*>* distancePool;
 		};
 
 	}
