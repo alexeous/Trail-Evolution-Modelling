@@ -116,7 +116,6 @@
     </CudaCompile>
     <ClCompile Include="PathReconstructor.cpp" />
     <ClCompile Include="PathThickener.cpp" />
-    <ClCompile Include="PathThickenerJob.cpp" />
     <CudaCompile Include="PathThickeningKernel.cu">
       <FileType>Document</FileType>
     </CudaCompile>
@@ -163,7 +162,6 @@
     <ClInclude Include="PathReconstructor.h" />
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="PathThickener.h" />
-    <ClInclude Include="PathThickenerJob.h" />
     <ClInclude Include="PathThickeningKernel.h" />
     <ClInclude Include="ResetNodesG.h" />
     <ClInclude Include="ResourceManager.h" />

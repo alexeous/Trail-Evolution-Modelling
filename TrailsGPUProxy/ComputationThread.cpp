@@ -51,7 +51,7 @@ namespace TrailEvolutionModelling {
 				threadPool->CancelAll();
 				threadPool = nullptr;
 			}
-			PathThickenerJob::numRemaining = 0;
+			PathThickener::numRemaining = 0;
 		}
 
 		TrailsComputationsOutput^ ComputationThread::GetResult() {
@@ -103,7 +103,7 @@ namespace TrailEvolutionModelling {
 					edgesHost, &cudaScheduler, &resources, pathThickener);
 
 				WavefrontCompletenessTable wavefrontTable(attractors, pathReconsturctor);
-				PathThickenerJob::numRemaining = wavefrontTable.numPaths;
+				PathThickener::numRemaining = wavefrontTable.numPaths;
 
 				NotifyProgress(L"—имул€ци€ движени€ \"непор€дочных пешеходов\"");
 				wavefrontTable.ResetCompleteness();
@@ -111,7 +111,7 @@ namespace TrailEvolutionModelling {
 					job->Start(&wavefrontTable, edgesDevice, &cudaScheduler);
 				}
 
-				while(PathThickenerJob::numRemaining > 0) {
+				while(PathThickener::numRemaining > 0) {
 					_sleep(5);
 				}
 

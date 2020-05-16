@@ -1,7 +1,11 @@
 #include "PathThickener.h"
+#include "CudaUtils.h"
+#include "PathThickeningKernel.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
+		std::atomic<int> PathThickener::numRemaining = 0;
+
 		PathThickener::PathThickener(int graphW, int graphH, float graphStep, 
 			float thickness, TramplabilityMask* tramplabilityMask, ResourceManager* resources)
 			: graphW(graphW),
@@ -9,26 +13,61 @@ namespace TrailEvolutionModelling {
 			  graphStep(graphStep),
 			  thickness(thickness),
 			  tramplabilityMask(tramplabilityMask),
-			  jobsPool(CreateJobsPool(resources))
+			  streamsPool(CreateStreamsPool(resources)),
+			  distancePairPool(CreateDistancePairPool(resources))
 		{
 		}
 
 		void PathThickener::StartThickening(PoolEntry<NodesFloatHost*> distanceToPath,
 			CudaScheduler* scheduler) 
 		{
-			PoolEntry<PathThickenerJob*> job = jobsPool->Take();
-			job.object->StartThickening(distanceToPath, thickness, graphStep, tramplabilityMask, job, scheduler);
+			PoolEntry<DistancePairDevice*> distancePairEntry = distancePairPool->Take();
+			DistancePairDevice* distancePair = distancePairEntry.object;
+			PoolEntry<cudaStream_t> streamEntry = streamsPool->Take();
+			cudaStream_t stream = streamEntry.object;
+
+			distanceToPath.object->CopyToDevicePair(distancePair, stream);
+			scheduler->Schedule(stream, [=] {
+				distanceToPath.ReturnToPool();
+				ThickenPathAsync(thickness, graphStep, distancePair, tramplabilityMask, stream);
+				scheduler->Schedule(stream, [=] {
+					// TODO: pass result for further work
+					distancePairEntry.ReturnToPool();
+					streamEntry.ReturnToPool();
+					numRemaining--;
+				});
+			});
 		}
 
-		ObjectPool<PathThickenerJob*>* PathThickener::CreateJobsPool(ResourceManager* resources) {
-			return resources->New<ObjectPool<PathThickenerJob*>>(
-				PATH_THICKENER_JOBS_POOL_SIZE,
-				[=] { return resources->New<PathThickenerJob>(graphW, graphH, resources); }
+		ObjectPool<cudaStream_t>* PathThickener::CreateStreamsPool(ResourceManager* resources) {
+			return resources->New<ObjectPool<cudaStream_t>>(
+				PATH_THICKENER_STREAMS_POOL_SIZE,
+				[] { cudaStream_t stream; cudaStreamCreate(&stream); return stream; },
+				[] (cudaStream_t stream, ResourceManager&) { cudaStreamDestroy(stream); }
 			);
 		}
 
+		ObjectPool<DistancePairDevice*>* PathThickener::CreateDistancePairPool(ResourceManager* resources) {
+			return resources->New<ObjectPool<DistancePairDevice*>>(
+				PATH_THICKENER_DISTANCE_DEVICE_POOL_SIZE,
+				[=] { return resources->New<DistancePairDevice>(graphW, graphH, resources); }
+			);
+		}
+
+		void PathThickener::ThickenPathAsync(float thickness, float graphStep, 
+			DistancePairDevice* distancePair, TramplabilityMask* tramplabilityMask, cudaStream_t stream) 
+		{
+			int doubleIterations = (int)ceilf(thickness / graphStep / 2);
+			for(int i = 0; i < doubleIterations; i++) {
+				CHECK_CUDA((PathThickening<false>(distancePair, graphW, graphH, tramplabilityMask, stream)));
+				CHECK_CUDA((PathThickening<true>(distancePair, graphW, graphH, tramplabilityMask, stream)));
+			}
+		}
+
 		void PathThickener::Free(ResourceManager& resources) {
-			resources.Free(jobsPool);
+			resources.Free(streamsPool);
+			resources.Free(distancePairPool);
+			//resources.Free(jobsPool);
 		}
 
 	}
