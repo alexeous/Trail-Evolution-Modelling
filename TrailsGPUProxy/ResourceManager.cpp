@@ -4,9 +4,26 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		void ResourceManager::FreeAll() {
-			while(!resources.empty()) {
-				IResource* resource = *resources.begin();
-				Free(resource);
+			while(true) {
+				IResource* next = nullptr;
+				
+				Monitor::Enter(sync);
+				try {
+					if(!resources.empty()) {
+						next = *resources.begin();
+					}
+					Monitor::Exit(sync);
+				}
+				catch(...) {
+					Monitor::Exit(sync);
+					throw;
+				}
+				
+				if(next == nullptr) {
+					break;
+				}
+				
+				Free(next);
 			}
 		}
 
