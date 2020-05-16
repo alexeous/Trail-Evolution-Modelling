@@ -134,7 +134,7 @@ namespace TrailEvolutionModelling.GraphBuilding
 
         static float AttractorPerformanceToNumber(AttractorPerformance performance)
         {
-            float normal = TrailsGPUProxy.StepSeconds * 0.033333f;
+            float normal = 0.033333f;   // people per virtual second
             switch (performance)
             {
                 case AttractorPerformance.Normal:
