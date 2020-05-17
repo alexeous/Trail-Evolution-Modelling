@@ -1,21 +1,19 @@
-#include "SaveNodesTramplingAsEdgesKernel.h"
+#include "ApplyTramplingsAndLawnRegeneration.h"
 #include "device_launch_parameters.h"
-#include "cuda_device_runtime_api.h"
 
-#define BLOCK_SIZE_X SAVE_NODES_TRAMPLING_AS_EDGES_BLOCK_SIZE_X
-#define BLOCK_SIZE_Y SAVE_NODES_TRAMPLING_AS_EDGES_BLOCK_SIZE_Y
+#define BLOCK_SIZE_X APPLY_TRAMPLINGS_AND_LAWN_REGENERATION_BLOCK_SIZE_X
+#define BLOCK_SIZE_Y APPLY_TRAMPLINGS_AND_LAWN_REGENERATION_BLOCK_SIZE_Y
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
-
-		using NodesFloatDevice = NodesDataHaloedDevice<float>;
 
 		inline __device__ void SaveTramplingToEdge(float& edge, bool tramplability, float node1, float node2) {
 			edge = tramplability * (node1 + node2) * 0.5f;
 		}
 
-		__global__ void SaveNodesTramplingAsEdgesKernel(NodesFloatDevice nodesTrampling, int graphW, int graphH,
-			EdgesTramplingEffect edges, TramplabilityMask tramplability) 
+		__global__ void ApplyTramplingsAndLawnRegenerationKernel(EdgesWeightsDevice target, int graphW, int graphH,
+			EdgesTramplingEffect indecentTrampling, NodesTramplingEffect decentTrampling,
+			TramplabilityMask tramplabilityMask) 
 		{
 			int i = blockIdx.x * blockDim.x + threadIdx.x;
 			int j = blockIdx.y * blockDim.y + threadIdx.y;
@@ -34,17 +32,15 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
-		cudaError SaveNodesTramplingAsEdges(NodesTramplingEffect* nodesTrampling, int graphW, int graphH,
-			EdgesTramplingEffect* targetEdges, TramplabilityMask* tramplabilityMask) 
+		void ApplyTramplingsAndLawnRegeneration(EdgesWeightsDevice* target, int graphW, int graphH, 
+			EdgesTramplingEffect* indecentTramplingEdges, NodesTramplingEffect* decentTramplingNodes, 
+			TramplabilityMask* tramplabilityMask) 
 		{
 			dim3 threadsDim(BLOCK_SIZE_X, BLOCK_SIZE_Y);
-			dim3 blocksDim(GetSaveNodesTramplingAsEdgesBlocksX(graphW),
-				           GetSaveNodesTramplingAsEdgesBlocksY(graphH));
-			
-			SaveNodesTramplingAsEdgesKernel<<<blocksDim, threadsDim>>>(*nodesTrampling->GetDataDevice(), graphW, graphH,
-				*targetEdges, *tramplabilityMask);
+			dim3 blocksDim(GetApplyTramplingsAndLawnRegenerationBlocksX(graphW),
+				           GetApplyTramplingsAndLawnRegenerationBlocksY(graphH));
 
-			return cudaGetLastError();
+
 		}
 
 	}

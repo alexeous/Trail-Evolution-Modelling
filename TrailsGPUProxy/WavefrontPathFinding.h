@@ -27,8 +27,6 @@ namespace TrailEvolutionModelling {
 		template cudaError_t WavefrontPathFinding<false, true>(ComputeNodesPair*, int, int, EdgesWeightsDevice*, int, float*, ExitFlag*, cudaStream_t);
 		template cudaError_t WavefrontPathFinding<true, false>(ComputeNodesPair*, int, int, EdgesWeightsDevice*, int, float*, ExitFlag*, cudaStream_t);
 		template cudaError_t WavefrontPathFinding<true, true>(ComputeNodesPair*, int, int, EdgesWeightsDevice*, int, float*, ExitFlag*, cudaStream_t);
-
-
-
+		
 	}
 }

@@ -47,10 +47,10 @@ namespace TrailEvolutionModelling {
 			});
 		}
 
-		void NodesTramplingEffect::SaveAsEdgesSync(EdgesDataDevice<float>* target, 
+		void NodesTramplingEffect::SaveAsEdgesSync(EdgesTramplingEffect* target,
 			TramplabilityMask* tramplabilityMask) 
 		{
-			SaveNodesTramplingAsEdges(effectDataDevice, graphW, graphH, target, tramplabilityMask);
+			SaveNodesTramplingAsEdges(this, graphW, graphH, target, tramplabilityMask);
 		}
 
 		float NodesTramplingEffect::CalcTramplingFactor(float peoplePerSecond) {
@@ -58,6 +58,10 @@ namespace TrailEvolutionModelling {
 				peoplePerSecond * performanceFactor * SIMULATION_STEP_SECONDS;
 		}
 
+
+		NodesFloatDevice* NodesTramplingEffect::GetDataDevice() {
+			return effectDataDevice;
+		}
 
 		void NodesTramplingEffect::SetAwaitedPathsNumber(int numAwaitedPaths) {
 			this->numAwaitedPaths = numAwaitedPaths;

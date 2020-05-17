@@ -9,6 +9,7 @@
 #include "Constants.h"
 #include "EdgesData.h"
 #include "TramplabilityMask.h"
+#include "EdgesTramplingEffect.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -22,13 +23,16 @@ namespace TrailEvolutionModelling {
 		struct NodesTramplingEffect : public IResource {
 			friend class ResourceManager;
 
+			float performanceFactor;
+			NodesFloatDevice* GetDataDevice();
+
 			void SetAwaitedPathsNumber(int numAwaitedPaths);
 			void DecrementAwaitedPathNumber();
 			void ClearSync();
 			void ApplyTramplingAsync(PoolEntry<DistancePairDevice*> distancePairEntry,
 				float pathThickness, float peoplePerSecond, PoolEntry<cudaStream_t> streamEntry,
 				CudaScheduler* scheduler);
-			void SaveAsEdgesSync(EdgesDataDevice<float>* target, TramplabilityMask* tramplabilityMask);
+			void SaveAsEdgesSync(EdgesTramplingEffect* target, TramplabilityMask* tramplabilityMask);
 
 			void AwaitAllPaths();
 			void CancelWaiting();
@@ -45,7 +49,6 @@ namespace TrailEvolutionModelling {
 		private:
 			int graphW;
 			int graphH;
-			float performanceFactor;
 			float graphStep;
 			NodesFloatDevice* effectDataDevice = nullptr;
 
