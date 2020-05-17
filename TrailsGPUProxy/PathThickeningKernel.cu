@@ -89,9 +89,9 @@ namespace TrailEvolutionModelling {
 		enum EdgeType { Straight, Diagonal };
 
 		template<EdgeType EdgeType>
-		inline __device__ void ProcessNeighbour(float& distance, bool isTramplable, float neighbour)
+		inline __device__ void ProcessNeighbour(float& distance, bool isTramplable, float neighbour, float graphStep)
 		{
-			constexpr float edge = EdgeType == EdgeType::Diagonal
+			constexpr float dirFactor = EdgeType == EdgeType::Diagonal
 				? 1.41421356f // sqrt(2)
 				: 1;
 			
@@ -99,13 +99,13 @@ namespace TrailEvolutionModelling {
 			// so min will choose 'distance'. This way we skip the non-tramplable edges.
 			// Otherwise, ((neighbour + edge) / isTramplable) == (neighbour + edge)
 			// and thus min does the real choice between this value and the old distance value
-			distance = min(distance, (neighbour + edge) / isTramplable);
+			distance = min(distance, (neighbour + graphStep * dirFactor) / isTramplable);
 		}
 
 
 		__global__ void PathThickeningKernel(NodesDataHaloedDevice<float> read,
 			NodesDataHaloedDevice<float> write,
-			int graphW, int graphH, TramplabilityMask tramplabilityMask) 
+			int graphW, int graphH, float graphStep, TramplabilityMask tramplabilityMask) 
 		{
 			__shared__ float distanceShared[SHARED_ARRAYS_SIZE_X][SHARED_ARRAYS_SIZE_Y];
 
@@ -117,20 +117,20 @@ namespace TrailEvolutionModelling {
 
 			if(i < graphW && j < graphH) {
 				float distance = GetAt(distanceShared, threadIdx.x, threadIdx.y);
-				ProcessNeighbour<EdgeType::Diagonal>(distance, tramplabilityMask.NW(i, j, graphW), GetAt(distanceShared, (int)threadIdx.x - 1, (int)threadIdx.y - 1));
-				ProcessNeighbour<EdgeType::Straight>(distance, tramplabilityMask.N (i, j, graphW), GetAt(distanceShared, (int)threadIdx.x,     (int)threadIdx.y - 1));
-				ProcessNeighbour<EdgeType::Diagonal>(distance, tramplabilityMask.NE(i, j, graphW), GetAt(distanceShared, (int)threadIdx.x + 1, (int)threadIdx.y - 1));
-				ProcessNeighbour<EdgeType::Straight>(distance, tramplabilityMask.W (i, j, graphW), GetAt(distanceShared, (int)threadIdx.x - 1, (int)threadIdx.y));
-				ProcessNeighbour<EdgeType::Straight>(distance, tramplabilityMask.E (i, j, graphW), GetAt(distanceShared, (int)threadIdx.x + 1, (int)threadIdx.y));
-				ProcessNeighbour<EdgeType::Diagonal>(distance, tramplabilityMask.SW(i, j, graphW), GetAt(distanceShared, (int)threadIdx.x - 1, (int)threadIdx.y + 1));
-				ProcessNeighbour<EdgeType::Straight>(distance, tramplabilityMask.S (i, j, graphW), GetAt(distanceShared, (int)threadIdx.x,     (int)threadIdx.y + 1));
-				ProcessNeighbour<EdgeType::Diagonal>(distance, tramplabilityMask.SE(i, j, graphW), GetAt(distanceShared, (int)threadIdx.x + 1, (int)threadIdx.y + 1));
+				ProcessNeighbour<EdgeType::Diagonal>(distance, tramplabilityMask.NW(i, j, graphW), GetAt(distanceShared, (int)threadIdx.x - 1, (int)threadIdx.y - 1), graphStep);
+				ProcessNeighbour<EdgeType::Straight>(distance, tramplabilityMask.N (i, j, graphW), GetAt(distanceShared, (int)threadIdx.x,     (int)threadIdx.y - 1), graphStep);
+				ProcessNeighbour<EdgeType::Diagonal>(distance, tramplabilityMask.NE(i, j, graphW), GetAt(distanceShared, (int)threadIdx.x + 1, (int)threadIdx.y - 1), graphStep);
+				ProcessNeighbour<EdgeType::Straight>(distance, tramplabilityMask.W (i, j, graphW), GetAt(distanceShared, (int)threadIdx.x - 1, (int)threadIdx.y),     graphStep);
+				ProcessNeighbour<EdgeType::Straight>(distance, tramplabilityMask.E (i, j, graphW), GetAt(distanceShared, (int)threadIdx.x + 1, (int)threadIdx.y),     graphStep);
+				ProcessNeighbour<EdgeType::Diagonal>(distance, tramplabilityMask.SW(i, j, graphW), GetAt(distanceShared, (int)threadIdx.x - 1, (int)threadIdx.y + 1), graphStep);
+				ProcessNeighbour<EdgeType::Straight>(distance, tramplabilityMask.S (i, j, graphW), GetAt(distanceShared, (int)threadIdx.x,     (int)threadIdx.y + 1), graphStep);
+				ProcessNeighbour<EdgeType::Diagonal>(distance, tramplabilityMask.SE(i, j, graphW), GetAt(distanceShared, (int)threadIdx.x + 1, (int)threadIdx.y + 1), graphStep);
 				write.At(i + 1, j + 1, graphW) = distance;
 			}
 		}
 
 		template<bool SwapNodesPair>
-		cudaError_t PathThickening(NodesDataDevicePair<float>* distanceToPath, int graphW, int graphH,
+		cudaError_t PathThickening(NodesDataDevicePair<float>* distanceToPath, int graphW, int graphH, float graphStep,
 			TramplabilityMask* tramplabilityMask, cudaStream_t stream)
 		{
 			dim3 threadsDim(BLOCK_SIZE_X, BLOCK_SIZE_Y);
@@ -138,11 +138,11 @@ namespace TrailEvolutionModelling {
 
 			if constexpr(!SwapNodesPair) {
 				PathThickeningKernel<<<blocksDim, threadsDim, 0, stream>>>
-					(*distanceToPath->readOnly, *distanceToPath->writeOnly, graphW, graphH, *tramplabilityMask);
+					(*distanceToPath->readOnly, *distanceToPath->writeOnly, graphW, graphH, graphStep, *tramplabilityMask);
 			}
 			else {
 				PathThickeningKernel<<<blocksDim, threadsDim, 0, stream>>>
-					(*distanceToPath->writeOnly, *distanceToPath->readOnly, graphW, graphH, *tramplabilityMask);
+					(*distanceToPath->writeOnly, *distanceToPath->readOnly, graphW, graphH, graphStep, *tramplabilityMask);
 			}
 
 			return cudaGetLastError();

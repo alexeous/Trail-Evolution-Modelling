@@ -12,12 +12,12 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		template<bool SwapNodesPair>
-		cudaError_t PathThickening(NodesDataDevicePair<float>* distanceToPath, int graphW, int graphH, 
+		cudaError_t PathThickening(NodesDataDevicePair<float>* distanceToPath, int graphW, int graphH, float graphStep,
 			TramplabilityMask* tramplabilityMask, cudaStream_t stream);
 
-		template cudaError_t PathThickening<false>(NodesDataDevicePair<float>* distanceToPath, int graphW, int graphH,
+		template cudaError_t PathThickening<false>(NodesDataDevicePair<float>* distanceToPath, int graphW, int graphH, float graphStep,
 			TramplabilityMask* tramplabilityMask, cudaStream_t stream);
-		template cudaError_t PathThickening<true>(NodesDataDevicePair<float>* distanceToPath, int graphW, int graphH,
+		template cudaError_t PathThickening<true>(NodesDataDevicePair<float>* distanceToPath, int graphW, int graphH, float graphStep,
 			TramplabilityMask* tramplabilityMask, cudaStream_t stream);
 
 		inline int GetPathThickeningBlocksX(int graphW) {

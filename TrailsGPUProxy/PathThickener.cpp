@@ -56,8 +56,8 @@ namespace TrailEvolutionModelling {
 		{
 			int doubleIterations = (int)ceilf(thickness / graphStep / 2);
 			for(int i = 0; i < doubleIterations; i++) {
-				CHECK_CUDA((PathThickening<false>(distancePair, graphW, graphH, tramplabilityMask, stream)));
-				CHECK_CUDA((PathThickening<true>(distancePair, graphW, graphH, tramplabilityMask, stream)));
+				CHECK_CUDA((PathThickening<false>(distancePair, graphW, graphH, graphStep, tramplabilityMask, stream)));
+				CHECK_CUDA((PathThickening<true>(distancePair, graphW, graphH, graphStep, tramplabilityMask, stream)));
 			}
 		}
 

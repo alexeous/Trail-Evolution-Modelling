@@ -131,7 +131,7 @@ namespace TrailEvolutionModelling {
 				edgesHost->CopyToSync(edgesDevice, w, h);
 				EdgesWeightsDevice* maximumWeights = resources.New<EdgesWeightsDevice>(edgesDevice, w, h);
 
-				constexpr int numThickIterations = 200;
+				constexpr int numThickIterations = 50;
 				for(int i = 0; i < numThickIterations; i++) {
 					NotifyProgress(String::Format(L"[‘аза 1] —имул€ци€ процесса вытаптывани€ ({0}/{1})", i, numThickIterations));
 
@@ -159,7 +159,7 @@ namespace TrailEvolutionModelling {
 				//DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentOriginal, cudaScheduler);
 				//nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
 
-				constexpr int numThinIterations = 200;
+				constexpr int numThinIterations = 50;
 				for(int i = 0; i < numThinIterations; i++) {
 					NotifyProgress(String::Format(L"[‘аза 2] —имул€ци€ процесса вытаптывани€ ({0}/{1})", i, numThinIterations));
 					
