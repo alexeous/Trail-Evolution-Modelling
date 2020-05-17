@@ -20,7 +20,7 @@ namespace TrailEvolutionModelling {
 			TrailsComputationsOutput^ ComputeTrails(TrailsComputationsInput^ input);
 
 		internal:
-			void NotifyProgress(const wchar_t* stage);
+			void NotifyProgress(String^ stage);
 		};
 	}
 }

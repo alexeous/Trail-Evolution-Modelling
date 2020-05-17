@@ -21,6 +21,7 @@ namespace TrailEvolutionModelling {
 		private:
 			void ComputationProc();
 			void NotifyProgress(const wchar_t* stage);
+			void NotifyProgress(String^ stage);
 
 			void ApplyTrampledness(Graph^ graph, EdgesDataHost<float>* edgesData);
 

@@ -17,8 +17,8 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
-		void TrailsGPUProxy::NotifyProgress(const wchar_t* stage) {
-			ProgressChanged(gcnew String(stage));
+		void TrailsGPUProxy::NotifyProgress(String^ stage) {
+			ProgressChanged(stage);
 		}
 	}
 }

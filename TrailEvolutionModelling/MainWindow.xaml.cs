@@ -455,15 +455,20 @@ namespace TrailEvolutionModelling
 
                         Color minCol = Color.FromArgb(255, 0, 255, 0);
                         Color maxCol = Color.Red;
-                        //const float minW = 1f;
-                        //const float maxW = 3.4f;
-                        const float minW = 0;
-                        const float maxW = 0.05f;
+                        float minW = TrailsGPUProxy.MinimumTramplableWeight;
+                        float maxW = AreaTypes.All
+                                        .Where(t => t.Attributes.IsTramplable)
+                                        .Max(t => t.Attributes.Weight);
 
                         foreach (var edge in graph.Edges)
                         {
                             if (edge.Trampledness == 0)
                                 continue;
+
+                            if (!edge.IsTramplable)
+                            {
+                                //MessageBox.Show(edge.Trampledness.ToString());   
+                            }
 
                             Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
                             Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();

@@ -93,6 +93,9 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="ApplyTramplingsAndLawnRegeneration.cu">
+      <FileType>Document</FileType>
+    </CudaCompile>
     <ClCompile Include="Attractor.cpp" />
     <ClCompile Include="AttractorsMap.cpp" />
     <ClCompile Include="ComputationThread.cpp" />
@@ -147,6 +150,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ApplyTramplingsAndLawnRegeneration.h" />
     <ClInclude Include="Attractor.h" />
     <ClInclude Include="AttractorsMap.h" />
     <ClInclude Include="ComputationThread.h" />
@@ -159,6 +163,7 @@
     <ClInclude Include="CudaScheduler.h" />
     <ClInclude Include="EdgesData.h" />
     <ClInclude Include="CudaUtils.h" />
+    <ClInclude Include="EdgesTramplingEffect.h" />
     <ClInclude Include="EdgesWeights.h" />
     <ClInclude Include="ExitFlag.h" />
     <ClInclude Include="IResource.h" />

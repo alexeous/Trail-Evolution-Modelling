@@ -51,13 +51,10 @@
     <ClCompile Include="PathThickener.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="NodesApplyTramplingKernel.cu">
-      <Filter>CudaKernels</Filter>
-    </ClCompile>
     <ClCompile Include="NodesTramplingEffect.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="SaveNodesTramplingAsEdgesKernel.cu">
+    <ClCompile Include="ApplyTramplingsAndLawnRegeneration.cu">
       <Filter>CudaKernels</Filter>
     </ClCompile>
   </ItemGroup>
@@ -160,6 +157,12 @@
     <ClInclude Include="SaveNodesTramplingAsEdgesKernel.h">
       <Filter>CudaKernels</Filter>
     </ClInclude>
+    <ClInclude Include="EdgesTramplingEffect.h">
+      <Filter>Data\Edges</Filter>
+    </ClInclude>
+    <ClInclude Include="ApplyTramplingsAndLawnRegeneration.h">
+      <Filter>CudaKernels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Exceptions">
@@ -200,5 +203,7 @@
     <CudaCompile Include="PathThickeningKernel.cu">
       <Filter>CudaKernels</Filter>
     </CudaCompile>
+    <CudaCompile Include="NodesApplyTramplingKernel.cu" />
+    <CudaCompile Include="SaveNodesTramplingAsEdgesKernel.cu" />
   </ItemGroup>
 </Project>
