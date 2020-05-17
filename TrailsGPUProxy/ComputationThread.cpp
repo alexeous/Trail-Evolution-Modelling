@@ -101,8 +101,11 @@ namespace TrailEvolutionModelling {
 				TramplabilityMask* tramplabilityMask = resources.New<TramplabilityMask>(graph, resources);
 
 				NotifyProgress(L"[Фаза 1] Инициализация весов рёбер для \"непорядочных пешеходов\"");
-				EdgesWeightsHost* edgesHost = resources.New<EdgesWeightsHost>(graph, false);
+				EdgesWeightsHost* edgesHost = resources.New<EdgesWeightsHost>(graph, TRAMPLABLE_WEIGHT_FOR_INDECENT);
 				EdgesWeightsDevice* edgesDevice = resources.New<EdgesWeightsDevice>(edgesHost, w, h);
+
+				EdgesWeightsDevice* edgesIndecentDeviceCopy = resources.New<EdgesWeightsDevice>(w, h);
+				edgesDevice->CopyToSync(edgesIndecentDeviceCopy, w, h);
 
 				NotifyProgress(L"Создание исполнителей волнового алгоритма на GPU");
 				std::vector<WavefrontJob*> wavefrontJobs = WavefrontJobsFactory::CreateJobs(w, h, &resources, attractors);
@@ -136,7 +139,10 @@ namespace TrailEvolutionModelling {
 
 
 				NotifyProgress(L"[Фаза 1] Инициализация весов рёбер для \"порядочных пешеходов\"");
-				edgesHost->InitFromGraph(graph, false);
+				edgesHost->InitFromGraph(graph, MIN_TRAMPLABLE_WEIGHT);
+				EdgesWeightsDevice* minimumWeights = resources.New<EdgesWeightsDevice>(edgesHost, w, h);
+
+				edgesHost->InitFromGraph(graph);
 				edgesHost->CopyToSync(edgesDevice, w, h);
 				
 				EdgesWeightsDevice* maximumWeights = resources.New<EdgesWeightsDevice>(w, h);
@@ -144,7 +150,7 @@ namespace TrailEvolutionModelling {
 
 				nodesTramplingEffect->performanceFactor = DECENT_PEDESTRIANS_SHARE;
 				
-				constexpr int numThickIterations = 1;
+				constexpr int numThickIterations = 50;
 				for(int i = 0; i < numThickIterations; i++) {
 					NotifyProgress(String::Format(
 						L"[Фаза 1] Симуляция процесса вытаптывания ({0}/{1})",
@@ -158,7 +164,7 @@ namespace TrailEvolutionModelling {
 					}
 					nodesTramplingEffect->AwaitAllPaths();
 					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, indecentTrampling,
-						nodesTramplingEffect->GetDataDevice(), tramplabilityMask, maximumWeights);
+						nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
 
 					edgesDevice->CopyToSync(edgesHost, w, h);
 				}
@@ -168,7 +174,12 @@ namespace TrailEvolutionModelling {
 
 				pathThickener->thickness = SECOND_PHASE_PATH_THICKNESS;
 
+
 				NotifyProgress(L"[Фаза 2] Вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
+				EdgesWeightsDevice* currentEdgesCopy = resources.New<EdgesWeightsDevice>(w, h);
+				edgesDevice->CopyToSync(currentEdgesCopy, w, h);
+				edgesIndecentDeviceCopy->CopyToSync(edgesDevice, w, h);
+
 				nodesTramplingEffect->performanceFactor = INDECENT_PEDESTRIANS_SHARE;
 				nodesTramplingEffect->SetAwaitedPathsNumber(wavefrontTable.numPaths);
 				nodesTramplingEffect->ClearSync();
@@ -179,8 +190,12 @@ namespace TrailEvolutionModelling {
 				nodesTramplingEffect->AwaitAllPaths();
 				nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
 
+				currentEdgesCopy->CopyToSync(edgesDevice, w, h);
+				resources.Free(edgesIndecentDeviceCopy);
+				resources.Free(currentEdgesCopy);
+
 				nodesTramplingEffect->performanceFactor = DECENT_PEDESTRIANS_SHARE;
-				constexpr int numThinIterations = 50;
+				constexpr int numThinIterations = 100;
 				for(int i = 0; i < numThinIterations; i++) {
 					NotifyProgress(String::Format(
 						L"[Фаза 2] Симуляция процесса вытаптывания ({0}/{1})",
@@ -194,7 +209,7 @@ namespace TrailEvolutionModelling {
 					}
 					nodesTramplingEffect->AwaitAllPaths();
 					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, indecentTrampling,
-						nodesTramplingEffect->GetDataDevice(), tramplabilityMask, maximumWeights);
+						nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
 
 					edgesDevice->CopyToSync(edgesHost, w, h);
 				}

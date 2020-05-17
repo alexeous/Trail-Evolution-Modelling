@@ -37,7 +37,30 @@ namespace TrailEvolutionModelling {
 
 #ifndef __CUDACC__
 			inline T& AtDir(int i, int j, int w, int dir);
-			void ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^));
+
+			template<typename... TArgs>
+			inline void ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^, TArgs...), TArgs... args) {
+				int w = graph->Width;
+				int h = graph->Height;
+				for(int i = 0; i < w; i++) {
+					for(int j = 0; j < h; j++) {
+						bool notLastColumn = i < w - 1;
+						bool notLastRow = j < h - 1;
+						bool notFirstColumn = i != 0;
+
+						Node^ node = graph->GetNodeAtOrNull(i, j);
+
+						func(E(i, j, w), GetEdge(node, Direction::E), args...);
+						if(notLastRow) {
+							func(S(i, j, w), GetEdge(node, Direction::S), args...);
+							if(notLastColumn)
+								func(SE(i, j, w), GetEdge(node, Direction::SE), args...);
+							if(notFirstColumn)
+								func(SW(i, j, w), GetEdge(node, Direction::SW), args...);
+						}
+					}
+				}
+			}
 
 		protected:
 			virtual void Free(ResourceManager&) = 0;
@@ -109,30 +132,11 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
-		template<typename T>
-		inline void EdgesData<T>::ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^))
-		{
-			int w = graph->Width;
-			int h = graph->Height;
-			for(int i = 0; i < w; i++) {
-				for(int j = 0; j < h; j++) {
-					bool notLastColumn = i < w - 1;
-					bool notLastRow = j < h - 1;
-					bool notFirstColumn = i != 0;
-
-					Node^ node = graph->GetNodeAtOrNull(i, j);
-
-					func(E(i, j, w), GetEdge(node, Direction::E));
-					if(notLastRow) {
-						func(S(i, j, w), GetEdge(node, Direction::S));
-						if(notLastColumn)
-							func(SE(i, j, w), GetEdge(node, Direction::SE));
-						if(notFirstColumn)
-							func(SW(i, j, w), GetEdge(node, Direction::SW));
-					}
-				}
-			}
-		}
+		//template<typename T, typename... TArgs>
+		//inline void EdgesData<T>::ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^, TArgs...))
+		//{
+		//	
+		//}
 
 		template<typename T>
 		inline Edge^ EdgesData<T>::GetEdge(Node^ node, Direction direction) {

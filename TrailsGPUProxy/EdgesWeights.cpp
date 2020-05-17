@@ -6,31 +6,37 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
-		EdgesWeightsHost::EdgesWeightsHost(Graph^ graph, bool initiallyTrampleAll)
+		EdgesWeightsHost::EdgesWeightsHost(Graph^ graph)
 			: EdgesDataHost(graph->Width, graph->Height) 
 		{
-			InitFromGraph(graph, initiallyTrampleAll);
+			InitFromGraph(graph);
 		}
 
-		void EdgesWeightsHost::InitFromGraph(Graph^ graph, bool initiallyTrampleAll) {
-			if(initiallyTrampleAll) {
-				ZipWithGraphEdges(graph, [](float& weight, Edge^ edge) {
-					if(edge == nullptr) {
-						weight = INFINITY;
-						return;
-					}
-					weight = edge->IsTramplable ? TRAMPLABLE_WEIGHT_FOR_INDECENT : edge->Weight;
-				});
-			}
-			else {
-				ZipWithGraphEdges(graph, [](float& weight, Edge^ edge) {
-					if(edge == nullptr) {
-						weight = INFINITY;
-						return;
-					}
-					weight = edge->Weight;
-				});
-			}
+		EdgesWeightsHost::EdgesWeightsHost(Graph^ graph, float setAllTramplable)
+			: EdgesDataHost(graph->Width, graph->Height) {
+			InitFromGraph(graph, setAllTramplable);
+		}
+
+		void EdgesWeightsHost::InitFromGraph(Graph^ graph) {
+			void (*func)(float&, Edge^) = [](float& weight, Edge^ edge) {
+				if(edge == nullptr) {
+					weight = INFINITY;
+					return;
+				}
+				weight = edge->Weight;
+			};
+			ZipWithGraphEdges(graph, func);
+		}
+
+		void EdgesWeightsHost::InitFromGraph(Graph^ graph, float setAllTramplable) {
+			void(*func)(float&, Edge^, float) = [](float& weight, Edge^ edge, float setAllTramplable) {
+				if(edge == nullptr) {
+					weight = INFINITY;
+					return;
+				}
+				weight = edge->IsTramplable ? setAllTramplable : edge->Weight;
+			};
+			ZipWithGraphEdges(graph, func, setAllTramplable);
 		}
 
 	}

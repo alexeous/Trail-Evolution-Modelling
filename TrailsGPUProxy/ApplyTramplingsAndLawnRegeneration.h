@@ -16,7 +16,7 @@ namespace TrailEvolutionModelling {
 
 		cudaError ApplyTramplingsAndLawnRegeneration(EdgesWeightsDevice* target, int graphW, int graphH,
 			EdgesTramplingEffect* indecentTramplingEdges, NodesFloatDevice* decentTramplingNodes,
-			TramplabilityMask* tramplabilityMask, EdgesWeightsDevice* maxWeights);
+			TramplabilityMask* tramplabilityMask, EdgesWeightsDevice* minWeights, EdgesWeightsDevice* maxWeights);
 
 		inline int GetApplyTramplingsAndLawnRegenerationBlocksX(int graphW) {
 			return divceil(graphW, APPLY_TRAMPLINGS_AND_LAWN_REGENERATION_BLOCK_SIZE_X);
