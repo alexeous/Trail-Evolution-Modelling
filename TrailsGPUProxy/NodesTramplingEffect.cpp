@@ -50,7 +50,7 @@ namespace TrailEvolutionModelling {
 		void NodesTramplingEffect::SaveAsEdgesSync(EdgesTramplingEffect* target,
 			TramplabilityMask* tramplabilityMask) 
 		{
-			SaveNodesTramplingAsEdges(this, graphW, graphH, target, tramplabilityMask);
+			SaveNodesTramplingAsEdges(effectDataDevice, graphW, graphH, target, tramplabilityMask);
 		}
 
 		float NodesTramplingEffect::CalcTramplingFactor(float peoplePerSecond) {

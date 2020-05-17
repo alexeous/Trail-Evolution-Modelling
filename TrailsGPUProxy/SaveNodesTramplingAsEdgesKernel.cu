@@ -34,14 +34,14 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
-		cudaError SaveNodesTramplingAsEdges(NodesTramplingEffect* nodesTrampling, int graphW, int graphH,
+		cudaError SaveNodesTramplingAsEdges(NodesFloatDevice* nodesTrampling, int graphW, int graphH,
 			EdgesTramplingEffect* targetEdges, TramplabilityMask* tramplabilityMask) 
 		{
 			dim3 threadsDim(BLOCK_SIZE_X, BLOCK_SIZE_Y);
 			dim3 blocksDim(GetSaveNodesTramplingAsEdgesBlocksX(graphW),
 				           GetSaveNodesTramplingAsEdgesBlocksY(graphH));
 			
-			SaveNodesTramplingAsEdgesKernel<<<blocksDim, threadsDim>>>(*nodesTrampling->GetDataDevice(), graphW, graphH,
+			SaveNodesTramplingAsEdgesKernel<<<blocksDim, threadsDim>>>(*nodesTrampling, graphW, graphH,
 				*targetEdges, *tramplabilityMask);
 
 			return cudaGetLastError();

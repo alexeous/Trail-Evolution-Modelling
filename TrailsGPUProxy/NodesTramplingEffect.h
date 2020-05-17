@@ -1,9 +1,9 @@
 #pragma once
+#include "cuda_runtime.h"
+#include "ResourceManager.h"
 #include <atomic>
 #include <gcroot.h>
-#include "cuda_runtime.h"
 #include "NodesDataHaloed.h"
-#include "ResourceManager.h"
 #include "ObjectPool.h"
 #include "CudaScheduler.h"
 #include "Constants.h"
