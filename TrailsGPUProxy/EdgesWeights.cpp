@@ -6,37 +6,57 @@
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
-		EdgesWeightsHost::EdgesWeightsHost(Graph^ graph)
-			: EdgesDataHost(graph->Width, graph->Height) 
-		{
-			InitFromGraph(graph);
-		}
+		//EdgesWeightsHost::EdgesWeightsHost(Graph^ graph)
+		//	: EdgesDataHost(graph->Width, graph->Height) 
+		//{
+		//	InitFromGraph(graph);
+		//}
 
-		EdgesWeightsHost::EdgesWeightsHost(Graph^ graph, float setAllTramplable)
+		EdgesWeightsHost::EdgesWeightsHost(Graph^ graph, bool trampleTramplable)
 			: EdgesDataHost(graph->Width, graph->Height) {
-			InitFromGraph(graph, setAllTramplable);
+			InitFromGraph(graph, trampleTramplable);
 		}
 
-		void EdgesWeightsHost::InitFromGraph(Graph^ graph) {
-			void (*func)(float&, Edge^) = [](float& weight, Edge^ edge) {
+		//void EdgesWeightsHost::InitFromGraph(Graph^ graph) {
+		//	
+		//	ZipWithGraphEdges(graph, func);
+		//}
+
+		void EdgesWeightsHost::InitFromGraph(Graph^ graph, float replaceAllTramplable) {
+			void(*func)(float&, Edge^, float) = [](float& weight, Edge^ edge, float replaceTramplable) {
 				if(edge == nullptr) {
 					weight = INFINITY;
 					return;
 				}
-				weight = edge->Weight;
+				weight = edge->IsTramplable ? replaceTramplable : edge->Weight;
 			};
+			ZipWithGraphEdges(graph, func, replaceAllTramplable);
+		}
+
+		void EdgesWeightsHost::InitFromGraph(Graph^ graph, bool trampleTramplable) {
+			void(*func)(float&, Edge^);
+			if(trampleTramplable) {
+				func = [](float& weight, Edge^ edge) {
+					if(edge == nullptr) {
+						weight = INFINITY;
+						return;
+					}
+					weight = edge->IsTramplable 
+						? edge->Weight / TRAMPLABLE_WEIGHT_REDUCTION_FACTOR_FOR_INDECENT 
+						: edge->Weight;
+					weight = std::fmaxf(MIN_TRAMPLABLE_WEIGHT, weight);
+				};
+			}
+			else {
+				func = [](float& weight, Edge^ edge) {
+					if(edge == nullptr) {
+						weight = INFINITY;
+						return;
+					}
+					weight = edge->Weight;
+				};
+			}
 			ZipWithGraphEdges(graph, func);
-		}
-
-		void EdgesWeightsHost::InitFromGraph(Graph^ graph, float setAllTramplable) {
-			void(*func)(float&, Edge^, float) = [](float& weight, Edge^ edge, float setAllTramplable) {
-				if(edge == nullptr) {
-					weight = INFINITY;
-					return;
-				}
-				weight = edge->IsTramplable ? setAllTramplable : edge->Weight;
-			};
-			ZipWithGraphEdges(graph, func, setAllTramplable);
 		}
 
 	}

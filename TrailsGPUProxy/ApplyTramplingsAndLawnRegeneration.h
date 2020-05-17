@@ -14,8 +14,8 @@ namespace TrailEvolutionModelling {
 
 		using NodesFloatDevice = NodesDataHaloedDevice<float>;
 
-		cudaError ApplyTramplingsAndLawnRegeneration(EdgesWeightsDevice* target, int graphW, int graphH,
-			EdgesTramplingEffect* indecentTramplingEdges, NodesFloatDevice* decentTramplingNodes,
+		cudaError ApplyTramplingsAndLawnRegeneration(EdgesWeightsDevice* target, int graphW, int graphH, 
+			float stepSeconds, EdgesTramplingEffect* indecentTramplingEdges, NodesFloatDevice* decentTramplingNodes,
 			TramplabilityMask* tramplabilityMask, EdgesWeightsDevice* minWeights, EdgesWeightsDevice* maxWeights);
 
 		inline int GetApplyTramplingsAndLawnRegenerationBlocksX(int graphW) {

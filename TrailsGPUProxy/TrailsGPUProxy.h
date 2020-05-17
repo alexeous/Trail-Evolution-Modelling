@@ -8,6 +8,7 @@ using namespace TrailEvolutionModelling::GraphTypes;
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
+
 		public ref class TrailsGPUProxy {
 		public:
 			static initonly int StepSeconds = SIMULATION_STEP_SECONDS;
@@ -22,6 +23,7 @@ namespace TrailEvolutionModelling {
 		internal:
 			void NotifyProgress(String^ stage);
 		};
+
 	}
 }
 

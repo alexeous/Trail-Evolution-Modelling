@@ -24,6 +24,7 @@ namespace TrailEvolutionModelling {
 			friend class ResourceManager;
 
 			float performanceFactor;
+			float simulationStepSeconds;
 			NodesFloatDevice* GetDataDevice();
 
 			void SetAwaitedPathsNumber(int numAwaitedPaths);
@@ -39,7 +40,7 @@ namespace TrailEvolutionModelling {
 
 		protected:
 			NodesTramplingEffect(int graphW, int graphH, float graphStep,
-				float performanceFactor, ResourceManager* resources);
+				float performanceFactor, float simulationStepSeconds, ResourceManager* resources);
 			void Free(ResourceManager& resources) override;
 
 		private:

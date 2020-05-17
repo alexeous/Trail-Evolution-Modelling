@@ -6,11 +6,12 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		NodesTramplingEffect::NodesTramplingEffect(int graphW, int graphH, float graphStep, 
-			float performanceFactor, ResourceManager* resources)
+			float performanceFactor, float simulationStepSeconds, ResourceManager* resources)
 			: graphW(graphW),
 			  graphH(graphH),
 			  graphStep(graphStep),
 			  performanceFactor(performanceFactor),
+			  simulationStepSeconds(simulationStepSeconds),
 			  effectDataDevice(resources->New<NodesFloatDevice>(graphW, graphH))
 		{
 			InitWaitObject();
@@ -55,7 +56,7 @@ namespace TrailEvolutionModelling {
 
 		float NodesTramplingEffect::CalcTramplingFactor(float peoplePerSecond) {
 			return TRAMPLING_EFFECT_PER_HUMAN_STEP * HUMAN_STEPS_PER_METER * graphStep *
-				peoplePerSecond * performanceFactor * SIMULATION_STEP_SECONDS;
+				peoplePerSecond * performanceFactor * simulationStepSeconds;
 		}
 
 

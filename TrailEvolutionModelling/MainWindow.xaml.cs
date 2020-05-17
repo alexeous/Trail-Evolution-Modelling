@@ -453,26 +453,20 @@ namespace TrailEvolutionModelling
                     {
                         var edgeLayer = new WritableLayer();
 
-                        Color minCol = Color.FromArgb(255, 0, 255, 0);
-                        Color maxCol = Color.Red;
+                        Color minCol = Color.Red;
+                        Color maxCol = Color.FromArgb(255, 0, 255, 0);
                         float minW = TrailsGPUProxy.MinimumTramplableWeight;
-                        float maxW = AreaTypes.All
-                                        .Where(t => t.Attributes.IsTramplable)
-                                        .Max(t => t.Attributes.Weight);
+                        float maxW = AreaTypes.Default.Attributes.Weight;
 
                         foreach (var edge in graph.Edges)
                         {
                             if (edge.Trampledness == 0)
                                 continue;
 
-                            if (!edge.IsTramplable)
-                            {
-                                //MessageBox.Show(edge.Trampledness.ToString());   
-                            }
-
                             Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
                             Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();
-                            float t = (edge.Trampledness - minW) / (maxW - minW);
+                            float newWeight = edge.Weight - edge.Trampledness;
+                            float t = (newWeight - minW) / (edge.Weight - minW);
                             Color color = Color.FromArgb(255, Lerp(minCol.R, maxCol.R, t), Lerp(minCol.G, maxCol.G, t), Lerp(minCol.B, maxCol.B, t));
                             edgeLayer.Add(new Feature
                             {

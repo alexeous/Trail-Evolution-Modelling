@@ -3,6 +3,10 @@
 #include "TrailsGPUProxy.h"
 #include "ThreadPool.h"
 #include "NodesTramplingEffect.h"
+#include "WavefrontCompletenessTable.h"
+#include "WavefrontJob.h"
+#include "EdgesWeights.h"
+#include "CudaScheduler.h"
 
 using namespace System;
 using namespace System::Collections::Concurrent;
@@ -20,6 +24,7 @@ namespace TrailEvolutionModelling {
 
 		private:
 			void ComputationProc();
+			void DoSimulationStep(float performanceFactor, NodesTramplingEffect* nodesTramplingEffect, WavefrontCompletenessTable& wavefrontTable, std::vector<WavefrontJob*>& wavefrontJobs, EdgesWeightsDevice* edgesDevice, CudaScheduler& cudaScheduler);
 			void NotifyProgress(const wchar_t* stage);
 			void NotifyProgress(String^ stage);
 

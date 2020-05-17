@@ -99,6 +99,7 @@ namespace TrailEvolutionModelling {
 		protected:
 			EdgesDataDevice(int w, int h);
 			EdgesDataDevice(const EdgesDataHost<T>* host, int w, int h);
+			EdgesDataDevice(const EdgesDataDevice<T>* device, int w, int h);
 			void Free(ResourceManager&) override;
 		};
 
@@ -255,6 +256,13 @@ namespace TrailEvolutionModelling {
 			EdgesDataDevice(w, h)
 		{
 			host->CopyToSync(this, w, h);
+		}
+
+		template<typename T>
+		inline EdgesDataDevice<T>::EdgesDataDevice(const EdgesDataDevice<T>* device, int w, int h) :
+			EdgesDataDevice(w, h) 
+		{
+			device->CopyToSync(this, w, h);
 		}
 
 		template<typename T>

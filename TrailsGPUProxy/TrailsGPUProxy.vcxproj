@@ -136,6 +136,9 @@
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="TrailsGPUProxy.cpp" />
     <ClCompile Include="TramplabilityMask.cpp" />
+    <CudaCompile Include="UpdateIndecentEdges.cu">
+      <FileType>Document</FileType>
+    </CudaCompile>
     <ClCompile Include="WavefrontCompletenessTable.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
@@ -184,6 +187,7 @@
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="TrailsGPUProxy.h" />
     <ClInclude Include="TramplabilityMask.h" />
+    <ClInclude Include="UpdateIndecentEdges.h" />
     <ClInclude Include="WavefrontCompletenessTable.h" />
     <ClInclude Include="WavefrontJob.h" />
     <ClInclude Include="WavefrontJobsFactory.h" />

@@ -163,6 +163,9 @@
     <ClInclude Include="ApplyTramplingsAndLawnRegeneration.h">
       <Filter>CudaKernels</Filter>
     </ClInclude>
+    <ClInclude Include="UpdateIndecentEdges.h">
+      <Filter>CudaKernels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Exceptions">
@@ -205,5 +208,8 @@
     </CudaCompile>
     <CudaCompile Include="NodesApplyTramplingKernel.cu" />
     <CudaCompile Include="SaveNodesTramplingAsEdgesKernel.cu" />
+    <CudaCompile Include="UpdateIndecentEdges.cu">
+      <Filter>CudaKernels</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>
