@@ -39,6 +39,7 @@ namespace TrailEvolutionModelling
         private MapObjectEditing mapObjectEditing;
         private AttractorTool attractorTool;
         private AttractorEditing attractorEditing;
+        private WritableLayer edgeLayer;
         private Tool[] allTools;
 
         private Thread computationThread;
@@ -127,6 +128,8 @@ namespace TrailEvolutionModelling
             mapObjectLayer = new MapObjectLayer();
             boundingAreaLayer = new BoundingAreaLayer();
             attractorLayer = new WritableLayer();
+
+            edgeLayer = new WritableLayer();
         }
 
         private void InitializeMapControl()
@@ -140,6 +143,8 @@ namespace TrailEvolutionModelling
             mapControl.Map.Layers.Add(mapObjectLayer);
             mapControl.Map.Layers.Add(attractorLayer);
             mapControl.Map.Layers.Add(boundingAreaLayer);
+
+            mapControl.Map.Layers.Add(edgeLayer);
 
             mapControl.MouseLeftButtonDown += OnMapLeftClick;
             mapControl.MouseRightButtonDown += OnMapRightClick;
@@ -447,7 +452,7 @@ namespace TrailEvolutionModelling
 
                     Dispatcher.Invoke(() =>
                     {
-                        var edgeLayer = new WritableLayer();
+                        edgeLayer.Clear();
 
                         Color minCol = Color.Red;
                         Color maxCol = Color.FromArgb(255, 0, 255, 0);
@@ -473,7 +478,8 @@ namespace TrailEvolutionModelling
                                 }
                             });
                         }
-                        mapControl.Map.Layers.Add(edgeLayer);
+
+                        edgeLayer.Refresh();
 
                         int Lerp(int a, int b, float t)
                         {
