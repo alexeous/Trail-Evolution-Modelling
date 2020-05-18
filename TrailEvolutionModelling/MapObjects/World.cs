@@ -45,6 +45,9 @@ namespace TrailEvolutionModelling.MapObjects
             if (!BoundingArea.Geometry.Contains(point))
                 return false;
 
+            if (mapObjects.Length == 0)
+                return true;
+
             var mapObjBuffer = mapObjBuffers.Value;
             mapObjBuffer.Clear();
             spatialIndex.GetNonAlloc(point, mapObjBuffer);
@@ -61,6 +64,9 @@ namespace TrailEvolutionModelling.MapObjects
         {
             if (BoundingArea.IntersectsLine(nodePos, neighbourPos))
                 return AreaAttributes.Unwalkable;
+
+            if (mapObjects.Length == 0)
+                return AreaTypes.Default.Attributes;
 
             var mapObjBuffer = mapObjBuffers.Value;
             mapObjBuffer.Clear();
