@@ -131,14 +131,16 @@ namespace TrailEvolutionModelling {
 				edgesHost->CopyToSync(edgesDevice, w, h);
 				EdgesWeightsDevice* maximumWeights = resources.New<EdgesWeightsDevice>(edgesDevice, w, h);
 
-				constexpr int numThickIterations = 50;
-				for(int i = 0; i < numThickIterations; i++) {
-					NotifyProgress(String::Format(L"[Фаза 1] Симуляция процесса вытаптывания ({0}/{1})", i, numThickIterations));
+				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS;
+
+				constexpr int iterationsPhase1 = 0;
+				for(int i = 0; i < iterationsPhase1; i++) {
+					NotifyProgress(String::Format(L"[Фаза 1] Симуляция процесса вытаптывания ({0}/{1})", i, iterationsPhase1));
 
 					DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
 					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
 
-					if(i % 5 == 0) {
+					if(i < 10 || i % 5 == 0) {
 						NotifyProgress(L"[Фаза 1] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
 						UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
 						DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
@@ -149,8 +151,7 @@ namespace TrailEvolutionModelling {
 
 
 				pathThickener->thickness = SECOND_PHASE_PATH_THICKNESS;
-				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS * 240;
-
+				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS * 10;
 
 
 				//NotifyProgress(L"[Фаза 2] Вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
@@ -159,17 +160,16 @@ namespace TrailEvolutionModelling {
 				//DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentOriginal, cudaScheduler);
 				//nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
 
-				constexpr int numThinIterations = 50;
-				for(int i = 0; i < numThinIterations; i++) {
-					NotifyProgress(String::Format(L"[Фаза 2] Симуляция процесса вытаптывания ({0}/{1})", i, numThinIterations));
-					
-					if(i % 5 == 0) {
-						NotifyProgress(L"[Фаза 1] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
+				constexpr int iterationsPhase2 = 40;
+				for(int i = 0; i < iterationsPhase2; i++) {
+					if(i < 10 || i % 5 == 0) {
+						NotifyProgress(L"[Фаза 2] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
 						UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
 						DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
 						nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
 					}
 
+					NotifyProgress(String::Format(L"[Фаза 2] Симуляция процесса вытаптывания ({0}/{1})", i, iterationsPhase2));
 					DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
 					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
 				}

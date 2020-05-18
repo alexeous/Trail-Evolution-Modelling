@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr float SIMULATION_STEP_SECONDS = 20 * 60;
+constexpr float SIMULATION_STEP_SECONDS = 120 * 60;
 
 constexpr float MIN_TRAMPLABLE_WEIGHT = 1.1f;
 constexpr float TRAMPLABLE_WEIGHT_REDUCTION_FACTOR_FOR_INDECENT = 2.0f;
