@@ -9,7 +9,8 @@ namespace TrailEvolutionModelling {
 			ResourceManager* resources, const AttractorsMap& attractors)
 		{
 			std::vector<WavefrontJob*> jobs;
-			for(auto goal : attractors.uniqueAttractors) {
+			for(auto pair : attractors) {
+				Attractor goal = pair.first;
 				auto starts = attractors.at(goal);
 
 				WavefrontJob* job = resources->New<WavefrontJob>(graphW, graphH, goal, starts, resources);

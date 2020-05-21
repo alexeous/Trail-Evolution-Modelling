@@ -32,18 +32,10 @@ namespace TrailEvolutionModelling {
         class AttractorsMap : public std::unordered_map<Attractor, std::vector<Attractor>> {
         public:
             AttractorsMap(Graph^ graph, array<RefAttractor^>^ refAttractors);
-            inline int GetSourceNumber() const { return numSources; }
-            inline int GetDrainNumber() const { return numDrains; }
 
         public:
-            const std::vector<Attractor> uniqueAttractors;
-
             static bool CanReach(Graph^ graph, RefAttractor^ a, RefAttractor^ b);
             static std::vector<Attractor> ConvertRefAttractors(array<RefAttractor^>^);
-        
-        private:
-            int numSources;
-            int numDrains;
         };
 
     }

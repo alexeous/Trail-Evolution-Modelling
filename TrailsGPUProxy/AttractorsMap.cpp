@@ -7,16 +7,9 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		AttractorsMap::AttractorsMap(Graph^ graph, array<RefAttractor^>^ refAttractors)
-			: uniqueAttractors(ConvertRefAttractors(refAttractors)), numSources(0), numDrains(0)
 		{
-			for(auto attractor : uniqueAttractors) {
-				if(attractor.isSource)
-					numSources++;
-				if(attractor.isDrain)
-					numDrains++;
-			}
-
-#define REF_TO_NATIVE(ref) uniqueAttractors[Array::IndexOf(refAttractors, (ref))]
+			std::vector<Attractor> nativeAttractors = ConvertRefAttractors(refAttractors);
+#define REF_TO_NATIVE(ref) nativeAttractors[Array::IndexOf(refAttractors, (ref))]
 
 			auto isolated = gcnew List<RefAttractor^>();
 			for each(auto attrI in refAttractors) {

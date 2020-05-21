@@ -16,8 +16,8 @@ namespace TrailEvolutionModelling {
 			enum Status { Unreachable, Blank, HalfCompleted, Completed };
 
 			struct Cell {
-				std::atomic<ComputeNodesHost*> sourceResult;
-				std::atomic<ComputeNodesHost*> drainResult;
+				std::atomic<ComputeNodesHost*> rowResult;
+				std::atomic<ComputeNodesHost*> colResult;
 				std::atomic<Status> status;
 
 				inline Status AdvanceStatus() {
@@ -44,23 +44,21 @@ namespace TrailEvolutionModelling {
 			void SetCompleted(const Attractor& attractor, ComputeNodesHost* calculatedNodes);
 
 		private:
-			void InitIndexMaps(const AttractorsMap& attractors);
 			void InitTable(const AttractorsMap& attractors);
+			void InitAttractors(const AttractorsMap& attractors);
 			int CountPaths(const AttractorsMap& attractors);
-			int GetIndex(const Attractor& source, const Attractor& drain);
-			void SetSourceCompleted(const Attractor& source, ComputeNodesHost* result);
-			void SetDrainCompleted(const Attractor& drain, ComputeNodesHost* result);
-			
-			inline Cell& GetCell(const Attractor& source, const Attractor& drain) 
-				{ return table[GetIndex(source, drain)]; }
+			inline Attractor GetRowAttractor(int row) const { return attractors[row]; }
+			inline Attractor GetColumnAttractor(int col) const { return attractors[size - 1 - col]; }
+			inline int GetRowIndex(const Attractor &attractor) const { return attractorToIndex.at(attractor); }
+			inline int GetColumnIndex(const Attractor& attractor) const { return size - 1 - attractorToIndex.at(attractor); }
+
 			inline Cell& GetCell(int row, int column)
-				{ return table[column + row * numColumns]; }
+				{ return table[column + row * size]; }
 
 		private:
-			int numRows;
-			int numColumns;
-			std::unordered_map<Attractor, int> sourceToRow;
-			std::unordered_map<Attractor, int> drainToColumn;
+			int size;
+			std::vector<Attractor> attractors;
+			std::unordered_map<Attractor, int> attractorToIndex;
 			Cell* table;
 
 			PathReconstructor* pathReconstructor;

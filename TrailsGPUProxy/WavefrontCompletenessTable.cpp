@@ -6,77 +6,62 @@ namespace TrailEvolutionModelling {
 
 		WavefrontCompletenessTable::WavefrontCompletenessTable(const AttractorsMap& attractors,
 			PathReconstructor* pathReconstructor)
-			: numRows(attractors.GetSourceNumber()), 
-			  numColumns(attractors.GetDrainNumber()),
+			: size((int)attractors.size()),
 			  table(nullptr),
 			  pathReconstructor(pathReconstructor),
 			  numPaths(CountPaths(attractors))
 		{
-			InitIndexMaps(attractors);
+			InitAttractors(attractors);
 			InitTable(attractors);
 		}
 
-		void WavefrontCompletenessTable::InitIndexMaps(const AttractorsMap& attractors) {
-			int row = 0;
-			int column = 0;
-			for(auto pair : attractors) {
-				Attractor attractor = pair.first;
-				if(attractor.isSource) {
-					sourceToRow[attractor] = row;
-					row++;
-				}
-				if(attractor.isDrain) {
-					drainToColumn[attractor] = column;
-					column++;
+		void WavefrontCompletenessTable::InitTable(const AttractorsMap& attractorsMap) {
+			table = new Cell[size * size];
+			for(int i = 0; i < size * size; i++) {
+				Cell& cell = table[i];
+				cell.status = Status::Unreachable;
+				cell.rowResult = nullptr;
+				cell.colResult = nullptr;
+			}
+			
+			for(int row = 0; row < attractors.size(); row++) {
+				Attractor rowAttr = GetRowAttractor(row);
+				std::vector<Attractor> reachableAttrs = attractorsMap.at(rowAttr);
+				for(int col = 0; col < size - row - 1; col++) {
+					Attractor colAttr = GetColumnAttractor(col);
+					bool reachable = std::find(reachableAttrs.begin(), reachableAttrs.end(), 
+						colAttr) != reachableAttrs.end();
+					if(reachable)
+						GetCell(row, col).status = Status::Blank;
 				}
 			}
 		}
 
-		void WavefrontCompletenessTable::InitTable(const AttractorsMap& attractors) {
-			int tableSize = numRows * numColumns;
-			table = new Cell[tableSize];
-			for(int i = 0; i < tableSize; i++) {
-				Cell& cell = table[i];
-				cell.status = Status::Unreachable;
-				cell.sourceResult = nullptr;
-				cell.drainResult = nullptr;
-			}
-
-			for(auto pair : attractors) {
-				// it's enough to iterate over sources only (or drains only) to
-				// process all source-drain pairs
-				if(pair.first.isDrain)
-					continue;
-				
-				Attractor source = pair.first;
-				const std::vector<Attractor>& drains = pair.second;
-				for(Attractor drain : drains) {
-					GetCell(source, drain).status = Status::Blank;
-				}
+		void WavefrontCompletenessTable::InitAttractors(const AttractorsMap& attrs) {
+			int i = 0;
+			for(auto pair : attrs) {
+				attractors.push_back(pair.first);
+				attractorToIndex[pair.first] = i;
+				i++;
 			}
 		}
 
 		int WavefrontCompletenessTable::CountPaths(const AttractorsMap& attractors) {
 			int count = 0;
 			for(auto pair : attractors) {
-				// it's enough to iterate over sources only (or drains only) to
-				// process all source-drain pairs
-				if(pair.first.isDrain)
-					continue;
-
-				count += pair.second.size();
+				count += (int)pair.second.size();
 			}
-			return count;
+			return count / 2; // div by 2 because it includes two-way paths
 		}
 
 		void WavefrontCompletenessTable::ResetCompleteness() {
-			int tableSize = numRows * numColumns;
+			int tableSize = size * size;
 			for(int i = 0; i < tableSize; i++) {
 				Cell& cell = table[i];
 				if(cell.status != Status::Unreachable) {
 					cell.status = Status::Blank;
-					cell.sourceResult = nullptr;
-					cell.drainResult = nullptr;
+					cell.rowResult = nullptr;
+					cell.colResult = nullptr;
 				}
 			}
 		}
@@ -84,50 +69,30 @@ namespace TrailEvolutionModelling {
 		void WavefrontCompletenessTable::SetCompleted(const Attractor& attractor, 
 			ComputeNodesHost* calculatedNodes) 
 		{
-			if(attractor.isSource) {
-				SetSourceCompleted(attractor, calculatedNodes);
-			}
-			if(attractor.isDrain) {
-				SetDrainCompleted(attractor, calculatedNodes);
-			}
-		}
-
-		void WavefrontCompletenessTable::SetSourceCompleted(const Attractor& source, 
-			ComputeNodesHost* result)
-		{
-			int row = sourceToRow[source];
-			for(auto pair : drainToColumn) {
-				Cell& cell = GetCell(row, pair.second);
+			int attrRow = GetRowIndex(attractor);
+			int attrCol = GetColumnIndex(attractor);
+			for(int col = 0; col < attrCol; col++) {
+				Cell& cell = GetCell(attrRow, col);
 				if(cell.status == Status::Unreachable)
 					continue;
 
-				cell.sourceResult = result;
+				cell.rowResult = calculatedNodes;
 				if(cell.AdvanceStatus() == Status::Completed) {
-					pathReconstructor->StartPathReconstruction(source, pair.first, result, cell.drainResult);
+					Attractor other = GetColumnAttractor(col);
+					pathReconstructor->StartPathReconstruction(attractor, other, calculatedNodes, cell.colResult);
 				}
 			}
-		}
-
-		void WavefrontCompletenessTable::SetDrainCompleted(const Attractor& drain, 
-			ComputeNodesHost* result)
-		{
-			int column = drainToColumn[drain];
-			for(auto pair : sourceToRow) {
-				Cell& cell = GetCell(pair.second, column);
+			for(int row = 0; row < attrRow; row++) {
+				Cell& cell = GetCell(row, attrCol);
 				if(cell.status == Status::Unreachable)
 					continue;
 
-				cell.drainResult = result;
+				cell.colResult = calculatedNodes;
 				if(cell.AdvanceStatus() == Status::Completed) {
-					pathReconstructor->StartPathReconstruction(pair.first, drain, cell.sourceResult, result);
+					Attractor other = GetRowAttractor(row);
+					pathReconstructor->StartPathReconstruction(attractor, other, calculatedNodes, cell.rowResult);
 				}
 			}
-		}
-
-		int WavefrontCompletenessTable::GetIndex(const Attractor& source, const Attractor& drain) {
-			int row = sourceToRow[source];
-			int col = drainToColumn[drain];
-			return col + row * numColumns;
 		}
 
 		WavefrontCompletenessTable::~WavefrontCompletenessTable() {

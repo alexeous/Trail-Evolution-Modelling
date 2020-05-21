@@ -12,8 +12,6 @@ namespace TrailEvolutionModelling {
 
 		struct Attractor {
 			int nodeI, nodeJ;
-			bool isSource;
-			bool isDrain;
 			float performance;
 
 			Attractor() = default;
