@@ -86,7 +86,7 @@ namespace TrailEvolutionModelling {
 					continue;
 
 				NodeIndex other = index + ComputeNode::DirectionToShift(dir);
-				if(visited.emplace(other).second)
+				if(!visited.emplace(other).second)
 					continue;
 
 				float otherForwardG = goalNodes->At(other).g;
