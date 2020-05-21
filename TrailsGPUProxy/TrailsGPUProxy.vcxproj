@@ -171,6 +171,7 @@
     <ClInclude Include="ExitFlag.h" />
     <ClInclude Include="IResource.h" />
     <ClInclude Include="IsolatedAttractorsException.h" />
+    <ClInclude Include="LambdaUtility.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="NodeIndex.h" />
     <ClInclude Include="NodesApplyTramplingKernel.h" />

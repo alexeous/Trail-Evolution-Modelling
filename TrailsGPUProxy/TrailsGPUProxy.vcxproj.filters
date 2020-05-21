@@ -54,9 +54,6 @@
     <ClCompile Include="NodesTramplingEffect.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="ApplyTramplingsAndLawnRegeneration.cu">
-      <Filter>CudaKernels</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CudaUtils.h" />
@@ -166,6 +163,7 @@
     <ClInclude Include="UpdateIndecentEdges.h">
       <Filter>CudaKernels</Filter>
     </ClInclude>
+    <ClInclude Include="LambdaUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Exceptions">
@@ -206,9 +204,14 @@
     <CudaCompile Include="PathThickeningKernel.cu">
       <Filter>CudaKernels</Filter>
     </CudaCompile>
-    <CudaCompile Include="NodesApplyTramplingKernel.cu" />
-    <CudaCompile Include="SaveNodesTramplingAsEdgesKernel.cu" />
     <CudaCompile Include="UpdateIndecentEdges.cu">
+      <Filter>CudaKernels</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ApplyTramplingsAndLawnRegeneration.cu" />
+    <CudaCompile Include="SaveNodesTramplingAsEdgesKernel.cu">
+      <Filter>CudaKernels</Filter>
+    </CudaCompile>
+    <CudaCompile Include="NodesApplyTramplingKernel.cu">
       <Filter>CudaKernels</Filter>
     </CudaCompile>
   </ItemGroup>

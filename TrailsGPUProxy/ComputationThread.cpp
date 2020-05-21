@@ -17,6 +17,7 @@
 #include "EdgesTramplingEffect.h"
 #include "ApplyTramplingsAndLawnRegeneration.h"
 #include "UpdateIndecentEdges.h"
+#include "LambdaUtility.h"
 
 using namespace System;
 using namespace System::Collections::Concurrent;
@@ -133,14 +134,14 @@ namespace TrailEvolutionModelling {
 
 				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS;
 
-				constexpr int iterationsPhase1 = 0;
+				constexpr int iterationsPhase1 = 20;
 				for(int i = 0; i < iterationsPhase1; i++) {
 					NotifyProgress(String::Format(L"[Фаза 1] Симуляция процесса вытаптывания ({0}/{1})", i, iterationsPhase1));
 
 					DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
 					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
-
-					if(i < 10 || i % 5 == 0) {
+					
+					if(true || i == 0) {
 						NotifyProgress(L"[Фаза 1] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
 						UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
 						DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
@@ -151,7 +152,7 @@ namespace TrailEvolutionModelling {
 
 
 				pathThickener->thickness = SECOND_PHASE_PATH_THICKNESS;
-				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS * 10;
+				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS;
 
 
 				//NotifyProgress(L"[Фаза 2] Вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
@@ -160,9 +161,9 @@ namespace TrailEvolutionModelling {
 				//DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentOriginal, cudaScheduler);
 				//nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
 
-				constexpr int iterationsPhase2 = 40;
+				constexpr int iterationsPhase2 = 0;
 				for(int i = 0; i < iterationsPhase2; i++) {
-					if(i < 10 || i % 5 == 0) {
+					if(i % 5 == 0) {
 						NotifyProgress(L"[Фаза 2] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
 						UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
 						DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
@@ -212,6 +213,16 @@ namespace TrailEvolutionModelling {
 			}
 		}
 
+		void RunWavefrontJobs(std::vector<WavefrontJob*>& wavefrontJobs,
+			WavefrontCompletenessTable* wavefrontTable, EdgesWeightsDevice* edgesDevice,
+			CudaScheduler* cudaScheduler)
+		{
+			using System::Threading::Tasks::Parallel;
+			Parallel::For(0, (int)wavefrontJobs.size(), CreateDelegate<Action<int>>([&](int i) {
+				wavefrontJobs[i]->Start(wavefrontTable, edgesDevice, cudaScheduler);
+			}));
+		}
+
 		void ComputationThread::DoSimulationStep(float performanceFactor, NodesTramplingEffect* nodesTramplingEffect, 
 			WavefrontCompletenessTable& wavefrontTable, std::vector<WavefrontJob*>& wavefrontJobs, 
 			EdgesWeightsDevice* edgesDevice, CudaScheduler& cudaScheduler) 
@@ -220,9 +231,12 @@ namespace TrailEvolutionModelling {
 			nodesTramplingEffect->SetAwaitedPathsNumber(wavefrontTable.numPaths);
 			nodesTramplingEffect->ClearSync();
 			wavefrontTable.ResetCompleteness();
-			for(auto job : wavefrontJobs) {
-				job->Start(&wavefrontTable, edgesDevice, &cudaScheduler);
-			}
+
+			
+			//for(auto job : wavefrontJobs) {
+			//	job->Start(&wavefrontTable, edgesDevice, &cudaScheduler);
+			//}
+			RunWavefrontJobs(wavefrontJobs, &wavefrontTable, edgesDevice, &cudaScheduler);
 			nodesTramplingEffect->AwaitAllPaths();
 		}
 
