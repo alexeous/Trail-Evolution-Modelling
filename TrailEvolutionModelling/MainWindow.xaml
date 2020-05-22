@@ -10,7 +10,7 @@
         Title="MainWindow" Height="682" Width="1139"
         WindowStartupLocation="CenterScreen" Loaded="OnWindowLoaded">
     <Grid>
-        <Grid x:Name="gridComputationIsOn" Panel.ZIndex="1" Width="1130" Visibility="Collapsed">
+        <Grid x:Name="gridComputationIsOn" Panel.ZIndex="1" Visibility="Collapsed">
             <Grid.Background>
                 <SolidColorBrush Color="#FF949BAC" Opacity="0.5"/>
             </Grid.Background>
