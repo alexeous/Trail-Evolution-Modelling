@@ -57,7 +57,7 @@ namespace TrailEvolutionModelling {
 
 				std::unordered_set<NodeIndex> visited { guide };
 				std::vector<NodeIndex> similarCostNodes { guide };
-				NodeIndex sumPos;
+				NodeIndex sumPos = guide;
 
 				SimilarCostNodesSearch(guide, startNodes, goalNodes,
 					minForwardG, maxForwardG, minBackwardG, maxBackwardG,
