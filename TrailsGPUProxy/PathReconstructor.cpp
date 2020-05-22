@@ -47,6 +47,8 @@ namespace TrailEvolutionModelling {
 			NodeIndex prev = start;
 			NodeIndex prevGuide = start;
 			NodeIndex guide = goalNodes->At(start).NextIndex(start);
+
+			Pave(distanceToPath, start);
 			while(guide != goal) {
 				NodeIndex nextGuide = goalNodes->At(guide).NextIndex(guide);
 
