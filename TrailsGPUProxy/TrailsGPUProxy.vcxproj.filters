@@ -207,11 +207,13 @@
     <CudaCompile Include="UpdateIndecentEdges.cu">
       <Filter>CudaKernels</Filter>
     </CudaCompile>
-    <CudaCompile Include="ApplyTramplingsAndLawnRegeneration.cu" />
     <CudaCompile Include="SaveNodesTramplingAsEdgesKernel.cu">
       <Filter>CudaKernels</Filter>
     </CudaCompile>
     <CudaCompile Include="NodesApplyTramplingKernel.cu">
+      <Filter>CudaKernels</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ApplyTramplingsAndLawnRegeneration.cu">
       <Filter>CudaKernels</Filter>
     </CudaCompile>
   </ItemGroup>

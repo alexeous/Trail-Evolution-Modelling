@@ -134,14 +134,14 @@ namespace TrailEvolutionModelling {
 
 				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS;
 
-				constexpr int iterationsPhase1 = 20;
+				constexpr int iterationsPhase1 = 50;
 				for(int i = 0; i < iterationsPhase1; i++) {
 					NotifyProgress(String::Format(L"[Фаза 1] Симуляция процесса вытаптывания ({0}/{1})", i, iterationsPhase1));
 
 					DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
 					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
 					
-					if(true || i == 0) {
+					if(i % 5 == 0) {
 						NotifyProgress(L"[Фаза 1] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
 						UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
 						DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
@@ -152,7 +152,7 @@ namespace TrailEvolutionModelling {
 
 
 				pathThickener->thickness = SECOND_PHASE_PATH_THICKNESS;
-				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS;
+				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS * 10;
 
 
 				//NotifyProgress(L"[Фаза 2] Вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
@@ -161,7 +161,7 @@ namespace TrailEvolutionModelling {
 				//DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentOriginal, cudaScheduler);
 				//nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
 
-				constexpr int iterationsPhase2 = 0;
+				constexpr int iterationsPhase2 = 50;
 				for(int i = 0; i < iterationsPhase2; i++) {
 					if(i % 5 == 0) {
 						NotifyProgress(L"[Фаза 2] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
