@@ -35,11 +35,11 @@ namespace TrailEvolutionModelling.MapObjects
             }
         };
 
-        public static AreaType PavedPath {get; private set;} = new AreaType
+        public static AreaType PavedPath { get; private set; } = new AreaType
         {
             Name = "PavedPath",
             DisplayedName = "Пешеходная дорожка",
-            Style = new PolygonStyle(140, 140, 140) { PenStyle = PenStyle.LongDash },
+            Style = new PolygonStyle(170, 170, 170) { PenStyle = PenStyle.LongDash },
             Attributes = new AreaAttributes
             {
                 IsWalkable = true,
@@ -48,7 +48,7 @@ namespace TrailEvolutionModelling.MapObjects
             }
         };
 
-        public static AreaType CarRoad {get; private set;} = new AreaType
+        public static AreaType CarRoad { get; private set; } = new AreaType
         {
             Name = "CarRoad",
             DisplayedName = "Проезжая часть",
@@ -61,7 +61,7 @@ namespace TrailEvolutionModelling.MapObjects
             }
         };
 
-        public static AreaType Vegetation {get; private set;} = new AreaType
+        public static AreaType Vegetation { get; private set; } = new AreaType
         {
             Name = "Vegetation",
             DisplayedName = "Растительность",
@@ -69,12 +69,12 @@ namespace TrailEvolutionModelling.MapObjects
             Attributes = new AreaAttributes
             {
                 IsWalkable = true,
-                IsTramplable = true,
+                IsTramplable = false,
                 Weight = 1.5f
             }
         };
 
-        public static AreaType WalkthroughableFence {get; private set;} = new AreaType
+        public static AreaType WalkthroughableFence { get; private set; } = new AreaType
         {
             Name = "WalkthroughableFence",
             DisplayedName = "Проходимый забор",
@@ -87,7 +87,7 @@ namespace TrailEvolutionModelling.MapObjects
             }
         };
 
-        public static AreaType Building {get; private set;} = new AreaType
+        public static AreaType Building { get; private set; } = new AreaType
         {
             Name = "Building",
             DisplayedName = "Здание",
@@ -95,15 +95,15 @@ namespace TrailEvolutionModelling.MapObjects
             Attributes = AreaAttributes.Unwalkable
         };
 
-        public static AreaType Fence {get; private set;} = new AreaType
+        public static AreaType Fence { get; private set; } = new AreaType
         {
             Name = "Fence",
-            DisplayedName = "Забор",
+            DisplayedName = "Непроходимый забор",
             Style = new LineStyle(76, 76, 76),
             Attributes = AreaAttributes.Unwalkable
         };
 
-        public static AreaType Water {get; private set;} = new AreaType
+        public static AreaType Water { get; private set; } = new AreaType
         {
             Name = "Water",
             DisplayedName = "Водоём",
@@ -111,10 +111,10 @@ namespace TrailEvolutionModelling.MapObjects
             Attributes = AreaAttributes.Unwalkable
         };
 
-        public static AreaType OtherUnwalkthroughable {get; private set;} = new AreaType
+        public static AreaType OtherUnwalkthroughable { get; private set; } = new AreaType
         {
             Name = "OtherUnwalkthroughable",
-            DisplayedName = "Прочее непроходимое препятствие",
+            DisplayedName = "Другое непроходимое препятствие",
             Style = new PolygonStyle(12, 12, 12),
             Attributes = AreaAttributes.Unwalkable
         };
