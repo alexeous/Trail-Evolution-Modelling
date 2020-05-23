@@ -5,13 +5,15 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		PathReconstructor::PathReconstructor(int graphW, int graphH, EdgesWeightsHost* edges,
-			CudaScheduler* cudaScheduler, ResourceManager* resources, PathThickener* pathThickener)
+			CudaScheduler* cudaScheduler, ResourceManager* resources, 
+			PathThickener* pathThickener, const AttractorsMap& attractorsMap)
 			: graphW(graphW),
 			  graphH(graphH),
 			  edges(edges),
 			  cudaScheduler(cudaScheduler),
 			  threadPool(threadPool),
 			  pathThickener(pathThickener),
+			  attractorsMap(attractorsMap),
 			  distancePool(CreateDistanceHostPool(resources))
 		{
 		}
@@ -30,8 +32,15 @@ namespace TrailEvolutionModelling {
 		{
 			PoolEntry<NodesFloatHost*> distanceEntry = distancePool->Take();
 			ReconstructPath(start, goal, startNodes, goalNodes, distanceEntry.object);
-			float averagePerformance = (start.performance + goal.performance) / 2;
-			pathThickener->StartThickening(distanceEntry, averagePerformance, cudaScheduler);
+			float peoplePerSecond = CalcPathFlow(start, goal);
+			pathThickener->StartThickening(distanceEntry, peoplePerSecond, cudaScheduler);
+		}
+
+		float PathReconstructor::CalcPathFlow(const Attractor& start, const Attractor& goal) const {
+			return (start.performance * goal.performance / attractorsMap.GetSumReachablePerformance(start)
+				+ goal.performance * start.performance / attractorsMap.GetSumReachablePerformance(goal)) / 2;
+
+			//return (start.performance + goal.performance) / 2;
 		}
 		
 		template<typename T> int sign(T val) { return (T(0) < val) - (val < T(0)); }

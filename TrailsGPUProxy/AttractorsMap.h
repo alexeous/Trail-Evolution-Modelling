@@ -32,10 +32,14 @@ namespace TrailEvolutionModelling {
         class AttractorsMap : public std::unordered_map<Attractor, std::vector<Attractor>> {
         public:
             AttractorsMap(Graph^ graph, array<RefAttractor^>^ refAttractors);
+            float GetSumReachablePerformance(const Attractor& attractor) const;
 
         public:
             static bool CanReach(Graph^ graph, RefAttractor^ a, RefAttractor^ b);
             static std::vector<Attractor> ConvertRefAttractors(array<RefAttractor^>^);
+
+        private:
+            std::unordered_map<Attractor, float> sumReachablePerformances;
         };
 
     }

@@ -11,6 +11,7 @@
 #include "ObjectPool.h"
 #include "EdgesWeights.h"
 #include "PathThickener.h"
+#include "AttractorsMap.h"
 
 #define DISTANCE_HOST_POOL_SIZE 20
 #define DISTANCE_DEVICE_POOL_SIZE 20
@@ -29,10 +30,12 @@ namespace TrailEvolutionModelling {
 			void StartPathReconstruction(Attractor start, Attractor goal,
 				ComputeNodesHost* startNodes, ComputeNodesHost* goalNodes);
 
+			float CalcPathFlow(const Attractor & start, const Attractor & goal) const;
+
 		protected:
 			PathReconstructor(int graphW, int graphH, EdgesWeightsHost* edges, 
 				CudaScheduler* cudaScheduler, ResourceManager* resources, 
-				PathThickener* pathThickener);
+				PathThickener* pathThickener, const AttractorsMap& attractorsMap);
 
 			void Free(ResourceManager& resources) override;
 
@@ -57,10 +60,11 @@ namespace TrailEvolutionModelling {
 		private:
 			int graphW;
 			int graphH;
-			EdgesWeightsHost* edges = nullptr;
-			CudaScheduler* cudaScheduler = nullptr;
-			ThreadPool* threadPool = nullptr;
-			PathThickener* pathThickener = nullptr;
+			EdgesWeightsHost* edges;
+			CudaScheduler* cudaScheduler;
+			ThreadPool* threadPool;
+			PathThickener* pathThickener;
+			AttractorsMap attractorsMap;
 			ObjectPool<NodesFloatHost*>* distancePool = nullptr;
 		};
 

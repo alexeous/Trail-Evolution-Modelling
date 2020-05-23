@@ -13,18 +13,23 @@ namespace TrailEvolutionModelling {
 
 			auto isolated = gcnew List<RefAttractor^>();
 			for each(auto attrI in refAttractors) {
-				std::vector<Attractor> reachable;
+				std::vector<Attractor> allReachable;
+				float sumReachablePerformance = 0;
 				for each(auto attrJ in refAttractors) {
 					if(attrI == attrJ || !(attrI->IsSource && attrJ->IsDrain || 
 										   attrI->IsDrain && attrJ->IsSource))
 						continue;
 
 					if(CanReach(graph, attrI, attrJ)) {
-						reachable.push_back(REF_TO_NATIVE(attrJ));
+						Attractor reachable = REF_TO_NATIVE(attrJ);
+						allReachable.push_back(reachable);
+						sumReachablePerformance += reachable.performance;
 					}
 				}
-				if(!reachable.empty()) {
-					(*this)[REF_TO_NATIVE(attrI)] = reachable;
+				if(!allReachable.empty()) {
+					Attractor attractor = REF_TO_NATIVE(attrI);
+					(*this)[attractor] = allReachable;
+					sumReachablePerformances[attractor] = sumReachablePerformance;
 				}
 				else {
 					isolated->Add(attrI);
@@ -36,6 +41,10 @@ namespace TrailEvolutionModelling {
 			}
 
 #undef REF_TO_NATIVE
+		}
+
+		float AttractorsMap::GetSumReachablePerformance(const Attractor& attractor) const {
+			return sumReachablePerformances.at(attractor);
 		}
 
 		bool AttractorsMap::CanReach(Graph^ graph, RefAttractor^ a, RefAttractor^ b) {
