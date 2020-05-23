@@ -183,6 +183,9 @@ namespace TrailEvolutionModelling
             var contextMenu = new ContextMenu();
             contextMenu.Items.Add(CreateModifyItem());
             contextMenu.Items.Add(CreateRemoveItem());
+            if (iMapObject is MapObject mapObj) {
+                contextMenu.Items.Add(CreateConvertItem(mapObj)); 
+            }
             return contextMenu;
 
             ///////// BUTTONS CREATION LOCAL FUNCS
@@ -240,6 +243,28 @@ namespace TrailEvolutionModelling
                     RefreshLayers();
                 };
                 return item;
+            }
+
+            MenuItem CreateConvertItem(MapObject mapObject)
+            {
+                var parent = new MenuItem
+                {
+                    Header = "Преобразовать в..."
+                };
+                foreach (var areaType in AreaTypes.All)
+                {
+                    var item = new MenuItem
+                    {
+                        Header = areaType.DisplayedName
+                    };
+                    item.Click += (s, e) =>
+                    {
+                        mapObject.AreaType = areaType;
+                        RefreshLayers();
+                    };
+                    parent.Items.Add(item);
+                }
+                return parent;
             }
             ///////// END BUTTONS CREATION LOCAL FUNCS
         }
