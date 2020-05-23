@@ -34,7 +34,7 @@ namespace TrailEvolutionModelling {
 
 		protected:
 			PathReconstructor(int graphW, int graphH, EdgesWeightsHost* edges, 
-				CudaScheduler* cudaScheduler, ResourceManager* resources, 
+				CudaScheduler* cudaScheduler, ThreadPool* threadPool, ResourceManager* resources,
 				PathThickener* pathThickener, const AttractorsMap& attractorsMap);
 
 			void Free(ResourceManager& resources) override;

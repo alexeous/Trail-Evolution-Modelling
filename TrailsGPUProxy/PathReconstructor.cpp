@@ -5,7 +5,7 @@ namespace TrailEvolutionModelling {
 	namespace GPUProxy {
 
 		PathReconstructor::PathReconstructor(int graphW, int graphH, EdgesWeightsHost* edges,
-			CudaScheduler* cudaScheduler, ResourceManager* resources, 
+			CudaScheduler* cudaScheduler, ThreadPool *threadPool, ResourceManager* resources, 
 			PathThickener* pathThickener, const AttractorsMap& attractorsMap)
 			: graphW(graphW),
 			  graphH(graphH),
@@ -30,10 +30,12 @@ namespace TrailEvolutionModelling {
 		void PathReconstructor::StartPathReconstruction(Attractor start, Attractor goal, 
 			ComputeNodesHost* startNodes, ComputeNodesHost* goalNodes) 
 		{
-			PoolEntry<NodesFloatHost*> distanceEntry = distancePool->Take();
-			ReconstructPath(start, goal, startNodes, goalNodes, distanceEntry.object);
-			float peoplePerSecond = CalcPathFlow(start, goal);
-			pathThickener->StartThickening(distanceEntry, peoplePerSecond, cudaScheduler);
+			threadPool->Schedule([=] {
+				PoolEntry<NodesFloatHost*> distanceEntry = distancePool->Take();
+				ReconstructPath(start, goal, startNodes, goalNodes, distanceEntry.object);
+				float peoplePerSecond = CalcPathFlow(start, goal);
+				pathThickener->StartThickening(distanceEntry, peoplePerSecond, cudaScheduler);
+			});
 		}
 
 		float PathReconstructor::CalcPathFlow(const Attractor& start, const Attractor& goal) const {
