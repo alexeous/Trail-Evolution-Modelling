@@ -54,6 +54,12 @@
     <ClCompile Include="NodesTramplingEffect.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
+    <ClCompile Include="EdgesDeltaCalculator.cpp">
+      <Filter>Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="EdgesDeltaCalcKernel.cu">
+      <Filter>CudaKernels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CudaUtils.h" />
@@ -164,6 +170,12 @@
       <Filter>CudaKernels</Filter>
     </ClInclude>
     <ClInclude Include="LambdaUtility.h" />
+    <ClInclude Include="EdgesDeltaCalculator.h">
+      <Filter>Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="EdgesDeltaCalcKernel.h">
+      <Filter>CudaKernels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Exceptions">

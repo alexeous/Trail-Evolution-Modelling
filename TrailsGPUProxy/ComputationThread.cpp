@@ -18,6 +18,7 @@
 #include "ApplyTramplingsAndLawnRegeneration.h"
 #include "UpdateIndecentEdges.h"
 #include "LambdaUtility.h"
+#include "EdgesDeltaCalculator.h"
 
 using namespace System;
 using namespace System::Collections::Concurrent;
@@ -131,49 +132,52 @@ namespace TrailEvolutionModelling {
 				edgesHost->InitFromGraph(graph, false);
 				edgesHost->CopyToSync(edgesDevice, w, h);
 				EdgesWeightsDevice* maximumWeights = resources.New<EdgesWeightsDevice>(edgesDevice, w, h);
-
+				float lastDelta = 0;
+				EdgesDeltaCalculator* edgesDeltaCalculator = resources.New<EdgesDeltaCalculator>(w, h, edgesDevice, resources);
+				constexpr float epsilonPerEdge = 0.001f;
+				float epsilon = epsilonPerEdge * graph->TramplableEdgesNumber;
 				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS;
-
-				constexpr int iterationsPhase1 = 50;
-				for(int i = 0; i < iterationsPhase1; i++) {
-					NotifyProgress(String::Format(L"[Фаза 1] Симуляция процесса вытаптывания ({0}/{1})", i, iterationsPhase1));
+				int i = 0;
+				do {
+					NotifyProgress(String::Format(L"[Фаза 1] Симуляция процесса вытаптывания {0:0.000}/{1:0.000}", lastDelta, epsilon));
 
 					DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
 					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
 					
+					if(i % 3 == 0) {
+						lastDelta = edgesDeltaCalculator->CalculateDelta(edgesDevice);
+					}
+
 					if(i % 5 == 0) {
-						NotifyProgress(L"[Фаза 1] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
+						//NotifyProgress(L"[Фаза 1] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
 						UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
 						DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
 						nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
 					}
-				}
+				} while(lastDelta > epsilon);
+
+
 
 
 
 				pathThickener->thickness = SECOND_PHASE_PATH_THICKNESS;
 				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS * 10;
-
-
-				//NotifyProgress(L"[Фаза 2] Вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
-				//edgesIndecentOriginal->CopyToSync(edgesDevice, w, h);
-
-				//DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentOriginal, cudaScheduler);
-				//nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
-
-				constexpr int iterationsPhase2 = 50;
-				for(int i = 0; i < iterationsPhase2; i++) {
+				i = 0;
+				do {
+					NotifyProgress(String::Format(L"[Фаза 2] Симуляция процесса вытаптывания {0:0.000}/{1:0.000}", lastDelta, epsilon));
 					if(i % 5 == 0) {
-						NotifyProgress(L"[Фаза 2] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
+						//NotifyProgress(L"[Фаза 2] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
 						UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
 						DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
 						nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
 					}
-
-					NotifyProgress(String::Format(L"[Фаза 2] Симуляция процесса вытаптывания ({0}/{1})", i, iterationsPhase2));
 					DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
 					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
-				}
+
+					if(i % 3 == 0) {
+						lastDelta = edgesDeltaCalculator->CalculateDelta(edgesDevice);
+					}
+				} while(lastDelta > epsilon);
 
 				NotifyProgress(L"Выгрузка результата");
 				edgesDevice->CopyToSync(edgesHost, w, h);

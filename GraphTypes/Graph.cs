@@ -17,6 +17,7 @@ namespace TrailEvolutionModelling.GraphTypes
         public float OriginY { get; set; }
         public float Step { get; set; }
         public float StepPhysicalMeters { get; set; }
+        public int TramplableEdgesNumber { get; set; }
         public IReadOnlyList<Edge> Edges => edges;
 
 

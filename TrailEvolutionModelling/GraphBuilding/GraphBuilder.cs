@@ -130,6 +130,10 @@ namespace TrailEvolutionModelling.GraphBuilding
                 area.IsWalkable)
             {
                 graph.AddEdge(node, direction, area.Weight, area.IsTramplable);
+                if (area.IsTramplable)
+                {
+                    graph.TramplableEdgesNumber++;
+                }
             }
         }
 

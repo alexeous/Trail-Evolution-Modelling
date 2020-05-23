@@ -108,6 +108,10 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsManaged>
     </ClCompile>
+    <CudaCompile Include="EdgesDeltaCalcKernel.cu">
+      <FileType>Document</FileType>
+    </CudaCompile>
+    <ClCompile Include="EdgesDeltaCalculator.cpp" />
     <ClCompile Include="EdgesWeights.cpp" />
     <ClCompile Include="ExitFlag.cpp" />
     <ClCompile Include="IsolatedAttractorsException.cpp" />
@@ -166,6 +170,8 @@
     <ClInclude Include="CudaScheduler.h" />
     <ClInclude Include="EdgesData.h" />
     <ClInclude Include="CudaUtils.h" />
+    <ClInclude Include="EdgesDeltaCalcKernel.h" />
+    <ClInclude Include="EdgesDeltaCalculator.h" />
     <ClInclude Include="EdgesTramplingEffect.h" />
     <ClInclude Include="EdgesWeights.h" />
     <ClInclude Include="ExitFlag.h" />
