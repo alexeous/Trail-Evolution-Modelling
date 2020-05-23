@@ -30,14 +30,11 @@ namespace TrailEvolutionModelling {
 			if(i > graphW || j > graphH)
 				return;
 
-			Update(original.E(i, j, graphW), current.E(i, j, graphW), target.E(i, j, graphW));
-			if(j < graphH - 1) {
-				Update(original.S(i, j, graphW), current.S(i, j, graphW), target.S(i, j, graphW));
-				if(i < graphW - 1)
-					Update(original.SE(i, j, graphW), current.SE(i, j, graphW), target.SE(i, j, graphW));
-				if(i != 0)
-					Update(original.SW(i, j, graphW), current.SW(i, j, graphW), target.SW(i, j, graphW));
-			}
+			int idx = i + j * (graphW + 1);
+			Update(original.horizontal[idx], current.horizontal[idx], target.horizontal[idx]);
+			Update(original.vertical[idx], current.vertical[idx], target.vertical[idx]);
+			Update(original.leftDiagonal[idx], current.leftDiagonal[idx], target.leftDiagonal[idx]);
+			Update(original.rightDiagonal[idx], current.rightDiagonal[idx], target.rightDiagonal[idx]);
 		}
 
 		cudaError UpdateIndecentEdges(EdgesWeightsDevice* edgesIndecentOriginal, 
