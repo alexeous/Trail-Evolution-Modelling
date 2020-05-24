@@ -6,6 +6,7 @@
 #include "Attractor.h"
 #include "AttractorsMap.h"
 #include "EdgesData.h"
+#include "TramplabilityMaskHost.h"
 #include "TramplabilityMask.h"
 #include "EdgesWeights.h"
 #include "WavefrontJob.h"
@@ -101,7 +102,8 @@ namespace TrailEvolutionModelling {
 				AttractorsMap attractors(graph, input->Attractors);
 
 				NotifyProgress(L"Построение маски вытаптываемости");
-				TramplabilityMask* tramplabilityMask = resources.New<TramplabilityMask>(graph, resources);
+				TramplabilityMaskHost* tramplabilityMaskHost = resources.New<TramplabilityMaskHost>(graph);
+				TramplabilityMask* tramplabilityMask = resources.New<TramplabilityMask>(tramplabilityMaskHost, w, h);
 
 				NotifyProgress(L"[Фаза 1] Инициализация весов рёбер для \"непорядочных пешеходов\"");
 				EdgesWeightsHost* edgesHost = resources.New<EdgesWeightsHost>(graph, true);

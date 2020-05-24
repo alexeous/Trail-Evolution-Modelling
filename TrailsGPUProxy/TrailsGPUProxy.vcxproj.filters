@@ -57,6 +57,9 @@
     <ClCompile Include="EdgesDeltaCalculator.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
+    <ClCompile Include="TramplabilityMaskHost.cpp">
+      <Filter>Data\Edges</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TrailsGPUProxy.h" />
@@ -178,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="MathUtils.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="TramplabilityMaskHost.h">
+      <Filter>Data\Edges</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
