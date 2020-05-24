@@ -43,12 +43,12 @@ namespace TrailEvolutionModelling {
 			catch(CudaExceptionNative ex) {
 				exception = gcnew CudaException(ex);
 			}
-			catch(Exception^ ex) {
-				exception = ex;
-			}
 			catch(std::exception& ex) {
 				std::string msg = ex.what();
 				exception = gcnew Exception("An unmanaged exception occured: " + gcnew String(msg.c_str()));
+			}
+			catch(Exception^ ex) {
+				exception = ex;
 			}
 			catch(...) {
 				exception = gcnew Exception("An unknown unmanaged exception occured");
@@ -196,12 +196,12 @@ namespace TrailEvolutionModelling {
 			catch(CudaExceptionNative ex) {
 				exception = gcnew CudaException(ex);
 			}
-			catch(Exception^ ex) {
-				exception = ex;
-			}
 			catch(std::exception& ex) {
 				std::string msg = ex.what();
 				exception = gcnew Exception("An unmanaged exception occured: " + gcnew String(msg.c_str()));
+			}
+			catch(Exception^ ex) {
+				exception = ex;
 			}
 			catch(...) {
 #ifdef _DEBUG
