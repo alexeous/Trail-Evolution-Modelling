@@ -42,6 +42,8 @@ namespace TrailEvolutionModelling
         private WritableLayer edgeLayer;
         private Tool[] allTools;
 
+        private System.Windows.Point mouseDownPos;
+
         private Thread computationThread;
 
         private XmlSaverLoader<SaveFile> saver;
@@ -146,7 +148,8 @@ namespace TrailEvolutionModelling
 
             mapControl.Map.Layers.Add(edgeLayer);
 
-            mapControl.MouseLeftButtonDown += OnMapLeftClick;
+            mapControl.MouseLeftButtonDown += OnMapLeftDown;
+            mapControl.MouseLeftButtonUp += OnMapLeftUp;
             mapControl.MouseRightButtonDown += OnMapRightClick;
         }
 
@@ -200,16 +203,7 @@ namespace TrailEvolutionModelling
                 {
                     UnhighlightAllMapObjects();
                     EndAllTools();
-                    if (iMapObject is MapObject mapObject)
-                    {
-                        mapObjectEditing.TargetObject = mapObject;
-                        mapObjectEditing.Begin();
-                    }
-                    else if (iMapObject is AttractorObject attractor)
-                    {
-                        attractorEditing.TargetObject = attractor;
-                        attractorEditing.Begin();
-                    }
+                    StartMapObjectEditing(iMapObject);
                 };
                 return item;
             }
@@ -269,6 +263,38 @@ namespace TrailEvolutionModelling
             ///////// END BUTTONS CREATION LOCAL FUNCS
         }
 
+        private void StartMapObjectEditing(IMapObject iMapObject)
+        {
+            if (iMapObject is MapObject mapObject)
+            {
+                mapObjectEditing.TargetObject = mapObject;
+                mapObjectEditing.Begin();
+            }
+            else if (iMapObject is AttractorObject attractor)
+            {
+                attractorEditing.TargetObject = attractor;
+                attractorEditing.Begin();
+            }
+        }
+
+        private void OnMapLeftUp(object sender, MouseButtonEventArgs e)
+        {
+            const double tolerance = 5;
+            var pos = e.GetPosition(mapControl);
+            if (Math.Abs(pos.X - mouseDownPos.X) > tolerance ||
+                Math.Abs(pos.Y - mouseDownPos.Y) > tolerance)
+            {
+                return;
+            }
+
+            UnhighlightAllMapObjects();
+            if (allTools.All(t => !t.IsActive))
+            {
+                var clickScreenPos = e.GetPosition(mapControl).ToMapsui();
+                TrySelectMapObjectAt(clickScreenPos, StartMapObjectEditing);
+            }
+        }
+
         private void OnMapRightClick(object sender, MouseButtonEventArgs e)
         {
             UnhighlightAllMapObjects();
@@ -280,6 +306,11 @@ namespace TrailEvolutionModelling
             }
 
             var clickScreenPos = e.GetPosition(mapControl).ToMapsui();
+            TrySelectMapObjectAt(clickScreenPos, OnMapObjectRightClick);
+        }
+
+        private void TrySelectMapObjectAt(Point clickScreenPos, Action<IMapObject> actionOnSelect)
+        {
             var clickWorldPos = mapControl.Viewport.ScreenToWorld(clickScreenPos);
             IEnumerable<IMapObject> mapObjects = GetFeaturesAt(clickWorldPos);
 
@@ -290,7 +321,7 @@ namespace TrailEvolutionModelling
             }
             if (count == 1)
             {
-                OnMapObjectRightClick(mapObjects.First());
+                actionOnSelect(mapObjects.First());
             }
             else
             {
@@ -308,7 +339,7 @@ namespace TrailEvolutionModelling
                     };
                     item.GotFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = true; RefreshLayers(); };
                     item.LostFocus += (s, ee) => { mapObject.Highlighter.IsHighlighted = false; RefreshLayers(); };
-                    item.Click += (s, ee) => OnMapObjectRightClick(mapObject);
+                    item.Click += (s, ee) => actionOnSelect(mapObject);
                     contextMenu.Items.Add(item);
                 }
                 contextMenu.IsOpen = true;
@@ -340,9 +371,9 @@ namespace TrailEvolutionModelling
             return any;
         }
 
-        private void OnMapLeftClick(object sender, MouseButtonEventArgs e)
+        private void OnMapLeftDown(object sender, MouseButtonEventArgs e)
         {
-            UnhighlightAllMapObjects();
+            mouseDownPos = e.GetPosition(mapControl);
         }
 
         private void OnMapObjectRightClick(IMapObject mapObject)
