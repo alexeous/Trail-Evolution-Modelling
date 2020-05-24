@@ -492,6 +492,7 @@ namespace TrailEvolutionModelling
 
         private void OnStartClick(object sender, RoutedEventArgs e)
         {
+            EndAllTools();
             World world = GetWorld();
             var computation = new TrailsComputation(world);
             computation.ProgressChanged += (_s, _e) => Dispatcher.Invoke(
@@ -568,6 +569,7 @@ namespace TrailEvolutionModelling
 
         private void OnAttractorButtonClick(object sender, RoutedEventArgs e)
         {
+            EndAllTools();
             attractorTool.AttractorType = (AttractorType)((FrameworkElement)sender).Tag;
             attractorTool.AttractorPerformance = AttractorPerformance.Normal;
             attractorTool.Begin();
@@ -575,6 +577,7 @@ namespace TrailEvolutionModelling
 
         private void OnLargeAttractorButtonClick(object sender, RoutedEventArgs e)
         {
+            EndAllTools();
             attractorTool.AttractorType = (AttractorType)((FrameworkElement)sender).Tag;
             attractorTool.AttractorPerformance = AttractorPerformance.High;
             attractorTool.Begin();
