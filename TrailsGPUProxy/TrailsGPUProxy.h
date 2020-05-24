@@ -11,11 +11,9 @@ namespace TrailEvolutionModelling {
 
 		public ref class TrailsGPUProxy {
 		public:
-			static initonly int StepSeconds = SIMULATION_STEP_SECONDS;
 			static initonly float MinimumTramplableWeight = MIN_TRAMPLABLE_WEIGHT;
 
 		public:
-
 			event Action<String^>^ ProgressChanged;
 
 			TrailsComputationsOutput^ ComputeTrails(TrailsComputationsInput^ input);
