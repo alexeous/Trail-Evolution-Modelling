@@ -37,6 +37,7 @@ namespace TrailEvolutionModelling {
 
 #ifndef __CUDACC__
 			inline T& AtDir(int i, int j, int w, int dir);
+			inline T& AtShift(int i, int j, int w, int shiftI, int shiftJ);
 
 			template<typename... TArgs>
 			inline void ZipWithGraphEdges(Graph^ graph, void (*func)(T&, Edge^, TArgs...), TArgs... args) {
@@ -131,6 +132,12 @@ namespace TrailEvolutionModelling {
 				default:
 					throw std::exception(("Invalid direction: " + std::to_string(dir)).c_str());
 			}
+		}
+
+		template<typename T>
+		inline T& EdgesData<T>::AtShift(int i, int j, int w, int shiftI, int shiftJ) {
+			int dir = ComputeNode::ShiftToDirection(NodeIndex(shiftI, shiftJ));
+			return AtDir(i, j, w, dir);
 		}
 
 		//template<typename T, typename... TArgs>

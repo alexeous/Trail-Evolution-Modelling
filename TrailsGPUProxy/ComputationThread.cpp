@@ -116,7 +116,7 @@ namespace TrailEvolutionModelling {
 				NodesTramplingEffect* nodesTramplingEffect = resources.New<NodesTramplingEffect>(w, h, stepMeters, INDECENT_PEDESTRIANS_SHARE, SIMULATION_STEP_SECONDS, &resources);
 				pendingTramplingEffect = nodesTramplingEffect;
 				PathThickener *pathThickener = resources.New<PathThickener>(w, h, stepMeters, FIRST_PHASE_PATH_THICKNESS, tramplabilityMask, nodesTramplingEffect, &resources);
-				PathReconstructor *pathReconsturctor = resources.New<PathReconstructor>(w, h, edgesHost, &cudaScheduler, threadPool, &resources, pathThickener, attractors);
+				PathReconstructor *pathReconsturctor = resources.New<PathReconstructor>(w, h, edgesHost, &cudaScheduler, threadPool, &resources, pathThickener, attractors, tramplabilityMaskHost);
 				WavefrontCompletenessTable wavefrontTable(attractors, pathReconsturctor);
 
 

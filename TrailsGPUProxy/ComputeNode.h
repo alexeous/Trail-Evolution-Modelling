@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "NodeIndex.h"
+#include <string>
 
 namespace TrailEvolutionModelling {
     namespace GPUProxy {
@@ -30,6 +31,37 @@ namespace TrailEvolutionModelling {
                     {-1,  1}, {0,  1}, {1,  1}
                 };
                 return shifts[direction];
+            }
+
+            static inline void ThrowInvalidShift(const NodeIndex& shift) {
+                std::string msg = "Invalid shift: (" + std::to_string(shift.i) + "; " + std::to_string(shift.j) + ")";
+                throw std::exception(msg.c_str());
+            }
+
+            static inline int ShiftToDirection(const NodeIndex& shift) {
+                switch(shift.j) {
+                    case -1:
+                        switch(shift.i) {
+                            case -1: return 0;
+                            case 0: return 1;
+                            case 1: return 2;
+                            default: ThrowInvalidShift(shift);
+                        }
+                    case 0:
+                        switch(shift.i) {
+                            case -1: return 3;
+                            case 1: return 4;
+                            default: ThrowInvalidShift(shift);
+                        }
+                    case 1:
+                        switch(shift.i) {
+                            case -1: return 5;
+                            case 0: return 6;
+                            case 1: return 7;
+                            default: ThrowInvalidShift(shift);
+                        }
+                } 
+                ThrowInvalidShift(shift);
             }
         };
 

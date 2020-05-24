@@ -7,7 +7,8 @@ namespace TrailEvolutionModelling {
 
 		PathReconstructor::PathReconstructor(int graphW, int graphH, EdgesWeightsHost* edges,
 			CudaScheduler* cudaScheduler, ThreadPool *threadPool, ResourceManager* resources, 
-			PathThickener* pathThickener, const AttractorsMap& attractorsMap)
+			PathThickener* pathThickener, const AttractorsMap& attractorsMap,
+			TramplabilityMaskHost* tramplabilityMaskHost)
 			: graphW(graphW),
 			  graphH(graphH),
 			  edges(edges),
@@ -15,6 +16,7 @@ namespace TrailEvolutionModelling {
 			  threadPool(threadPool),
 			  pathThickener(pathThickener),
 			  attractorsMap(attractorsMap),
+		      tramplabilityMask(tramplabilityMaskHost),
 			  distancePool(CreateDistanceHostPool(resources))
 		{
 		}
@@ -58,7 +60,6 @@ namespace TrailEvolutionModelling {
 			NodeIndex prevGuide = start;
 			NodeIndex guide = goalNodes->At(start).NextIndex(start);
 
-			Pave(distanceToPath, start);
 			while(guide != goal) {
 				NodeIndex nextGuide = goalNodes->At(guide).NextIndex(guide);
 
@@ -78,14 +79,15 @@ namespace TrailEvolutionModelling {
 				float2 averagePos = sumPos / (float)similarCostNodes.size();
 				NodeIndex next = GetClosestTo(similarCostNodes, averagePos);
 				
-				BridgeExclusively(distanceToPath, prev, next);
-				Pave(distanceToPath, next);
+				NodeIndex bridgeLast = BridgeExclusively(distanceToPath, prev, next);
+				Pave(distanceToPath, next, bridgeLast);
 
 				prev = next;
 				prevGuide = guide;
 				guide = nextGuide;
 			}
-			Pave(distanceToPath, goal);
+			NodeIndex preGoal = BridgeExclusively(distanceToPath, prev, goal);
+			Pave(distanceToPath, goal, preGoal);
 		}
 
 		inline void PathReconstructor::SimilarCostNodesSearch(NodeIndex index, 
@@ -129,19 +131,29 @@ namespace TrailEvolutionModelling {
 			return closest;
 		}
 
-		inline void PathReconstructor::Pave(NodesFloatHost* distanceToPath, NodeIndex index) {
+		inline void PathReconstructor::Pave(NodesFloatHost* distanceToPath, NodeIndex index, NodeIndex lastPaved) {
+			if(index == lastPaved)
+				return;
+
+			NodeIndex shift = index - lastPaved;
+			bool isEdgeTramplable = tramplabilityMask->AtShift(lastPaved.i, lastPaved.j, graphW, shift.i, shift.j);
+			if(!isEdgeTramplable) {
+				return;
+			}
 			distanceToPath->At(index) = 0;
 		}
 
-		inline void PathReconstructor::BridgeExclusively(NodesFloatHost* distanceToPath, NodeIndex from, NodeIndex to) {
+		inline NodeIndex PathReconstructor::BridgeExclusively(NodesFloatHost* distanceToPath, NodeIndex from, NodeIndex to) {
 			NodeIndex intermediate = from;
 			NodeIndex delta = to - intermediate;
 			while(abs(delta.i) > 1 || abs(delta.j) > 1) {
+				NodeIndex lastPaved = intermediate;
 				intermediate += NodeIndex(sign(delta.i), sign(delta.j));
 				delta = to - intermediate;
 
-				Pave(distanceToPath, intermediate);
+				Pave(distanceToPath, intermediate, lastPaved);
 			}
+			return intermediate;
 		}
 
 		void PathReconstructor::Free(ResourceManager& resources) {

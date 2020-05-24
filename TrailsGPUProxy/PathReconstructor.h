@@ -12,6 +12,7 @@
 #include "EdgesWeights.h"
 #include "PathThickener.h"
 #include "AttractorsMap.h"
+#include "TramplabilityMaskHost.h"
 
 #define DISTANCE_HOST_POOL_SIZE 20
 #define DISTANCE_DEVICE_POOL_SIZE 20
@@ -35,7 +36,8 @@ namespace TrailEvolutionModelling {
 		protected:
 			PathReconstructor(int graphW, int graphH, EdgesWeightsHost* edges, 
 				CudaScheduler* cudaScheduler, ThreadPool* threadPool, ResourceManager* resources,
-				PathThickener* pathThickener, const AttractorsMap& attractorsMap);
+				PathThickener* pathThickener, const AttractorsMap& attractorsMap, 
+				TramplabilityMaskHost* tramplabilityMaskHost);
 
 			void Free(ResourceManager& resources) override;
 
@@ -53,8 +55,8 @@ namespace TrailEvolutionModelling {
 				NodeIndex& sumPos);
 
 			inline NodeIndex GetClosestTo(const std::vector<NodeIndex>& indices, float2 to);
-			inline void Pave(NodesFloatHost* distanceToPath, NodeIndex index);
-			inline void BridgeExclusively(NodesFloatHost* distanceToPath, NodeIndex from, NodeIndex to);
+			inline void Pave(NodesFloatHost* distanceToPath, NodeIndex index, NodeIndex lastPaved);
+			inline NodeIndex BridgeExclusively(NodesFloatHost* distanceToPath, NodeIndex from, NodeIndex to);
 
 
 		private:
@@ -65,6 +67,7 @@ namespace TrailEvolutionModelling {
 			ThreadPool* threadPool;
 			PathThickener* pathThickener;
 			AttractorsMap attractorsMap;
+			TramplabilityMaskHost* tramplabilityMask;
 			ObjectPool<NodesFloatHost*>* distancePool = nullptr;
 		};
 
