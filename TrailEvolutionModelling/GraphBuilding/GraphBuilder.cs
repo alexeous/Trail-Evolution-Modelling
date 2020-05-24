@@ -39,6 +39,9 @@ namespace TrailEvolutionModelling.GraphBuilding
                 if (closest == null)
                     throw new ArgumentException("Graph has no nodes");
 
+                if (attractors.Exists(a => a.Node == closest))
+                    continue;
+
                 var attractor = new Attractor
                 {
                     Node = closest,
