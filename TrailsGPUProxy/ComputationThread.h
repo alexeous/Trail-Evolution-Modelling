@@ -27,11 +27,13 @@ namespace TrailEvolutionModelling {
 			void DoSimulationStep(float performanceFactor, NodesTramplingEffect* nodesTramplingEffect, WavefrontCompletenessTable& wavefrontTable, std::vector<WavefrontJob*>& wavefrontJobs, EdgesWeightsDevice* edgesDevice, CudaScheduler& cudaScheduler);
 			void NotifyProgress(const wchar_t* stage);
 			void NotifyProgress(String^ stage);
+			void NotifyCanGiveUnripeResult();
 
 			void ApplyTrampledness(Graph^ graph, EdgesDataHost<float>* edgesData);
 
 		internal:
 			void AbortWithException(std::exception_ptr ex);
+			void GiveUnripeResultImmediate();
 
 			static ConcurrentDictionary<int, ComputationThread^>^ runThreads = 
 				gcnew ConcurrentDictionary<int, ComputationThread^>();
@@ -42,6 +44,7 @@ namespace TrailEvolutionModelling {
 			TrailsComputationsOutput^ output;
 			Thread^ thread;
 			volatile Exception^ exception;
+			volatile bool giveUnripeResult = false;
 
 			ThreadPool* threadPool = nullptr;
 			NodesTramplingEffect* pendingTramplingEffect = nullptr;

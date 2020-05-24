@@ -17,7 +17,10 @@
             <Grid HorizontalAlignment="Center" Height="190" Margin="0" VerticalAlignment="Center" Width="270" Background="White">
                 <StackPanel Margin="20,0,20,20" VerticalAlignment="Bottom">
                     <ProgressBar IsIndeterminate="True" Height="20"/>
-                    <Button x:Name="buttonCancelComputation" HorizontalAlignment="Right" DockPanel.Dock="Right" Content="Отмена" Margin="0,8,0,0" VerticalAlignment="Center" Padding="3,1" Click="OnCancelComputationClick"/>
+                    <DockPanel Margin="0,8,0,0">
+                        <Button x:Name="buttonCancelComputation" HorizontalAlignment="Right" Content="Отмена" VerticalAlignment="Center" Padding="3,1" DockPanel.Dock="Right" Click="OnCancelComputationClick"/>
+                        <Button x:Name="buttonGiveUnripeResult" HorizontalAlignment="Right" Content="Выдать ответ досрочно" VerticalAlignment="Center" Padding="3,1" Click="OnGiveUnripeResultClick" DockPanel.Dock="Right" Margin="0,0,4,0" Visibility="Collapsed"/>
+                    </DockPanel>
                 </StackPanel>
                 <TextBlock HorizontalAlignment="Center" Margin="0,30,0,0" TextWrapping="Wrap" Text="Идёт симуляция..." VerticalAlignment="Top" FontSize="14"/>
                 <TextBlock x:Name="textBoxComputationStage" Margin="20,60,20,0" TextWrapping="Wrap" Text="Идёт симуляция..." VerticalAlignment="Top" Foreground="#FF6A6A6A" FontFamily="Segoe UI Semilight"/>

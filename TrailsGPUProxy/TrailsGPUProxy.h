@@ -15,11 +15,15 @@ namespace TrailEvolutionModelling {
 
 		public:
 			event Action<String^>^ ProgressChanged;
+			event Action^ CanGiveUnripeResult;
+
+			property bool GiveUnripeResultFlag;
 
 			TrailsComputationsOutput^ ComputeTrails(TrailsComputationsInput^ input);
 
 		internal:
 			void NotifyProgress(String^ stage);
+			void NotifyCanGiveUnripeResult();
 		};
 
 	}

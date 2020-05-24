@@ -56,6 +56,11 @@ namespace TrailEvolutionModelling {
 			thread->Abort();
 		}
 
+		void ComputationThread::GiveUnripeResultImmediate() {
+			giveUnripeResult = true;
+			thread->Abort();
+		}
+
 		void ComputationThread::CancelAll() {
 			if(threadPool) {
 				threadPool->CancelAll();
@@ -139,47 +144,62 @@ namespace TrailEvolutionModelling {
 				constexpr float epsilonPerEdge = 0.001f;
 				float epsilon = epsilonPerEdge * graph->TramplableEdgesNumber;
 				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS;
-				int i = 0;
-				do {
-					NotifyProgress(String::Format(L"[Фаза 1] Симуляция процесса вытаптывания {0:0.000}/{1:0.000}", lastDelta, epsilon));
 
-					DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
-					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
-					
-					if(i % 3 == 0) {
-						lastDelta = edgesDeltaCalculator->CalculateDelta(edgesDevice);
+				try {
+					int i = 0;
+					do {
+						NotifyProgress(String::Format(L"[Фаза 1] Симуляция процесса вытаптывания {0:0.000}/{1:0.000}", lastDelta, epsilon));
+
+						DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
+						ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
+
+						if(i == 0) {
+							NotifyCanGiveUnripeResult();
+						}
+
+						if(i % 3 == 0) {
+							lastDelta = edgesDeltaCalculator->CalculateDelta(edgesDevice);
+						}
+
+						if(i % 5 == 0) {
+							//NotifyProgress(L"[Фаза 1] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
+							UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
+							DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
+							nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
+						}
+					} while(lastDelta > epsilon);
+
+
+
+
+
+					pathThickener->thickness = SECOND_PHASE_PATH_THICKNESS;
+					nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS * 10;
+					i = 0;
+					do {
+						NotifyProgress(String::Format(L"[Фаза 2] Симуляция процесса вытаптывания {0:0.000}/{1:0.000}", lastDelta, epsilon));
+						if(i % 5 == 0) {
+							//NotifyProgress(L"[Фаза 2] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
+							UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
+							DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
+							nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
+						}
+						DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
+						ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
+
+						if(i % 3 == 0) {
+							lastDelta = edgesDeltaCalculator->CalculateDelta(edgesDevice);
+						}
+					} while(lastDelta > epsilon);
+				}
+				catch(ThreadAbortException^ ex) {
+					if(giveUnripeResult) {
+						Thread::ResetAbort();
+						CancelAll();
 					}
-
-					if(i % 5 == 0) {
-						//NotifyProgress(L"[Фаза 1] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
-						UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
-						DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
-						nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
-					}
-				} while(lastDelta > epsilon);
-
-
-
-
-
-				pathThickener->thickness = SECOND_PHASE_PATH_THICKNESS;
-				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS * 10;
-				i = 0;
-				do {
-					NotifyProgress(String::Format(L"[Фаза 2] Симуляция процесса вытаптывания {0:0.000}/{1:0.000}", lastDelta, epsilon));
-					if(i % 5 == 0) {
-						//NotifyProgress(L"[Фаза 2] Промежуточное вычисление эффекта вытаптывания от \"непорядочных пешеходов\"");
-						UpdateIndecentEdges(edgesIndecentOriginal, edgesDevice, edgesIndecentPeriodicallyUpdated, w, h);
-						DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
-						nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
-					}
-					DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
-					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
-
-					if(i % 3 == 0) {
-						lastDelta = edgesDeltaCalculator->CalculateDelta(edgesDevice);
-					}
-				} while(lastDelta > epsilon);
+					else
+						throw ex;
+				}
 
 				NotifyProgress(L"Выгрузка результата");
 				edgesDevice->CopyToSync(edgesHost, w, h);
@@ -191,7 +211,7 @@ namespace TrailEvolutionModelling {
 				output = result;
 			}
 			catch(ThreadAbortException^) {
-				System::Threading::Thread::ResetAbort();
+				Thread::ResetAbort();
 			}
 			catch(CudaExceptionNative ex) {
 				exception = gcnew CudaException(ex);
@@ -252,6 +272,10 @@ namespace TrailEvolutionModelling {
 
 		void ComputationThread::NotifyProgress(String^ stage) {
 			proxy->NotifyProgress(stage);
+		}
+
+		void ComputationThread::NotifyCanGiveUnripeResult() {
+			proxy->NotifyCanGiveUnripeResult();
 		}
 
 		inline void ApplyTramplednessFunc(float& newWeight, Edge^ edge) {

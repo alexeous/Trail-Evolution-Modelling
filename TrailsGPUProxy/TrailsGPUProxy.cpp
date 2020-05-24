@@ -12,6 +12,11 @@ namespace TrailEvolutionModelling {
 				return computationThread->GetResult();
 			}
 			catch(ThreadAbortException^ ex) {
+				if(GiveUnripeResultFlag) {
+					Thread::ResetAbort();
+					computationThread->GiveUnripeResultImmediate();
+					return computationThread->GetResult();
+				}
 				computationThread->CancelAll();
 				throw ex;
 			}
@@ -19,6 +24,10 @@ namespace TrailEvolutionModelling {
 
 		void TrailsGPUProxy::NotifyProgress(String^ stage) {
 			ProgressChanged(stage);
+		}
+
+		void TrailsGPUProxy::NotifyCanGiveUnripeResult() {
+			CanGiveUnripeResult();
 		}
 	}
 }

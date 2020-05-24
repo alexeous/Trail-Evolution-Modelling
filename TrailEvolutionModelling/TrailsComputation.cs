@@ -14,9 +14,22 @@ namespace TrailEvolutionModelling
     class TrailsComputation
     {
         public event EventHandler ProgressChanged;
+        public event EventHandler CanGiveUnripeResult;
+
         public string CurrentStage { get; private set; }
 
+        public bool GiveUnripeResultFlag
+        {
+            get => proxy?.GiveUnripeResultFlag ?? false;
+            set
+            {
+                if (proxy != null) 
+                    proxy.GiveUnripeResultFlag = value;
+            }
+        }
+
         private World world;
+        TrailsGPUProxy proxy;
 
         public TrailsComputation(World world)
         {
@@ -34,9 +47,11 @@ namespace TrailEvolutionModelling
                 Graph = graph,
                 Attractors = attractors
             };
-            var proxy = new TrailsGPUProxy();
+            proxy = new TrailsGPUProxy();
             proxy.ProgressChanged += ReportProgress;
+            proxy.CanGiveUnripeResult += () => CanGiveUnripeResult?.Invoke(this, EventArgs.Empty);
             TrailsComputationsOutput output = proxy.ComputeTrails(computationsInput);
+            proxy = null;
             return output;
         }
 

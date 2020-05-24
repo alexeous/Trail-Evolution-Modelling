@@ -45,6 +45,7 @@ namespace TrailEvolutionModelling
         private System.Windows.Point mouseDownPos;
 
         private Thread computationThread;
+        private TrailsComputation computation;
 
         private XmlSaverLoader<SaveFile> saver;
 
@@ -494,56 +495,21 @@ namespace TrailEvolutionModelling
         {
             EndAllTools();
             World world = GetWorld();
-            var computation = new TrailsComputation(world);
+            computation = new TrailsComputation(world);
             computation.ProgressChanged += (_s, _e) => Dispatcher.Invoke(
                 () => textBoxComputationStage.Text = computation.CurrentStage
+            );
+            computation.CanGiveUnripeResult += (_s, _e) => Dispatcher.Invoke(
+                () => buttonGiveUnripeResult.Visibility = Visibility.Visible
             );
 
             computationThread = new Thread(() =>
             {
                 try
                 {
-                    Dispatcher.Invoke(() => gridComputationIsOn.Visibility = Visibility.Visible);
+                    Dispatcher.Invoke(ShowComputationsIsOnGrid);
                     TrailsComputationsOutput output = computation.Run();
-                    Graph graph = output.Graph;
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        edgeLayer.Clear();
-
-                        Color minCol = Color.Red;
-                        Color maxCol = Color.FromArgb(255, 0, 255, 0);
-                        float minW = TrailsGPUProxy.MinimumTramplableWeight;
-                        float maxW = AreaTypes.Default.Attributes.Weight;
-
-                        foreach (var edge in graph.Edges)
-                        {
-                            if (edge.Trampledness == 0)
-                                continue;
-
-                            Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
-                            Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();
-                            float newWeight = edge.Weight - edge.Trampledness;
-                            float t = (newWeight - minW) / (edge.Weight - minW);
-                            Color color = Color.FromArgb(255, Lerp(minCol.R, maxCol.R, t), Lerp(minCol.G, maxCol.G, t), Lerp(minCol.B, maxCol.B, t));
-                            edgeLayer.Add(new Feature
-                            {
-                                Geometry = new LineString(new[] { pos1, pos2 }),
-                                Styles = new[]
-                                {
-                                    new VectorStyle { Line = new Pen(color, 1) }
-                                }
-                            });
-                        }
-
-                        edgeLayer.Refresh();
-
-                        int Lerp(int a, int b, float t)
-                        {
-                            t = Math.Max(0, Math.Min(t, 1));
-                            return (int)(a * (1 - t) + b * t);
-                        }
-                    });
+                    Dispatcher.Invoke(() => DrawTrampledness(output.Graph));
                 }
                 catch (IsolatedAttractorsException)
                 {
@@ -559,12 +525,56 @@ namespace TrailEvolutionModelling
                 finally
                 {
                     Dispatcher.Invoke(() => gridComputationIsOn.Visibility = Visibility.Collapsed);
+                    computation = null;
+                    computationThread = null;
                 }
             });
             computationThread.IsBackground = true;
             computationThread.Start();
+        }
 
+        private void ShowComputationsIsOnGrid()
+        {
+            buttonGiveUnripeResult.Visibility = Visibility.Collapsed;
+            gridComputationIsOn.Visibility = Visibility.Visible;
+        }
 
+        private void DrawTrampledness(Graph graph)
+        {
+            edgeLayer.Clear();
+
+            Color minCol = Color.Red;
+            Color maxCol = Color.FromArgb(255, 0, 255, 0);
+            float minW = TrailsGPUProxy.MinimumTramplableWeight;
+            float maxW = AreaTypes.Default.Attributes.Weight;
+
+            foreach (var edge in graph.Edges)
+            {
+                if (edge.Trampledness == 0)
+                    continue;
+
+                Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
+                Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();
+                float newWeight = edge.Weight - edge.Trampledness;
+                float t = (newWeight - minW) / (edge.Weight - minW);
+                Color color = Color.FromArgb(255, Lerp(minCol.R, maxCol.R, t), Lerp(minCol.G, maxCol.G, t), Lerp(minCol.B, maxCol.B, t));
+                edgeLayer.Add(new Feature
+                {
+                    Geometry = new LineString(new[] { pos1, pos2 }),
+                    Styles = new[]
+                    {
+                        new VectorStyle { Line = new Pen(color, 1) }
+                    }
+                });
+            }
+
+            edgeLayer.Refresh();
+
+            int Lerp(int a, int b, float t)
+            {
+                t = Math.Max(0, Math.Min(t, 1));
+                return (int)(a * (1 - t) + b * t);
+            }
         }
 
         private void OnAttractorButtonClick(object sender, RoutedEventArgs e)
@@ -595,7 +605,26 @@ namespace TrailEvolutionModelling
 
         private void OnCancelComputationClick(object sender, RoutedEventArgs e)
         {
-            computationThread?.Abort();
+            if (MessageBox.Show("Вы уверены, что хотите прервать вычисления? Операция необратима.",
+                "Отменить вычисления?", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                computationThread?.Abort();
+            }
+        }
+
+        private void OnGiveUnripeResultClick(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Вы уверены, что хотите получить незаконченный результат? " +
+                "Продолжить вычисления с данного места будет невозможно.",
+                "Выдать результат досрочно?", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                var localComp = computation;
+                if (localComp != null)
+                {
+                    localComp.GiveUnripeResultFlag = true;
+                }
+                computationThread?.Abort();
+            }
         }
     }
 }
