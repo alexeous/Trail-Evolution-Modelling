@@ -1,4 +1,5 @@
 #include "AttractorsMap.h"
+#include <algorithm>
 #include "IsolatedAttractorsException.h"
 
 using namespace TrailEvolutionModelling::GPUProxy;
@@ -9,6 +10,7 @@ namespace TrailEvolutionModelling {
 		AttractorsMap::AttractorsMap(Graph^ graph, array<RefAttractor^>^ refAttractors)
 		{
 			std::vector<Attractor> nativeAttractors = ConvertRefAttractors(refAttractors);
+
 #define REF_TO_NATIVE(ref) nativeAttractors[Array::IndexOf(refAttractors, (ref))]
 
 			auto isolated = gcnew List<RefAttractor^>();
@@ -16,8 +18,7 @@ namespace TrailEvolutionModelling {
 				std::vector<Attractor> allReachable;
 				float sumReachablePerformance = 0;
 				for each(auto attrJ in refAttractors) {
-					if(attrI == attrJ || !(attrI->IsSource && attrJ->IsDrain || 
-										   attrI->IsDrain && attrJ->IsSource))
+					if(attrI == attrJ || !CanFlow(attrI, attrJ))
 						continue;
 
 					if(CanReach(graph, attrI, attrJ)) {
@@ -41,6 +42,11 @@ namespace TrailEvolutionModelling {
 			}
 
 #undef REF_TO_NATIVE
+		}
+
+		bool AttractorsMap::CanFlow(RefAttractor^ attrI, RefAttractor^ attrJ) {
+			return attrI->IsSource && attrJ->IsDrain ||
+				attrI->IsDrain && attrJ->IsSource;
 		}
 
 		float AttractorsMap::GetSumReachablePerformance(const Attractor& attractor) const {

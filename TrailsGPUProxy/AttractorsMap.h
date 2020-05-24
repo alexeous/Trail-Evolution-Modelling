@@ -36,6 +36,7 @@ namespace TrailEvolutionModelling {
 
         public:
             static bool CanReach(Graph^ graph, RefAttractor^ a, RefAttractor^ b);
+			static bool CanFlow(RefAttractor^ attrI, RefAttractor^ attrJ);
             static std::vector<Attractor> ConvertRefAttractors(array<RefAttractor^>^);
 
         private:
