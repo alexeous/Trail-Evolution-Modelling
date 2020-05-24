@@ -57,12 +57,8 @@
     <ClCompile Include="EdgesDeltaCalculator.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="EdgesDeltaCalcKernel.cu">
-      <Filter>CudaKernels</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CudaUtils.h" />
     <ClInclude Include="TrailsGPUProxy.h" />
     <ClInclude Include="IsolatedAttractorsException.h">
       <Filter>Exceptions</Filter>
@@ -109,7 +105,6 @@
     <ClInclude Include="ResetNodesG.h">
       <Filter>CudaKernels</Filter>
     </ClInclude>
-    <ClInclude Include="MathUtils.h" />
     <ClInclude Include="WavefrontCompletenessTable.h">
       <Filter>Algorithms</Filter>
     </ClInclude>
@@ -169,12 +164,20 @@
     <ClInclude Include="UpdateIndecentEdges.h">
       <Filter>CudaKernels</Filter>
     </ClInclude>
-    <ClInclude Include="LambdaUtility.h" />
     <ClInclude Include="EdgesDeltaCalculator.h">
       <Filter>Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="EdgesDeltaCalcKernel.h">
       <Filter>CudaKernels</Filter>
+    </ClInclude>
+    <ClInclude Include="CudaUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="LambdaUtility.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MathUtils.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -205,6 +208,9 @@
     <Filter Include="Threading">
       <UniqueIdentifier>{ca6ffccf-9c89-483c-9d8d-d7bcbe1bd541}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{b3377de9-71cd-4f5b-af89-2cef6c3d190f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="ResetNodesG.cu">
@@ -228,5 +234,6 @@
     <CudaCompile Include="ApplyTramplingsAndLawnRegeneration.cu">
       <Filter>CudaKernels</Filter>
     </CudaCompile>
+    <CudaCompile Include="EdgesDeltaCalcKernel.cu" />
   </ItemGroup>
 </Project>
