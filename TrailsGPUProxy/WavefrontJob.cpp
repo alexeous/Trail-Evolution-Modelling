@@ -45,7 +45,7 @@ namespace TrailEvolutionModelling {
 					}
 				}
 			});
-			(*withoutExitFlagCheck)(minIterations / 2);
+			(*withoutExitFlagCheck)(std::max(1, minIterations / 2));
 
 			exitFlag->ReadFromDeviceAsync(stream);
 			withExitFlagCheck = new std::function<void()>;
