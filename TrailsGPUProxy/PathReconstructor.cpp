@@ -1,5 +1,6 @@
 #include "PathReconstructor.h"
 #include "NodeIndex.h"
+#include "MathUtils.h"
 
 namespace TrailEvolutionModelling {
 	namespace GPUProxy {
@@ -44,8 +45,6 @@ namespace TrailEvolutionModelling {
 
 			return (start.performance + goal.performance) / 2;
 		}
-		
-		template<typename T> int sign(T val) { return (T(0) < val) - (val < T(0)); }
 
 		void PathReconstructor::ReconstructPath(Attractor startAttractor, Attractor goalAttractor, 
 			ComputeNodesHost* startNodes, ComputeNodesHost* goalNodes, 
