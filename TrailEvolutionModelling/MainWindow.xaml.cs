@@ -146,8 +146,9 @@ namespace TrailEvolutionModelling
             mapControl.Map.Layers.Add(mapObjectLayer);
             mapControl.Map.Layers.Add(attractorLayer);
             mapControl.Map.Layers.Add(boundingAreaLayer);
-
-            mapControl.Map.Layers.Add(edgeLayer);
+            mapControl.Map.Layers.Add(new RasterizingLayer(edgeLayer, 
+                delayBeforeRasterize: 0, renderResolutionMultiplier: 1, 
+                rasterizer: null, overscanRatio: 2));
 
             mapControl.MouseLeftButtonDown += OnMapLeftDown;
             mapControl.MouseLeftButtonUp += OnMapLeftUp;
