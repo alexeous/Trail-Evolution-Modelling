@@ -141,7 +141,7 @@ namespace TrailEvolutionModelling {
 				EdgesWeightsDevice* maximumWeights = resources.New<EdgesWeightsDevice>(edgesDevice, w, h);
 				float lastDelta = 0;
 				EdgesDeltaCalculator* edgesDeltaCalculator = resources.New<EdgesDeltaCalculator>(w, h, edgesDevice, resources);
-				constexpr float epsilonPerEdge = 0.001f;
+				constexpr float epsilonPerEdge = 0.001f*3;
 				float epsilon = epsilonPerEdge * graph->TramplableEdgesNumber;
 				nodesTramplingEffect->simulationStepSeconds = SIMULATION_STEP_SECONDS;
 
@@ -167,7 +167,8 @@ namespace TrailEvolutionModelling {
 							DoSimulationStep(INDECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesIndecentPeriodicallyUpdated, cudaScheduler);
 							nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
 						}
-					} while(lastDelta > epsilon);
+						i++;
+					} while(i < 10 || lastDelta > epsilon);
 
 
 
@@ -190,7 +191,8 @@ namespace TrailEvolutionModelling {
 						if(i % 3 == 0) {
 							lastDelta = edgesDeltaCalculator->CalculateDelta(edgesDevice);
 						}
-					} while(lastDelta > epsilon);
+						i++;
+					} while(i < 10 || lastDelta > epsilon);
 				}
 				catch(ThreadAbortException^ ex) {
 					if(giveUnripeResult) {
