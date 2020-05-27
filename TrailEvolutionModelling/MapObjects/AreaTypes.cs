@@ -70,7 +70,7 @@ namespace TrailEvolutionModelling.MapObjects
             {
                 IsWalkable = true,
                 IsTramplable = false,
-                Weight = 1.5f
+                Weight = 1.8f
             }
         };
 
