@@ -498,6 +498,8 @@ namespace TrailEvolutionModelling
         private void OnStartClick(object sender, RoutedEventArgs e)
         {
             EndAllTools();
+            buttonStart.IsEnabled = false;
+
             World world = GetWorld();
             computation = new TrailsComputation(world);
             computation.ProgressChanged += (_s, _e) => Dispatcher.Invoke(
@@ -528,7 +530,10 @@ namespace TrailEvolutionModelling
                 }
                 finally
                 {
-                    Dispatcher.Invoke(() => gridComputationIsOn.Visibility = Visibility.Collapsed);
+                    Dispatcher.Invoke(() => {
+                        gridComputationIsOn.Visibility = Visibility.Collapsed;
+                        buttonStart.IsEnabled = true;
+                    });
                     computation = null;
                     computationThread = null;
                 }
