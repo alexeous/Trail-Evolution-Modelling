@@ -40,6 +40,7 @@ namespace TrailEvolutionModelling
         private AttractorTool attractorTool;
         private AttractorEditing attractorEditing;
         private WritableLayer edgeLayer;
+        private RasterizingLayer edgeRasterizingLayer;
         private Tool[] allTools;
 
         private System.Windows.Point mouseDownPos;
@@ -126,6 +127,8 @@ namespace TrailEvolutionModelling
 
             RefreshButtons();
             ZoomToPoint(new Point(9231625, 7402608));
+
+            checkBoxShowTrampledness.IsChecked = true;
         }
 
         private void InitLayers()
@@ -135,6 +138,9 @@ namespace TrailEvolutionModelling
             attractorLayer = new WritableLayer();
 
             edgeLayer = new WritableLayer();
+            edgeRasterizingLayer = new RasterizingLayer(edgeLayer,
+                delayBeforeRasterize: 0, renderResolutionMultiplier: 1,
+                rasterizer: null, overscanRatio: 2);
         }
 
         private void InitializeMapControl()
@@ -148,9 +154,7 @@ namespace TrailEvolutionModelling
             mapControl.Map.Layers.Add(mapObjectLayer);
             mapControl.Map.Layers.Add(attractorLayer);
             mapControl.Map.Layers.Add(boundingAreaLayer);
-            mapControl.Map.Layers.Add(new RasterizingLayer(edgeLayer, 
-                delayBeforeRasterize: 0, renderResolutionMultiplier: 1, 
-                rasterizer: null, overscanRatio: 2));
+            mapControl.Map.Layers.Add(edgeRasterizingLayer);
 
             mapControl.MouseLeftButtonDown += OnMapLeftDown;
             mapControl.MouseLeftButtonUp += OnMapLeftUp;
@@ -485,6 +489,7 @@ namespace TrailEvolutionModelling
             
             this.trampledness = saveFile.Trampledness;
             DrawTrampledness();
+            checkBoxShowTrampledness.IsChecked = true;
 
             mapControl.ZoomToBox(saveFile.Viewport.TopLeft, saveFile.Viewport.BottomRight);
             
@@ -647,6 +652,19 @@ namespace TrailEvolutionModelling
                     localComp.GiveUnripeResultFlag = true;
                 }
                 computationThread?.Abort();
+            }
+        }
+
+        private void OnShowTramplednessToggled(object sender, RoutedEventArgs e)
+        {
+            if (checkBoxShowTrampledness.IsChecked == true)
+            {
+                if (!mapControl.Map.Layers.Contains(edgeRasterizingLayer))
+                    mapControl.Map.Layers.Add(edgeRasterizingLayer);
+            }
+            else
+            {
+                mapControl.Map.Layers.Remove(edgeRasterizingLayer);
             }
         }
     }

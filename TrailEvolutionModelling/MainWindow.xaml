@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:TrailEvolutionModelling" 
         xmlns:tk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="MainWindow" Height="657" Width="1169"
+        Title="MainWindow" Height="692" Width="1159"
         WindowStartupLocation="CenterScreen" Loaded="OnWindowLoaded">
     <Grid>
         <Grid x:Name="gridComputationIsOn" Panel.ZIndex="1" Visibility="Collapsed">
@@ -127,12 +127,19 @@
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
-                    <Button x:Name="buttonStart" Margin="0,0,0,2" VerticalAlignment="Bottom" HorizontalContentAlignment="Left" Padding="6,3,1,3" Click="OnStartClick" Height="38">
-                        <StackPanel Orientation="Horizontal">
-                            <Image Source="Resources/Play.png" Width="24" Margin="0,3,5,3" />
-                            <TextBlock VerticalAlignment="Center" Margin="5,0,0,0"><Run Text="Запустить"/></TextBlock>
-                        </StackPanel>
-                    </Button>
+                    <StackPanel Margin="0,0,0,2" VerticalAlignment="Bottom" Orientation="Vertical">
+                        <Button x:Name="buttonStart" VerticalAlignment="Bottom" HorizontalContentAlignment="Left" Padding="6,3,1,3" Click="OnStartClick" Height="38">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Resources/Play.png" Width="24" Margin="0,3,5,3" />
+                                <TextBlock VerticalAlignment="Center" Margin="5,0,0,0"><Run Text="Запустить"/></TextBlock>
+                            </StackPanel>
+                        </Button>
+                        <CheckBox x:Name="checkBoxShowTrampledness" Margin="0,4,2,4" Checked="OnShowTramplednessToggled" Unchecked="OnShowTramplednessToggled">
+                            <TextBlock TextWrapping="Wrap">
+                                Отображать вытоптанные области
+                            </TextBlock>
+                        </CheckBox>
+                    </StackPanel>
                 </Grid>
             </Grid>
         </DockPanel>
