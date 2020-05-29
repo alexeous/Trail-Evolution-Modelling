@@ -503,7 +503,10 @@ namespace TrailEvolutionModelling
             World world = GetWorld();
             computation = new TrailsComputation(world);
             computation.ProgressChanged += (_s, _e) => Dispatcher.Invoke(
-                () => textBoxComputationStage.Text = computation.CurrentStage
+                () => {
+                    if (computation != null)
+                        textBoxComputationStage.Text = computation.CurrentStage;
+                }
             );
             computation.CanGiveUnripeResult += (_s, _e) => Dispatcher.Invoke(
                 () => buttonGiveUnripeResult.Visibility = Visibility.Visible
