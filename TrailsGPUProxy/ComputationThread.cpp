@@ -168,7 +168,7 @@ namespace TrailEvolutionModelling {
 							nodesTramplingEffect->SaveAsEdgesSync(indecentTrampling, tramplabilityMask);
 						}
 						i++;
-					} while(i < 10 || lastDelta > epsilon);
+					} while(lastDelta > epsilon);
 
 
 
@@ -192,7 +192,7 @@ namespace TrailEvolutionModelling {
 							lastDelta = edgesDeltaCalculator->CalculateDelta(edgesDevice);
 						}
 						i++;
-					} while(i < 10 || lastDelta > epsilon);
+					} while(lastDelta > epsilon);
 				}
 				catch(ThreadAbortException^ ex) {
 					if(giveUnripeResult) {
