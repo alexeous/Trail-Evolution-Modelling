@@ -472,6 +472,9 @@ namespace TrailEvolutionModelling
 
         private void LoadFromSaveFile(SaveFile saveFile)
         {
+            EndAllTools();
+            ClearTrampledness();
+
             boundingAreaTool.BoundingArea = saveFile.World.BoundingArea;
             mapObjectLayer.Clear();
             mapObjectLayer.AddRange(saveFile.World.MapObjects);
@@ -538,6 +541,11 @@ namespace TrailEvolutionModelling
         {
             buttonGiveUnripeResult.Visibility = Visibility.Collapsed;
             gridComputationIsOn.Visibility = Visibility.Visible;
+        }
+
+        private void ClearTrampledness()
+        {
+            edgeLayer.Clear();
         }
 
         private void DrawTrampledness(Graph graph)
