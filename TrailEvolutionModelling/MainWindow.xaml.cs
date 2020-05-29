@@ -597,6 +597,7 @@ namespace TrailEvolutionModelling
             }
 
             edgeLayer.Refresh();
+            checkBoxShowTrampledness.IsChecked = true;
 
             int Lerp(int a, int b, float t)
             {
