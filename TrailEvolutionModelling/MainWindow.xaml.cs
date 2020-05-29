@@ -47,6 +47,8 @@ namespace TrailEvolutionModelling
         private Thread computationThread;
         private TrailsComputation computation;
 
+        private Trampledness trampledness;
+
         private XmlSaverLoader<SaveFile> saver;
 
         private Button[] MapObjectButtons => new[]
@@ -480,8 +482,12 @@ namespace TrailEvolutionModelling
             mapObjectLayer.AddRange(saveFile.World.MapObjects);
             attractorLayer.Clear();
             attractorLayer.AddRange(saveFile.World.AttractorObjects);
-            mapControl.ZoomToBox(saveFile.Viewport.TopLeft, saveFile.Viewport.BottomRight);
+            
+            this.trampledness = saveFile.Trampledness;
+            DrawTrampledness();
 
+            mapControl.ZoomToBox(saveFile.Viewport.TopLeft, saveFile.Viewport.BottomRight);
+            
             RefreshLayers();
             RefreshButtons();
         }
@@ -491,7 +497,8 @@ namespace TrailEvolutionModelling
             return new SaveFile
             {
                 World = GetWorld(),
-                Viewport = mapControl.Viewport.Extent
+                Viewport = mapControl.Viewport.Extent,
+                Trampledness = trampledness
             };
         }
 
@@ -518,7 +525,8 @@ namespace TrailEvolutionModelling
                 {
                     Dispatcher.Invoke(ShowComputationsIsOnGrid);
                     TrailsComputationsOutput output = computation.Run();
-                    Dispatcher.Invoke(() => DrawTrampledness(output.Graph));
+                    trampledness = new Trampledness(output.Graph);
+                    Dispatcher.Invoke(() => DrawTrampledness());
                 }
                 catch (IsolatedAttractorsException)
                 {
@@ -553,27 +561,25 @@ namespace TrailEvolutionModelling
 
         private void ClearTrampledness()
         {
+            trampledness = null;
             edgeLayer.Clear();
         }
 
-        private void DrawTrampledness(Graph graph)
+        private void DrawTrampledness()
         {
+            if (trampledness == null)
+                return;
+
             edgeLayer.Clear();
 
             Color minCol = Color.Red;
             Color maxCol = Color.FromArgb(255, 0, 255, 0);
-            float minW = TrailsGPUProxy.MinimumTramplableWeight;
-            float maxW = AreaTypes.Default.Attributes.Weight;
 
-            foreach (var edge in graph.Edges)
+            foreach (var edge in trampledness)
             {
-                if (edge.Trampledness == 0)
-                    continue;
-
-                Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
-                Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();
-                float newWeight = edge.Weight - edge.Trampledness;
-                float t = (newWeight - minW) / (edge.Weight - minW);
+                Point pos1 = new Point(edge.X1, edge.Y1);
+                Point pos2 = new Point(edge.X2, edge.Y2);
+                float t = edge.Trampledness;
                 Color color = Color.FromArgb(255, Lerp(minCol.R, maxCol.R, t), Lerp(minCol.G, maxCol.G, t), Lerp(minCol.B, maxCol.B, t));
                 edgeLayer.Add(new Feature
                 {

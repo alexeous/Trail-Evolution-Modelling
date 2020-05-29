@@ -15,5 +15,6 @@ namespace TrailEvolutionModelling.Files
     {
         public World World { get; set; }
         public BoundingBox Viewport { get; set; }
+        public Trampledness Trampledness { get; set; }
     }
 }
