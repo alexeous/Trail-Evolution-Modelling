@@ -44,8 +44,9 @@ namespace TrailEvolutionModelling {
 		float PathReconstructor::CalcPathFlow(const Attractor& start, const Attractor& goal) const {
 			//return (start.performance * goal.performance / attractorsMap.GetSumReachablePerformance(start)
 			//	+ goal.performance * start.performance / attractorsMap.GetSumReachablePerformance(goal)) / 2;
-
-			return (start.performance + goal.performance) / 2;
+			return (start.performance * goal.performance / attractorsMap.GetSumReachablePerformance(start)
+				+ goal.performance * start.performance / attractorsMap.GetSumReachablePerformance(goal));
+			//return (start.performance + goal.performance) / 2;
 		}
 
 		void PathReconstructor::ReconstructPath(Attractor startAttractor, Attractor goalAttractor, 

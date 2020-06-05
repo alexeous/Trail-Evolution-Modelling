@@ -159,7 +159,7 @@ namespace TrailEvolutionModelling.GraphBuilding
 
         static float AttractorPerformanceToNumber(AttractorPerformance performance)
         {
-            float normal = ((float)random.NextDouble() * 0.1f + 0.95f) * 0.033333f;   // people per virtual second
+            float normal = ((float)random.NextDouble() * 0.1f + 0.95f) * 0.1f;   // people per virtual second
             switch (performance)
             {
                 case AttractorPerformance.Normal:
