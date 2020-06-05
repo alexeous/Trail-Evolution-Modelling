@@ -72,20 +72,33 @@ namespace TrailEvolutionModelling.MapObjects
             mapObjBuffer.Clear();
             spatialIndex.GetNonAlloc(new BoundingBox(nodePos, neighbourPos), mapObjBuffer);
             float maxWeight = 0;
+            bool isMaxTramplable = true;
             AreaAttributes resultAttribtues = default;
             foreach (var mapObj in mapObjBuffer)
             {
-                if (mapObj.IntersectsLine(nodePos, neighbourPos))
+                if (!mapObj.IntersectsLine(nodePos, neighbourPos))
                 {
-                    AreaAttributes attributes = mapObj.AreaType.Attributes;
-                    if (!attributes.IsWalkable)
-                        return AreaAttributes.Unwalkable;
+                    continue;
+                }
 
-                    if (attributes.Weight > maxWeight)
-                    {
-                        maxWeight = attributes.Weight;
-                        resultAttribtues = attributes;
-                    }
+                AreaAttributes attributes = mapObj.AreaType.Attributes;
+                if (!attributes.IsWalkable)
+                    return AreaAttributes.Unwalkable;
+
+                bool replace = false;
+                if (!attributes.IsTramplable && isMaxTramplable)
+                {
+                    replace = true;
+                    isMaxTramplable = false;
+                }
+                if (attributes.Weight > maxWeight && attributes.IsTramplable == isMaxTramplable)
+                {
+                    replace = true;
+                }
+                if (replace)
+                {
+                    maxWeight = attributes.Weight;
+                    resultAttribtues = attributes;
                 }
             }
 
