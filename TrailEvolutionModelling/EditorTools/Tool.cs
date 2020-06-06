@@ -10,12 +10,15 @@ namespace TrailEvolutionModelling.EditorTools
     {
         public bool IsActive { get; private set; }
 
+        public event EventHandler OnBegin;
+
         public void Begin()
         {
             if (IsActive)
                 return;
 
             IsActive = true;
+            OnBegin?.Invoke(this, EventArgs.Empty);
             BeginImpl();
         }
 

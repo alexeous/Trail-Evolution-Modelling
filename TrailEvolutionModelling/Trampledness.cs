@@ -83,13 +83,13 @@ namespace TrailEvolutionModelling
 
             foreach (var edge in graph.Edges)
             {
-                if (edge.Trampledness == 0)
+                float newWeight = edge.Weight - edge.Trampledness;
+                float t = (newWeight - minW) / (edge.Weight - minW);
+                if (edge.Trampledness < 0.5f)
                     continue;
 
                 Point pos1 = graph.GetNodePosition(edge.Node1).ToMapsui();
                 Point pos2 = graph.GetNodePosition(edge.Node2).ToMapsui();
-                float newWeight = edge.Weight - edge.Trampledness;
-                float t = (newWeight - minW) / (edge.Weight - minW);
                 Add(new TramplednessEdge(pos1, pos2, t));
             }
         }

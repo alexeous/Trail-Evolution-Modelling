@@ -52,6 +52,8 @@ namespace TrailEvolutionModelling
 
         private XmlSaverLoader<SaveFile> saver;
 
+        private bool unsavedChanges = false;
+
         private Button[] MapObjectButtons => new[]
         {
             buttonPavedPath,
@@ -176,6 +178,11 @@ namespace TrailEvolutionModelling
                 polygonTool, lineTool, mapObjectEditing,
                 boundingAreaTool, attractorTool, attractorEditing
             };
+
+            foreach (var tool in allTools)
+            {
+                tool.OnBegin += OnToolBegin;
+            }
         }
 
         private void InitSaver()
@@ -187,6 +194,11 @@ namespace TrailEvolutionModelling
         {
             var extent = new Point(1000, 1000);
             mapControl.ZoomToBox(center - extent, center + extent);
+        }
+
+        private void OnToolBegin(object sender, EventArgs e)
+        {
+            unsavedChanges = true;
         }
 
         private ContextMenu CreateMapObjectContextMenu(IMapObject iMapObject)
@@ -459,42 +471,79 @@ namespace TrailEvolutionModelling
             return AreaTypes.GetByName(areaTypeName);
         }
 
+        private void OnNewFileClick(object sender, RoutedEventArgs e)
+        {
+            if (ConfirmOverrideUnsavedChanges())
+                NewFile();
+        }
+
         private void OnOpenFileClick(object sender, RoutedEventArgs e)
         {
             SaveFile save = saver.Load();
             if (save != null)
-                LoadFromSaveFile(save);
+                if (ConfirmOverrideUnsavedChanges())
+                    LoadFromSaveFile(save);
         }
 
         private void OnSaveFileClick(object sender, RoutedEventArgs e)
         {
             saver.Save(PrepareSaveFile());
+            unsavedChanges = false;
         }
 
         private void OnSaveFileAsClick(object sender, RoutedEventArgs e)
         {
             saver.SaveAs(PrepareSaveFile());
+            unsavedChanges = false;
+        }
+
+        private void NewFile()
+        {
+            ClearAll();
+            unsavedChanges = false;
+        }
+
+        private bool ConfirmOverrideUnsavedChanges()
+        {
+            if (!unsavedChanges)
+                return true;
+
+            const string text = "Несохранённые изменения могут быть утеряны. Продолжить?";
+            const string caption = "Внимание! Несохранённые изменения!";
+            var result = MessageBox.Show(text, caption, MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            return result == MessageBoxResult.Yes;
         }
 
         private void LoadFromSaveFile(SaveFile saveFile)
         {
-            EndAllTools();
-            ClearTrampledness();
+            ClearAll();
 
             boundingAreaTool.BoundingArea = saveFile.World.BoundingArea;
-            mapObjectLayer.Clear();
             mapObjectLayer.AddRange(saveFile.World.MapObjects);
-            attractorLayer.Clear();
             attractorLayer.AddRange(saveFile.World.AttractorObjects);
-            
+
             this.trampledness = saveFile.Trampledness;
             DrawTrampledness();
             checkBoxShowTrampledness.IsChecked = true;
 
             mapControl.ZoomToBox(saveFile.Viewport.TopLeft, saveFile.Viewport.BottomRight);
-            
+
             RefreshLayers();
             RefreshButtons();
+
+            unsavedChanges = false;
+        }
+
+        private void ClearAll()
+        {
+            EndAllTools();
+            ClearTrampledness();
+            boundingAreaTool.BoundingArea = null;
+            mapObjectLayer.Clear();
+            attractorLayer.Clear();
+            RefreshLayers();
+            RefreshButtons();
+            mapControl.Refresh();
         }
 
         private SaveFile PrepareSaveFile()
@@ -531,7 +580,8 @@ namespace TrailEvolutionModelling
                     Dispatcher.Invoke(ShowComputationsIsOnGrid);
                     TrailsComputationsOutput output = computation.Run();
                     trampledness = new Trampledness(output.Graph);
-                    Dispatcher.Invoke(() => DrawTrampledness());
+                    unsavedChanges = true;
+                    Dispatcher.Invoke(DrawTrampledness);
                 }
                 catch (IsolatedAttractorsException)
                 {
@@ -597,6 +647,7 @@ namespace TrailEvolutionModelling
             }
 
             edgeLayer.Refresh();
+            mapControl.Refresh();
             checkBoxShowTrampledness.IsChecked = true;
 
             int Lerp(int a, int b, float t)
