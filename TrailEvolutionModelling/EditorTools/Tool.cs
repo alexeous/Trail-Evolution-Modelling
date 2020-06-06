@@ -11,6 +11,7 @@ namespace TrailEvolutionModelling.EditorTools
         public bool IsActive { get; private set; }
 
         public event EventHandler OnBegin;
+        public event EventHandler OnEnd;
 
         public void Begin()
         {
@@ -29,6 +30,7 @@ namespace TrailEvolutionModelling.EditorTools
 
             IsActive = false;
             EndImpl();
+            OnEnd?.Invoke(this, EventArgs.Empty);
             return true;
         }
 

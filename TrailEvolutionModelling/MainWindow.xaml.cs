@@ -182,6 +182,7 @@ namespace TrailEvolutionModelling
             foreach (var tool in allTools)
             {
                 tool.OnBegin += OnToolBegin;
+                tool.OnEnd += OnToolEnd;
             }
         }
 
@@ -199,6 +200,11 @@ namespace TrailEvolutionModelling
         private void OnToolBegin(object sender, EventArgs e)
         {
             unsavedChanges = true;
+        }
+
+        private void OnToolEnd(object sender, EventArgs e)
+        {
+            RefreshButtons();
         }
 
         private ContextMenu CreateMapObjectContextMenu(IMapObject iMapObject)
@@ -386,8 +392,6 @@ namespace TrailEvolutionModelling
                 any |= tool.End();
             }
 
-            RefreshButtons();
-
             return any;
         }
 
@@ -454,7 +458,8 @@ namespace TrailEvolutionModelling
 
         private void RefreshStartButton()
         {
-            buttonStart.IsEnabled = boundingAreaTool.BoundingArea != null;
+            buttonStart.IsEnabled = boundingAreaTool.BoundingArea != null &&
+                attractorLayer.GetFeatures().Count() != 0;
         }
 
         private void RefreshLayers()
