@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Mapsui.Geometries;
+using Mapsui.UI.Wpf;
 
 namespace TrailEvolutionModelling.MapObjects
 {
@@ -13,5 +14,6 @@ namespace TrailEvolutionModelling.MapObjects
         Highlighter Highlighter { get; }
 
         double Distance(Point p);
+        bool IsMouseOver(Point worldPos, MapControl mapControl);
     }
 }

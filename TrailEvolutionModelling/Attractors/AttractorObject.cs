@@ -12,6 +12,7 @@ using System.Xml.Serialization;
 using Mapsui.Geometries;
 using Mapsui.Providers;
 using Mapsui.Styles;
+using Mapsui.UI.Wpf;
 using TrailEvolutionModelling.MapObjects;
 using TrailEvolutionModelling.Util;
 
@@ -104,6 +105,13 @@ namespace TrailEvolutionModelling.Attractors
         {
             return Position.Distance(p);
         }
+
+        public bool IsMouseOver(Point worldPos, MapControl mapControl)
+        {
+            double tolerance = mapControl.Viewport.Resolution * 15;
+            return Distance(worldPos) <= tolerance;
+        }
+
         
         private void UpdateStyle()
         {

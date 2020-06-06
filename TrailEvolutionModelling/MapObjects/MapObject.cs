@@ -10,6 +10,8 @@ using System.Xml.Serialization;
 using Mapsui.Geometries;
 using Mapsui.Providers;
 using Mapsui.Styles;
+using Mapsui.UI;
+using Mapsui.UI.Wpf;
 
 namespace TrailEvolutionModelling.MapObjects
 {
@@ -73,6 +75,12 @@ namespace TrailEvolutionModelling.MapObjects
                 writer.WriteAttributeString("AreaType", AreaType.Name);
             
             writer.WriteString(ConvertGeometryToText());
+        }
+
+        public bool IsMouseOver(Point worldPos, MapControl mapControl)
+        {
+            double tolerance = mapControl.Viewport.Resolution * 5;
+            return Distance(worldPos) <= tolerance;
         }
 
         public abstract double Distance(Point p);

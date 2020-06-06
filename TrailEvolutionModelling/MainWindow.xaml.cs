@@ -368,14 +368,12 @@ namespace TrailEvolutionModelling
 
         private IEnumerable<IMapObject> GetFeaturesAt(Point point)
         {
-            double tolerance = mapControl.Viewport.Resolution * 5;
-
             var boundingBox = new BoundingBox(point, point);
             return mapObjectLayer.GetFeaturesInView(boundingBox, mapControl.Viewport.Resolution)
                 .Concat(boundingAreaLayer.GetFeaturesInView(boundingBox, mapControl.Viewport.Resolution))
                 .Concat(attractorLayer.GetFeaturesInView(boundingBox, mapControl.Viewport.Resolution))
                 .OfType<IMapObject>()
-                .Where(p => p.Distance(point) <= tolerance);
+                .Where(p => p.IsMouseOver(point, mapControl));
         }
 
         private bool EndAllTools()
