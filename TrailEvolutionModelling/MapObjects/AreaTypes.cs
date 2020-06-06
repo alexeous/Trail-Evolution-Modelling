@@ -57,7 +57,7 @@ namespace TrailEvolutionModelling.MapObjects
             {
                 IsWalkable = true,
                 IsTramplable = false,
-                Weight = 1.2f
+                Weight = 2f
             }
         };
 
@@ -69,8 +69,8 @@ namespace TrailEvolutionModelling.MapObjects
             Attributes = new AreaAttributes
             {
                 IsWalkable = true,
-                IsTramplable = false,
-                Weight = 1.8f
+                IsTramplable = true,
+                Weight = 3.4f
             }
         };
 
