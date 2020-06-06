@@ -459,7 +459,7 @@ namespace TrailEvolutionModelling
         private void RefreshStartButton()
         {
             buttonStart.IsEnabled = boundingAreaTool.BoundingArea != null &&
-                attractorLayer.GetFeatures().Count() != 0;
+                attractorLayer.GetFeatures().Count() > 1;
         }
 
         private void RefreshLayers()
