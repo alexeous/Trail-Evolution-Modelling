@@ -193,6 +193,10 @@ namespace TrailEvolutionModelling {
 						}
 						i++;
 					} while(lastDelta > epsilon);
+
+					nodesTramplingEffect->simulationStepSeconds = 10.0f / LAWN_REGENERATION_PER_SECOND;
+					DoSimulationStep(DECENT_PEDESTRIANS_SHARE, nodesTramplingEffect, wavefrontTable, wavefrontJobs, edgesDevice, cudaScheduler);
+					ApplyTramplingsAndLawnRegeneration(edgesDevice, w, h, nodesTramplingEffect->simulationStepSeconds, indecentTrampling, nodesTramplingEffect->GetDataDevice(), tramplabilityMask, minimumWeights, maximumWeights);
 				}
 				catch(ThreadAbortException^ ex) {
 					if(giveUnripeResult) {
