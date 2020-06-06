@@ -206,7 +206,7 @@ namespace TrailEvolutionModelling
             var contextMenu = new ContextMenu();
             contextMenu.Items.Add(CreateModifyItem());
             contextMenu.Items.Add(CreateRemoveItem());
-            if (iMapObject is MapObject mapObj) {
+            if (iMapObject is MapObject mapObj && !(iMapObject is BoundingAreaPolygon)) {
                 contextMenu.Items.Add(CreateConvertItem(mapObj)); 
             }
             return contextMenu;
@@ -265,7 +265,9 @@ namespace TrailEvolutionModelling
                 {
                     Header = "Преобразовать в..."
                 };
-                foreach (var areaType in AreaTypes.All)
+                var convertOptions = AreaTypes.All
+                    .Where(x => x.GeometryType == mapObject.AreaType.GeometryType);
+                foreach (var areaType in convertOptions)
                 {
                     var item = new MenuItem
                     {

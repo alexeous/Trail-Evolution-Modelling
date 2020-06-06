@@ -11,6 +11,8 @@ using TrailEvolutionModelling.Styles;
 
 namespace TrailEvolutionModelling.MapObjects
 {
+    public enum AreaGeometryType { None, Line, Polygon }
+
     [Serializable]
     public class AreaType
     {
@@ -25,6 +27,9 @@ namespace TrailEvolutionModelling.MapObjects
         
         [XmlAttribute]
         public string DisplayedName { get; set; }
+
+        [XmlIgnore]
+        public AreaGeometryType GeometryType { get; set; }
 
         public AreaType() { }
 

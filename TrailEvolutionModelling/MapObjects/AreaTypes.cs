@@ -26,6 +26,7 @@ namespace TrailEvolutionModelling.MapObjects
         {
             Name = "Lawn",
             DisplayedName = "Газон",
+            GeometryType = AreaGeometryType.None,
             Style = new PolygonStyle(97, 170, 77) { PenStyle = PenStyle.LongDash },
             Attributes = new AreaAttributes
             {
@@ -39,6 +40,7 @@ namespace TrailEvolutionModelling.MapObjects
         {
             Name = "PavedPath",
             DisplayedName = "Пешеходная дорожка",
+            GeometryType = AreaGeometryType.Polygon,
             Style = new PolygonStyle(170, 170, 170) { PenStyle = PenStyle.LongDash },
             Attributes = new AreaAttributes
             {
@@ -52,6 +54,7 @@ namespace TrailEvolutionModelling.MapObjects
         {
             Name = "CarRoad",
             DisplayedName = "Проезжая часть",
+            GeometryType = AreaGeometryType.Polygon,
             Style = new PolygonStyle(57, 74, 84) { PenStyle = PenStyle.LongDash },
             Attributes = new AreaAttributes
             {
@@ -65,6 +68,7 @@ namespace TrailEvolutionModelling.MapObjects
         {
             Name = "Vegetation",
             DisplayedName = "Растительность",
+            GeometryType = AreaGeometryType.Polygon,
             Style = new PolygonStyle(41, 122, 47) { PenStyle = PenStyle.LongDash },
             Attributes = new AreaAttributes
             {
@@ -78,6 +82,7 @@ namespace TrailEvolutionModelling.MapObjects
         {
             Name = "WalkthroughableFence",
             DisplayedName = "Проходимый забор",
+            GeometryType = AreaGeometryType.Line,
             Style = new LineStyle(63, 76, 96) { PenStyle = PenStyle.LongDash },
             Attributes = new AreaAttributes
             {
@@ -91,6 +96,7 @@ namespace TrailEvolutionModelling.MapObjects
         {
             Name = "Building",
             DisplayedName = "Здание",
+            GeometryType = AreaGeometryType.Polygon,
             Style = new PolygonStyle(50, 45, 45),
             Attributes = AreaAttributes.Unwalkable
         };
@@ -99,6 +105,7 @@ namespace TrailEvolutionModelling.MapObjects
         {
             Name = "Fence",
             DisplayedName = "Непроходимый забор",
+            GeometryType = AreaGeometryType.Line,
             Style = new LineStyle(76, 76, 76),
             Attributes = AreaAttributes.Unwalkable
         };
@@ -107,6 +114,7 @@ namespace TrailEvolutionModelling.MapObjects
         {
             Name = "Water",
             DisplayedName = "Водоём",
+            GeometryType = AreaGeometryType.Polygon,
             Style = new PolygonStyle(116, 179, 224),
             Attributes = AreaAttributes.Unwalkable
         };
@@ -115,6 +123,7 @@ namespace TrailEvolutionModelling.MapObjects
         {
             Name = "OtherUnwalkthroughable",
             DisplayedName = "Другое непроходимое препятствие",
+            GeometryType = AreaGeometryType.Polygon,
             Style = new PolygonStyle(12, 12, 12),
             Attributes = AreaAttributes.Unwalkable
         };
