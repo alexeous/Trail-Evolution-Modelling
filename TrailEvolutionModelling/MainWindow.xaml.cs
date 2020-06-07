@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Mapsui;
 using Mapsui.Geometries;
 using Mapsui.Layers;
 using Mapsui.Providers;
 using Mapsui.Styles;
 using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
+using Microsoft.Win32;
 using TrailEvolutionModelling.Attractors;
 using TrailEvolutionModelling.EditorTools;
 using TrailEvolutionModelling.Files;
@@ -32,6 +35,8 @@ namespace TrailEvolutionModelling
         private MapObjectLayer mapObjectLayer;
         private BoundingAreaLayer boundingAreaLayer;
         private WritableLayer attractorLayer;
+        private WritableLayer edgeLayer;
+        private RasterizingLayer edgeRasterizingLayer;
 
         private PolygonTool polygonTool;
         private LineTool lineTool;
@@ -39,8 +44,6 @@ namespace TrailEvolutionModelling
         private MapObjectEditing mapObjectEditing;
         private AttractorTool attractorTool;
         private AttractorEditing attractorEditing;
-        private WritableLayer edgeLayer;
-        private RasterizingLayer edgeRasterizingLayer;
         private Tool[] allTools;
 
         private System.Windows.Point mouseDownPos;
@@ -502,6 +505,12 @@ namespace TrailEvolutionModelling
             unsavedChanges = false;
         }
 
+
+        private void OnExportImageClick(object sender, RoutedEventArgs e)
+        {
+            ExportImage();
+        }
+
         private void NewFile()
         {
             ClearAll();
@@ -559,6 +568,47 @@ namespace TrailEvolutionModelling
                 Viewport = mapControl.Viewport.Extent,
                 Trampledness = trampledness
             };
+        }
+
+        private void ExportImage()
+        {
+            var dialog = new SaveFileDialog
+            {
+                Filter = "png|*.png"
+            };
+            if (dialog.ShowDialog() != true)
+                return;
+
+
+            IReadOnlyViewport viewport;
+            BoundingBox boundingBox = boundingAreaTool.BoundingArea?.Geometry?.BoundingBox;
+            if (boundingBox != null)
+            {
+                viewport = new Viewport
+                {
+                    Center = boundingBox.Centroid,
+                    Width = boundingBox.Width,
+                    Height = boundingBox.Height
+                };
+            }
+            else
+            {
+                viewport = mapControl.Viewport;
+            }
+
+            try
+            {
+                ILayer[] layers = { mapObjectLayer, edgeLayer };
+                using (var bitmap = mapControl.Renderer.RenderToBitmapStream(viewport, layers, null, 3))
+                {
+                    File.WriteAllBytes(dialog.FileName, bitmap.ToArray());
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("При экспорте изображения возникла ошибка:\n" + ex.Message, "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void OnStartClick(object sender, RoutedEventArgs e)

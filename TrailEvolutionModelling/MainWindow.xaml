@@ -37,6 +37,7 @@
                     <MenuItem Header="Открыть..." Click="OnOpenFileClick"/>
                     <MenuItem Header="Сохранить" Click="OnSaveFileClick"/>
                     <MenuItem Header="Сохранить как..." Click="OnSaveFileAsClick"/>
+                    <MenuItem Header="Экспорт изображения..." Click="OnExportImageClick" />
                 </MenuItem>
             </Menu>
             <mapsui:MapControl x:Name="mapControl" Margin="0"/>
